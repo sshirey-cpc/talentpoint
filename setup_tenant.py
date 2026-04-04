@@ -692,43 +692,57 @@ def seed_firstline(client, dataset_id, tenant_id):
         """).result()
     print(f"  Seeded {len(sal_cats)} salary categories")
 
-    # Staff List Columns (maps HRIS fields to display columns)
+    # Staff List Columns — Base Package (20 columns, every tenant gets these)
     # Format: (id, hris_field, display_name, category, data_type, filterable, default_visible, sort)
-    columns = [
+    base_columns = [
+        # Personal
         ("c_fname", "first_name", "First Name", "Personal", "text", False, True, 1),
         ("c_lname", "last_name", "Last Name", "Personal", "text", False, True, 2),
         ("c_pref", "Preferred_First_Name", "Preferred Name", "Personal", "text", False, False, 3),
         ("c_email", "Email_Address", "Email", "Personal", "email", False, True, 4),
         ("c_phone", "Work_Phone", "Phone", "Personal", "text", False, False, 5),
-        ("c_eid", "Employee_ID", "Employee #", "HR", "text", False, False, 6),
-        ("c_title", "Job_Title", "Job Title", "Position", "text", True, True, 7),
-        ("c_func", "Job_Function", "Job Category", "Position", "text", True, False, 8),
-        ("c_dept", "Dept", "Department", "Position", "text", True, False, 9),
-        ("c_loc", "Location_Name", "School", "Position", "text", True, True, 10),
-        ("c_sup", "Supervisor_Name__Unsecured_", "Supervisor", "Position", "text", True, True, 11),
-        ("c_status", "Employment_Status", "Status", "HR", "badge", True, True, 12),
-        ("c_ftpt", "Full_Part_Time_Code", "FT/PT", "HR", "text", True, False, 13),
-        ("c_pay", "Salary_or_Hourly", "Pay Type", "HR", "text", True, False, 14),
-        ("c_hire", "Last_Hire_Date", "Hire Date", "HR", "date", False, True, 15),
-        ("c_edu", "Highest_Education_Level", "Education", "HR", "text", True, False, 16),
-        ("c_yoe", "Relevant_Years_of_Experience", "YOE", "HR", "text", False, False, 17),
-        ("c_subj", "Subject_Desc", "Subject", "Position", "text", True, False, 18),
-        ("c_grade", "Grade_Level_Desc", "Grade Level", "Position", "text", True, False, 19),
-        ("c_sor", "Science_of_Reading", "Science of Reading", "Compliance", "boolean", True, False, 20),
-        ("c_num", "Numeracy_Certification", "Numeracy Cert", "Compliance", "boolean", True, False, 21),
-        ("c_tcert", "Teacher_Certification", "Teacher Cert", "Compliance", "boolean", True, False, 22),
-        ("c_tshirt", "T_Shirt_Size_Desc", "T-Shirt Size", "Personal", "text", False, False, 23),
-        ("c_dob", "Date_Of_Birth", "Birthday (MM-DD)", "Personal", "text", False, False, 24),
-        ("c_term", "Termination_Date", "Term Date", "HR", "date", False, False, 25),
-        ("c_gl", "GL_Account_Number", "GL Account", "HR", "text", False, False, 26),
+        ("c_dob", "Date_Of_Birth", "Birthday (MM-DD)", "Personal", "text", False, False, 6),
+        ("c_tshirt", "T_Shirt_Size_Desc", "T-Shirt Size", "Personal", "text", False, False, 7),
+        # Position (ordered: School, Title, Subject, Grade, Dept, Category, Supervisor)
+        ("c_loc", "Location_Name", "School", "Position", "text", True, True, 8),
+        ("c_title", "Job_Title", "Job Title", "Position", "text", True, True, 9),
+        ("c_subj", "Subject_Desc", "Subject", "Position", "text", True, True, 10),
+        ("c_grade", "Grade_Level_Desc", "Grade Level", "Position", "text", True, True, 11),
+        ("c_dept", "Dept", "Department", "Position", "text", True, False, 12),
+        ("c_func", "Job_Function", "Job Category", "Position", "text", True, True, 13),
+        ("c_sup", "Supervisor_Name__Unsecured_", "Supervisor", "Position", "text", True, True, 14),
+        # HR
+        ("c_eid", "Employee_ID", "Employee #", "HR", "text", False, False, 15),
+        ("c_status", "Employment_Status", "Status", "HR", "badge", True, True, 16),
+        ("c_ftpt", "Full_Part_Time_Code", "FT/PT", "HR", "text", True, False, 17),
+        ("c_pay", "Salary_or_Hourly", "Pay Type", "HR", "text", True, False, 18),
+        ("c_hire", "Last_Hire_Date", "Hire Date", "HR", "date", False, True, 19),
+        ("c_edu", "Highest_Education_Level", "Education", "HR", "text", True, False, 20),
+        ("c_yoe", "Relevant_Years_of_Experience", "YOE", "HR", "text", False, False, 21),
     ]
-    for cid, hris, display, cat, dtype, filt, vis, sort in columns:
+    for cid, hris, display, cat, dtype, filt, vis, sort in base_columns:
         client.query(f"""
             INSERT INTO `{dataset_ref}.staff_list_column` VALUES (
                 '{cid}', '{tenant_id}', '{hris}', '{display}', '{cat}', '{dtype}', {filt}, {vis}, {sort}, TRUE
             )
         """).result()
-    print(f"  Seeded {len(columns)} staff list columns")
+    print(f"  Seeded {len(base_columns)} base staff list columns")
+
+    # Staff List Columns — Tenant Add-ons (FirstLine-specific)
+    addon_columns = [
+        ("c_sor", "Science_of_Reading", "Science of Reading", "Compliance", "boolean", True, False, 22),
+        ("c_num", "Numeracy_Certification", "Numeracy Cert", "Compliance", "boolean", True, False, 23),
+        ("c_tcert", "Teacher_Certification", "Teacher Cert", "Compliance", "boolean", True, False, 24),
+        ("c_gl", "GL_Account_Number", "GL Account", "Finance", "text", False, False, 25),
+        ("c_term", "Termination_Date", "Term Date", "HR", "date", False, False, 26),
+    ]
+    for cid, hris, display, cat, dtype, filt, vis, sort in addon_columns:
+        client.query(f"""
+            INSERT INTO `{dataset_ref}.staff_list_column` VALUES (
+                '{cid}', '{tenant_id}', '{hris}', '{display}', '{cat}', '{dtype}', {filt}, {vis}, {sort}, TRUE
+            )
+        """).result()
+    print(f"  Seeded {len(addon_columns)} FirstLine add-on columns")
 
     print("\n  FirstLine Schools tenant setup complete!")
     print(f"  Add admin users with: INSERT INTO `{dataset_ref}.user_role` ...")
