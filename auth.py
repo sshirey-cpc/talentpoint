@@ -99,13 +99,25 @@ def is_authenticated():
     """Check if the current request has a valid session."""
     if os.environ.get('DEV_MODE') == 'true':
         if 'user' not in session:
-            session['user'] = {
-                'email': os.environ.get('DEV_USER_EMAIL', 'dev@example.com'),
-                'name': 'Dev User',
-                'role': 'super_admin',
-                'title': 'Developer',
-                'picture': '',
-            }
+            dev_email = os.environ.get('DEV_USER_EMAIL', 'dev@example.com')
+            # Look up real user info from config
+            user_role = config.get_user_role(dev_email)
+            if user_role:
+                session['user'] = {
+                    'email': dev_email,
+                    'name': user_role.get('name', dev_email.split('@')[0]),
+                    'role': user_role.get('role', 'super_admin'),
+                    'title': user_role.get('title', ''),
+                    'picture': '',
+                }
+            else:
+                session['user'] = {
+                    'email': dev_email,
+                    'name': dev_email.split('@')[0].replace('.', ' ').title(),
+                    'role': 'super_admin',
+                    'title': '',
+                    'picture': '',
+                }
         return True
     return 'user' in session
 

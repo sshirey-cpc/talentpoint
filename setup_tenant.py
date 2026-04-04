@@ -441,16 +441,16 @@ def create_tables(client, dataset_id):
 
 
 def seed_firstline(client, dataset_id, tenant_id):
-    """Seed FirstLine Schools configuration as the reference tenant."""
+    """Seed demo configuration. Uses generic school names and CPC branding."""
     dataset_ref = f"{client.project}.{dataset_id}"
     now = "CURRENT_TIMESTAMP()"
 
-    # Tenant
+    # Tenant — generic demo branding (no client logos or names)
     client.query(f"""
         INSERT INTO `{dataset_ref}.tenant` VALUES (
-            '{tenant_id}', 'FirstLine Schools', 'firstline', 'firstlineschools.org',
-            'https://firstlineschools.org/wp-content/uploads/2020/08/FLS-Logo_v2019_Color.png',
-            '#e47727', '#002f60', 'America/Chicago',
+            '{tenant_id}', 'TalentPoint Demo', 'demo', '',
+            '',
+            '#2563eb', '#1e293b', 'America/Chicago',
             'bigquery',
             'talent-demo-482004.talent_grow_observations.staff_master_list_with_function',
             'Email_Address', 'first_name', 'last_name', 'Job_Title',
@@ -459,15 +459,15 @@ def seed_firstline(client, dataset_id, tenant_id):
             {now}
         )
     """).result()
-    print("  Seeded tenant: FirstLine Schools")
+    print("  Seeded tenant: TalentPoint Demo")
 
-    # Schools
+    # Schools — generic demo names (HRIS names still map to real data for testing)
     schools = [
-        ("ashe", "Arthur Ashe", "Arthur Ashe Charter School", "Arthur Ashe Charter School", True, 1),
-        ("green", "Samuel J Green", "Samuel J Green Charter School", "Samuel J Green Charter School", True, 2),
-        ("hughes", "Langston Hughes", "Langston Hughes Academy", "Langston Hughes Academy", True, 3),
-        ("wheatley", "Phillis Wheatley", "Phillis Wheatley Community School", "Phillis Wheatley Community School", True, 4),
-        ("network", "Network", "FirstLine Network", "FirstLine Network", False, 5),
+        ("ashe", "Northside Elementary", "Northside Elementary School", "Arthur Ashe Charter School", True, 1),
+        ("green", "Riverside Academy", "Riverside Academy", "Samuel J Green Charter School", True, 2),
+        ("hughes", "Westlake Middle", "Westlake Middle School", "Langston Hughes Academy", True, 3),
+        ("wheatley", "Eastbrook High", "Eastbrook High School", "Phillis Wheatley Community School", True, 4),
+        ("network", "Network Office", "Network Office", "FirstLine Network", False, 5),
     ]
     for sid, name, full_name, hris_name, is_site, sort in schools:
         client.query(f"""

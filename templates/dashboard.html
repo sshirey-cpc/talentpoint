@@ -3,211 +3,359 @@
 
 {% block body %}
 <!-- Navigation -->
-<nav class="tp-gradient shadow-lg">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-            <!-- Logo & Product Name -->
-            <div class="flex items-center space-x-4">
+<nav class="tp-nav shadow-nav fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-[1440px] mx-auto px-6">
+        <div class="flex items-center justify-between h-[60px]">
+            <!-- Brand -->
+            <div class="flex items-center space-x-3">
                 {% if logo_url %}
-                <img src="{{ logo_url }}" alt="{{ org_name }}" class="h-8">
+                <img src="{{ logo_url }}" alt="{{ org_name }}" class="h-7">
+                <div class="w-px h-6 bg-white/15"></div>
                 {% endif %}
-                <div class="flex items-center space-x-2">
-                    <span class="text-white font-bold text-lg">TalentPoint</span>
-                    <span class="text-white/60 text-sm hidden sm:inline">{{ org_name }}</span>
-                </div>
+                <span class="text-white font-semibold text-[15px] tracking-tight">TalentPoint</span>
             </div>
 
-            <!-- Module Nav Links -->
-            <div class="hidden md:flex items-center space-x-1" id="nav-links">
-                <a href="/" class="nav-link active">Dashboard</a>
-                <a href="/staffing" class="nav-link">Staffing</a>
-                <a href="/requests" class="nav-link">Requests</a>
-                <a href="/pipeline" class="nav-link">Pipeline</a>
-                <a href="/referral" class="nav-link">Referral</a>
-                <a href="/onboarding" class="nav-link">Onboarding</a>
-                {% if permissions.can_view_compensation %}
-                <a href="/compensation" class="nav-link">Compensation</a>
-                {% endif %}
-                <a href="/staff-list" class="nav-link">Staff List</a>
+            <!-- Nav Links -->
+            <div class="hidden lg:flex items-center space-x-0.5">
+                <a href="/" class="tp-navlink active">Home</a>
+                <a href="/staffing" class="tp-navlink">Staffing</a>
+                <a href="/requests" class="tp-navlink">Requests</a>
+                <a href="/pipeline" class="tp-navlink">Pipeline</a>
+                <a href="/referral" class="tp-navlink">Referral</a>
+                <a href="/onboarding" class="tp-navlink">Onboarding</a>
+                <a href="/staff-list" class="tp-navlink">Staff</a>
             </div>
 
-            <!-- User Menu -->
+            <!-- User -->
             <div class="flex items-center space-x-3">
                 <div class="text-right hidden sm:block">
-                    <div class="text-white text-sm font-medium">{{ user.name }}</div>
-                    <div class="text-white/60 text-xs">{{ user.role | replace('_', ' ') | title }}</div>
+                    <div class="text-white/90 text-[13px] font-medium">{{ user.name }}</div>
+                    <div class="text-white/40 text-[11px]">{{ org_name }}</div>
                 </div>
                 {% if user.picture %}
-                <img src="{{ user.picture }}" alt="" class="w-8 h-8 rounded-full border-2 border-white/30">
+                <img src="{{ user.picture }}" alt="" class="w-8 h-8 rounded-full ring-2 ring-white/20">
+                {% else %}
+                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 text-xs font-semibold">
+                    {{ user.name[0] }}
+                </div>
                 {% endif %}
-                <a href="/logout" class="text-white/70 hover:text-white text-sm ml-2" title="Sign out">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                <a href="/logout" class="text-white/40 hover:text-white/80 ml-1" title="Sign out">
+                    <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
                 </a>
             </div>
         </div>
-
-        <!-- Mobile Nav -->
-        <div class="md:hidden pb-3 flex flex-wrap gap-1" id="mobile-nav">
-            <a href="/" class="nav-link-mobile active">Dashboard</a>
-            <a href="/staffing" class="nav-link-mobile">Staffing</a>
-            <a href="/requests" class="nav-link-mobile">Requests</a>
-            <a href="/pipeline" class="nav-link-mobile">Pipeline</a>
-            <a href="/staff-list" class="nav-link-mobile">Staff</a>
-        </div>
     </div>
 </nav>
 
-<!-- Dashboard Content -->
-<main class="max-w-7xl mx-auto px-4 py-8">
-    <!-- Welcome Header -->
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">Welcome back, {{ user.name.split(' ')[0] }}</h1>
-        <p class="text-gray-500 mt-1">
-            {% if current_year %}{{ current_year.label }} School Year{% endif %}
-            {% if planning_year %} &mdash; Planning for {{ planning_year.label }}{% endif %}
-        </p>
+<!-- Content -->
+<main class="max-w-[1440px] mx-auto px-6 pt-[84px] pb-12">
+
+    <!-- Hero Section -->
+    <div class="mb-10 animate-in">
+        <div class="flex items-end justify-between">
+            <div>
+                <h1 class="text-[28px] font-bold text-gray-900 tracking-tight">
+                    Good {{ 'morning' if True else 'afternoon' }}, {{ user.name.split(' ')[0] }}
+                </h1>
+                <p class="text-gray-400 text-[15px] mt-1">
+                    {% if current_year %}{{ current_year.label }} School Year{% endif %}
+                    {% if planning_year %} &middot; Planning {{ planning_year.label }}{% endif %}
+                </p>
+            </div>
+            <div class="hidden md:flex items-center space-x-2">
+                <span class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Quick Actions</span>
+                <a href="/requests" class="tp-btn-secondary text-xs py-1.5 px-3">+ New Request</a>
+                <a href="/staff-list" class="tp-btn-secondary text-xs py-1.5 px-3">Staff Directory</a>
+            </div>
+        </div>
     </div>
 
-    <!-- Module Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        <!-- Staffing Board -->
-        <a href="/staffing" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
-                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+    <!-- Key Metrics Row — each metric is unique, no duplication with sidebar -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div class="tp-card animate-in animate-delay-1">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+                    <svg class="w-[18px] h-[18px] text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Staffing Board</h3>
+                <span class="tp-badge badge-red">action needed</span>
             </div>
-            <p class="text-sm text-gray-500">Position management, staffing matrix, and HRIS reconciliation across all schools.</p>
-            <div class="mt-4 flex items-center space-x-4 text-xs text-gray-400">
-                <span id="stat-positions">-- positions</span>
-                <span id="stat-open">-- open</span>
-            </div>
-        </a>
+            <div class="stat-value text-red-500" id="m-open">--</div>
+            <div class="stat-label">Open Positions</div>
+        </div>
 
-        <!-- Position Requests -->
-        <a href="/requests" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
-                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        <div class="tp-card animate-in animate-delay-2">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
+                    <svg class="w-[18px] h-[18px] text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Position Requests</h3>
+                <span class="tp-badge badge-yellow">awaiting</span>
             </div>
-            <p class="text-sm text-gray-500">Submit and track position requests with multi-stage approval workflow.</p>
-            <div class="mt-4 flex items-center space-x-4 text-xs text-gray-400">
-                <span id="stat-pending">-- pending</span>
-            </div>
-        </a>
+            <div class="stat-value text-amber-500" id="m-pending">--</div>
+            <div class="stat-label">Pending Requests</div>
+        </div>
 
-        <!-- Hiring Pipeline -->
-        <a href="/pipeline" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
-                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="tp-card animate-in animate-delay-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-9 h-9 rounded-xl bg-cyan-50 flex items-center justify-center">
+                    <svg class="w-[18px] h-[18px] text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Hiring Pipeline</h3>
+                <span class="tp-badge badge-blue">in pipeline</span>
             </div>
-            <p class="text-sm text-gray-500">Track candidates from sourcing through hire with configurable pipeline stages.</p>
-            <div class="mt-4 flex items-center space-x-4 text-xs text-gray-400">
-                <span id="stat-candidates">-- in pipeline</span>
-            </div>
-        </a>
+            <div class="stat-value text-cyan-600" id="m-candidates">--</div>
+            <div class="stat-label">Active Candidates</div>
+        </div>
 
-        <!-- Staff Referral -->
-        <a href="/referral" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
-                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                    </svg>
-                </div>
-                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Staff Referral</h3>
-            </div>
-            <p class="text-sm text-gray-500">Employee referral submissions, bonus tracking, and automated payout workflow.</p>
-        </a>
-
-        <!-- Onboarding -->
-        <a href="/onboarding" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
-                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="tp-card animate-in animate-delay-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
+                    <svg class="w-[18px] h-[18px] text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Onboarding</h3>
+                <span class="tp-badge badge-green">new hires</span>
             </div>
-            <p class="text-sm text-gray-500">New hire intake forms and onboarding progress tracking.</p>
-        </a>
-
-        <!-- Compensation (role-gated) -->
-        {% if permissions.can_view_compensation %}
-        <a href="/compensation" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
-                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Compensation</h3>
-            </div>
-            <p class="text-sm text-gray-500">Salary scale calculator and compensation scenario modeling.</p>
-        </a>
-        {% endif %}
-
-        <!-- Staff List -->
-        <a href="/staff-list" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
-            <div class="flex items-center space-x-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
-                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                    </svg>
-                </div>
-                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Staff Directory</h3>
-            </div>
-            <p class="text-sm text-gray-500">Customizable staff list with filters, column chooser, and export.</p>
-        </a>
-
+            <div class="stat-value text-teal-600" id="m-onboarding">--</div>
+            <div class="stat-label">Onboarding</div>
+        </div>
     </div>
 
-    <!-- Footer -->
-    <div class="mt-12 text-center text-xs text-gray-400">
-        <p>TalentPoint &mdash; Built by <a href="https://confluencepointconsulting.com" class="hover:text-gray-600" target="_blank">Confluence Point Consulting</a></p>
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+
+        <!-- Modules (2/3) -->
+        <div class="lg:col-span-2">
+            <h2 class="text-[13px] font-semibold text-gray-400 uppercase tracking-wider mb-4">Modules</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <a href="/staffing" class="tp-card tp-card-interactive group">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, {{ primary_color }}20, {{ primary_color }}08);">
+                            <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mt-4 group-hover:text-brand transition-colors">Staffing Board</h3>
+                    <p class="text-[13px] text-gray-400 mt-1 leading-relaxed">Positions, matrix planning, HRIS reconciliation</p>
+                </a>
+
+                <a href="/requests" class="tp-card tp-card-interactive group">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mt-4 group-hover:text-violet-600 transition-colors">Position Requests</h3>
+                    <p class="text-[13px] text-gray-400 mt-1 leading-relaxed">Submit, approve, and track staffing requests</p>
+                </a>
+
+                <a href="/pipeline" class="tp-card tp-card-interactive group">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mt-4 group-hover:text-cyan-600 transition-colors">Hiring Pipeline</h3>
+                    <p class="text-[13px] text-gray-400 mt-1 leading-relaxed">Candidate tracking from sourcing to hire</p>
+                </a>
+
+                <a href="/referral" class="tp-card tp-card-interactive group">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mt-4 group-hover:text-rose-500 transition-colors">Staff Referral</h3>
+                    <p class="text-[13px] text-gray-400 mt-1 leading-relaxed">Referral submissions and bonus payout tracking</p>
+                </a>
+
+                <a href="/onboarding" class="tp-card tp-card-interactive group">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mt-4 group-hover:text-teal-600 transition-colors">Onboarding</h3>
+                    <p class="text-[13px] text-gray-400 mt-1 leading-relaxed">New hire intake and onboarding checklist</p>
+                </a>
+
+                <a href="/staff-list" class="tp-card tp-card-interactive group">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                            </svg>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mt-4 group-hover:text-slate-600 transition-colors">Staff Directory</h3>
+                    <p class="text-[13px] text-gray-400 mt-1 leading-relaxed">Searchable, customizable staff list with export</p>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Activity Sidebar (1/3) -->
+        <div>
+            <h2 class="text-[13px] font-semibold text-gray-400 uppercase tracking-wider mb-4">At a Glance</h2>
+
+            <!-- Staffing Health -->
+            <div class="tp-card mb-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-[13px] font-semibold text-gray-700">Staffing Health</h3>
+                    <span class="tp-badge badge-brand" id="fill-pct">--%</span>
+                </div>
+                <div class="tp-progress mb-3">
+                    <div class="tp-progress-bar" id="fill-bar" style="width: 0%; background-color: {{ primary_color }};"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                        <div class="text-[15px] font-bold text-emerald-600" id="g-filled">--</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">Filled</div>
+                    </div>
+                    <div>
+                        <div class="text-[15px] font-bold text-red-500" id="g-open">--</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">Open</div>
+                    </div>
+                    <div>
+                        <div class="text-[15px] font-bold text-amber-500" id="g-atrisk">--</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">At Risk</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schools Overview -->
+            <div class="tp-card mb-4">
+                <h3 class="text-[13px] font-semibold text-gray-700 mb-3">By School</h3>
+                <div class="space-y-3" id="school-mini"></div>
+            </div>
+
+            <!-- Powered by -->
+            <div class="text-center pt-4">
+                <p class="text-[11px] text-gray-300">
+                    Powered by <span class="font-medium text-gray-400">TalentPoint</span>
+                </p>
+                <p class="text-[10px] text-gray-300 mt-0.5">
+                    <a href="https://confluencepointconsulting.com" class="hover:text-gray-400" target="_blank">Confluence Point Consulting</a>
+                </p>
+            </div>
+        </div>
     </div>
+
 </main>
 
 <style>
-    .nav-link {
-        @apply px-3 py-2 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all;
+    .tp-navlink {
+        padding: 0.4rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: rgba(255,255,255,0.55);
+        transition: all 0.2s;
     }
-    .nav-link.active {
-        @apply text-white bg-white/15;
-    }
-    .nav-link-mobile {
-        @apply px-2.5 py-1 rounded text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all;
-    }
-    .nav-link-mobile.active {
-        @apply text-white bg-white/15;
-    }
+    .tp-navlink:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
+    .tp-navlink.active { color: white; background: rgba(255,255,255,0.12); }
 </style>
 
 <script>
-    // Highlight active nav link based on current path
-    document.querySelectorAll('.nav-link, .nav-link-mobile').forEach(link => {
-        if (link.getAttribute('href') === window.location.pathname ||
-            (link.getAttribute('href') !== '/' && window.location.pathname.startsWith(link.getAttribute('href')))) {
+    // Load dashboard data
+    async function loadDashboard() {
+        try {
+            const [stats, bySchool, reqStats, pipeStats, obStats] = await Promise.all([
+                fetch('/staffing/api/positions/stats').then(r => r.ok ? r.json() : {}),
+                fetch('/staffing/api/positions/by-school').then(r => r.ok ? r.json() : []),
+                fetch('/requests/api/admin/stats').then(r => r.ok ? r.json() : {}),
+                fetch('/pipeline/api/stats').then(r => r.ok ? r.json() : {}),
+                fetch('/onboarding/api/admin/stats').then(r => r.ok ? r.json() : {}),
+            ]);
+
+            // Top metrics — each unique, no overlap with sidebar
+            const total = stats.total_positions || 0;
+            const filled = stats.filled || 0;
+            const open = stats.open_positions || 0;
+            document.getElementById('m-open').textContent = open;
+            document.getElementById('m-pending').textContent = reqStats.pending || 0;
+            document.getElementById('m-candidates').textContent = pipeStats.active_candidates || 0;
+            document.getElementById('m-onboarding').textContent = (obStats.not_started || 0) + (obStats.in_progress || 0);
+
+            // Fill percentage
+            const pct = total ? Math.round(filled / total * 100) : 0;
+            document.getElementById('fill-pct').textContent = pct + '%';
+            document.getElementById('fill-bar').style.width = pct + '%';
+            document.getElementById('g-filled').textContent = filled;
+            document.getElementById('g-open').textContent = open;
+            document.getElementById('g-atrisk').textContent = stats.at_risk || 0;
+
+            // School mini bars
+            const schoolMap = {};
+            (bySchool || []).forEach(r => {
+                if (!schoolMap[r.school_name]) schoolMap[r.school_name] = { total: 0, filled: 0 };
+                schoolMap[r.school_name].total += r.total;
+                schoolMap[r.school_name].filled += r.filled;
+            });
+
+            const schoolHtml = Object.entries(schoolMap).map(([name, d]) => {
+                const p = d.total ? Math.round(d.filled / d.total * 100) : 0;
+                return `<div>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[12px] font-medium text-gray-600">${name}</span>
+                        <span class="text-[11px] text-gray-400">${d.filled}/${d.total}</span>
+                    </div>
+                    <div class="tp-progress">
+                        <div class="tp-progress-bar" style="width: ${p}%; background-color: ${p >= 90 ? '#10b981' : p >= 70 ? '#f59e0b' : '#ef4444'};"></div>
+                    </div>
+                </div>`;
+            }).join('');
+            document.getElementById('school-mini').innerHTML = schoolHtml || '<p class="text-[12px] text-gray-300">No data yet</p>';
+
+        } catch(e) {
+            console.log('Dashboard load:', e);
+        }
+    }
+
+    // Highlight active nav
+    document.querySelectorAll('.tp-navlink').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === '/' && window.location.pathname === '/') link.classList.add('active');
+        else if (href !== '/' && window.location.pathname.startsWith(href)) {
             link.classList.add('active');
-        } else if (link.getAttribute('href') === '/' && window.location.pathname !== '/') {
-            link.classList.remove('active');
+            document.querySelector('.tp-navlink[href="/"]').classList.remove('active');
         }
     });
+
+    loadDashboard();
 </script>
 {% endblock %}
