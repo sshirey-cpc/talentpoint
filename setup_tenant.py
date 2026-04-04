@@ -405,6 +405,34 @@ def create_tables(client, dataset_id):
         bigquery.SchemaField("sort_order", "INT64"),
     ]
 
+    # --- Staff List ---
+    tables['staff_list_column'] = [
+        bigquery.SchemaField("column_id", "STRING", mode="REQUIRED"),
+        bigquery.SchemaField("tenant_id", "STRING"),
+        bigquery.SchemaField("hris_field", "STRING"),       # actual HRIS column name
+        bigquery.SchemaField("display_name", "STRING"),     # friendly label
+        bigquery.SchemaField("category", "STRING"),         # grouping: "Personal", "Position", "HR", "Compliance"
+        bigquery.SchemaField("data_type", "STRING"),        # text, date, email, badge, boolean
+        bigquery.SchemaField("filterable", "BOOL"),
+        bigquery.SchemaField("default_visible", "BOOL"),
+        bigquery.SchemaField("sort_order", "INT64"),
+        bigquery.SchemaField("active", "BOOL"),
+    ]
+
+    tables['staff_list_view'] = [
+        bigquery.SchemaField("view_id", "STRING", mode="REQUIRED"),
+        bigquery.SchemaField("tenant_id", "STRING"),
+        bigquery.SchemaField("name", "STRING"),             # "All Teachers at Ashe", "Hourly Staff"
+        bigquery.SchemaField("created_by", "STRING"),
+        bigquery.SchemaField("is_shared", "BOOL"),          # visible to all users or just creator
+        bigquery.SchemaField("visible_columns", "STRING"),  # JSON array of column_ids
+        bigquery.SchemaField("filters", "STRING"),          # JSON object of column_id -> [values]
+        bigquery.SchemaField("sort_column", "STRING"),
+        bigquery.SchemaField("sort_direction", "STRING"),   # asc, desc
+        bigquery.SchemaField("created_at", "TIMESTAMP"),
+        bigquery.SchemaField("updated_at", "TIMESTAMP"),
+    ]
+
     for table_name, schema in tables.items():
         table_ref = f"{dataset_ref}.{table_name}"
         table = bigquery.Table(table_ref, schema=schema)
@@ -663,6 +691,44 @@ def seed_firstline(client, dataset_id, tenant_id):
             )
         """).result()
     print(f"  Seeded {len(sal_cats)} salary categories")
+
+    # Staff List Columns (maps HRIS fields to display columns)
+    # Format: (id, hris_field, display_name, category, data_type, filterable, default_visible, sort)
+    columns = [
+        ("c_fname", "first_name", "First Name", "Personal", "text", False, True, 1),
+        ("c_lname", "last_name", "Last Name", "Personal", "text", False, True, 2),
+        ("c_pref", "Preferred_First_Name", "Preferred Name", "Personal", "text", False, False, 3),
+        ("c_email", "Email_Address", "Email", "Personal", "email", False, True, 4),
+        ("c_phone", "Work_Phone", "Phone", "Personal", "text", False, False, 5),
+        ("c_eid", "Employee_ID", "Employee #", "HR", "text", False, False, 6),
+        ("c_title", "Job_Title", "Job Title", "Position", "text", True, True, 7),
+        ("c_func", "Job_Function", "Job Category", "Position", "text", True, False, 8),
+        ("c_dept", "Dept", "Department", "Position", "text", True, False, 9),
+        ("c_loc", "Location_Name", "School", "Position", "text", True, True, 10),
+        ("c_sup", "Supervisor_Name__Unsecured_", "Supervisor", "Position", "text", True, True, 11),
+        ("c_status", "Employment_Status", "Status", "HR", "badge", True, True, 12),
+        ("c_ftpt", "Full_Part_Time_Code", "FT/PT", "HR", "text", True, False, 13),
+        ("c_pay", "Salary_or_Hourly", "Pay Type", "HR", "text", True, False, 14),
+        ("c_hire", "Last_Hire_Date", "Hire Date", "HR", "date", False, True, 15),
+        ("c_edu", "Highest_Education_Level", "Education", "HR", "text", True, False, 16),
+        ("c_yoe", "Relevant_Years_of_Experience", "YOE", "HR", "text", False, False, 17),
+        ("c_subj", "Subject_Desc", "Subject", "Position", "text", True, False, 18),
+        ("c_grade", "Grade_Level_Desc", "Grade Level", "Position", "text", True, False, 19),
+        ("c_sor", "Science_of_Reading", "Science of Reading", "Compliance", "boolean", True, False, 20),
+        ("c_num", "Numeracy_Certification", "Numeracy Cert", "Compliance", "boolean", True, False, 21),
+        ("c_tcert", "Teacher_Certification", "Teacher Cert", "Compliance", "boolean", True, False, 22),
+        ("c_tshirt", "T_Shirt_Size_Desc", "T-Shirt Size", "Personal", "text", False, False, 23),
+        ("c_dob", "Date_Of_Birth", "Birthday (MM-DD)", "Personal", "text", False, False, 24),
+        ("c_term", "Termination_Date", "Term Date", "HR", "date", False, False, 25),
+        ("c_gl", "GL_Account_Number", "GL Account", "HR", "text", False, False, 26),
+    ]
+    for cid, hris, display, cat, dtype, filt, vis, sort in columns:
+        client.query(f"""
+            INSERT INTO `{dataset_ref}.staff_list_column` VALUES (
+                '{cid}', '{tenant_id}', '{hris}', '{display}', '{cat}', '{dtype}', {filt}, {vis}, {sort}, TRUE
+            )
+        """).result()
+    print(f"  Seeded {len(columns)} staff list columns")
 
     print("\n  FirstLine Schools tenant setup complete!")
     print(f"  Add admin users with: INSERT INTO `{dataset_ref}.user_role` ...")
