@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+*.json
+!package.json
+.gcloudignore
+venv/
+.venv/
+*.egg-info/
+dist/
+build/

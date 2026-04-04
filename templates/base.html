@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TalentPoint{% endblock %} | {{ org_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tp-primary': '{{ primary_color }}',
+                        'tp-secondary': '{{ secondary_color }}',
+                        'tp-light': '{{ primary_color }}15',
+                    },
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        :root {
+            --tp-primary: {{ primary_color }};
+            --tp-secondary: {{ secondary_color }};
+        }
+        body { font-family: 'Open Sans', sans-serif; }
+        .tp-gradient { background: linear-gradient(135deg, {{ secondary_color }} 0%, {{ primary_color }} 100%); }
+        .tp-card { @apply bg-white rounded-lg shadow-sm border border-gray-100 p-6; }
+        .tp-badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% block body %}{% endblock %}
+</body>
+</html>

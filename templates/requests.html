@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block title %}Position Requests{% endblock %}
+
+{% block body %}
+<nav class="tp-gradient shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+                {% if logo_url %}<img src="{{ logo_url }}" alt="{{ org_name }}" class="h-8">{% endif %}
+                <span class="text-white font-bold text-lg">TalentPoint</span>
+                <span class="text-white/60 text-sm hidden sm:inline">{{ org_name }}</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/staffing" class="nav-link">Staffing</a>
+                <a href="/requests" class="nav-link active">Requests</a>
+                <a href="/pipeline" class="nav-link">Pipeline</a>
+                <a href="/staff-list" class="nav-link">Staff List</a>
+            </div>
+            <div class="flex items-center space-x-3">
+                {% if user %}<span class="text-white text-sm">{{ user.name }}</span>
+                <a href="/logout" class="text-white/70 hover:text-white text-sm">Sign out</a>
+                {% else %}<a href="/login" class="text-white text-sm font-medium">Sign In</a>{% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="flex space-x-8">
+            <button onclick="showSection('form')" class="tab-btn active" data-tab="form">Submit Request</button>
+            <button onclick="showSection('lookup')" class="tab-btn" data-tab="lookup">Look Up Status</button>
+            {% if user and permissions.can_edit %}
+            <button onclick="showSection('admin')" class="tab-btn" data-tab="admin">Admin Dashboard</button>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- Submit Request Form -->
+    <div id="section-form" class="section-content">
+        <div class="max-w-2xl mx-auto tp-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Position Request</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Request Type</label>
+                    <select id="req-type" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" onchange="onTypeChange()">
+                        <option value="">Select a request type...</option>
+                        {% for rt in request_types %}
+                        <option value="{{ rt }}">{{ rt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">School Year</label>
+                    <div class="flex space-x-3">
+                        {% for sy in school_years %}
+                        <label class="flex items-center space-x-2">
+                            <input type="radio" name="school_year" value="{{ sy.year_id }}" {% if sy.is_planning %}checked{% endif %} class="text-tp-primary">
+                            <span class="text-sm">{{ sy.label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div id="employee-section">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Employee Email (departing)</label>
+                    <div class="flex space-x-2">
+                        <input type="email" id="req-employee-email" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="employee@{{ org_name | lower | replace(' ', '') }}.org">
+                        <button onclick="lookupEmployee()" class="px-4 py-2 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200">Look Up</button>
+                    </div>
+                    <div id="employee-info" class="mt-2 text-sm text-gray-500 hidden"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">School</label>
+                        <select id="req-school" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                            {% for s in schools %}<option value="{{ s.school_id }}">{{ s.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Position Title</label>
+                        <input type="text" id="req-title" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="e.g., 3rd Grade Teacher">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hours/Status</label>
+                        <select id="req-hours" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                            <option>Full-Time (40 hrs)</option>
+                            <option>Part-Time (29 hrs or less)</option>
+                            <option>Seasonal</option>
+                            <option>Temp (6 months or less)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Reports To</label>
+                        <input type="text" id="req-reports" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Justification</label>
+                    <textarea id="req-justification" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="Why is this position needed?"></textarea>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="req-sped" class="rounded text-tp-primary">
+                    <label for="req-sped" class="text-sm text-gray-700">SPED compliance review needed</label>
+                </div>
+
+                <button onclick="submitRequest()"
+                        class="w-full py-3 rounded-lg text-white font-medium transition-all hover:opacity-90"
+                        style="background-color: {{ primary_color }};">
+                    Submit Request
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lookup Section -->
+    <div id="section-lookup" class="section-content hidden">
+        <div class="max-w-2xl mx-auto tp-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Look Up Your Requests</h2>
+            <div class="flex space-x-2 mb-4">
+                <input type="email" id="lookup-email" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="Your email address">
+                <button onclick="lookupRequests()" class="px-6 py-2 rounded-lg text-white text-sm font-medium" style="background-color: {{ primary_color }};">Look Up</button>
+            </div>
+            <div id="lookup-results"></div>
+        </div>
+    </div>
+
+    <!-- Admin Section -->
+    {% if user and permissions.can_edit %}
+    <div id="section-admin" class="section-content hidden">
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold" style="color: {{ secondary_color }};" id="admin-total">--</div>
+                <div class="text-xs text-gray-500 mt-1">Total</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-yellow-600" id="admin-pending">--</div>
+                <div class="text-xs text-gray-500 mt-1">Pending</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-green-600" id="admin-approved">--</div>
+                <div class="text-xs text-gray-500 mt-1">Approved</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-red-600" id="admin-denied">--</div>
+                <div class="text-xs text-gray-500 mt-1">Denied</div>
+            </div>
+        </div>
+        <div class="tp-card overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500 border-b">
+                        <th class="pb-3 font-medium">ID</th>
+                        <th class="pb-3 font-medium">Type</th>
+                        <th class="pb-3 font-medium">Position</th>
+                        <th class="pb-3 font-medium">Requestor</th>
+                        <th class="pb-3 font-medium">Date</th>
+                        <th class="pb-3 font-medium">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-requests-table"></tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+
+<style>
+    .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all; }
+    .nav-link.active { @apply text-white bg-white/15; }
+    .tab-btn { @apply pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-all; }
+    .tab-btn.active { border-color: {{ primary_color }}; color: {{ secondary_color }}; font-weight: 600; }
+    .tp-card { @apply bg-white rounded-lg shadow-sm border border-gray-100 p-6; }
+    .tp-badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+</style>
+
+<script>
+    const API = '/requests';
+
+    function showSection(name) {
+        document.querySelectorAll('.section-content').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('section-' + name).classList.remove('hidden');
+        document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+        if (name === 'admin') loadAdminDashboard();
+    }
+
+    function onTypeChange() {
+        const type = document.getElementById('req-type').value;
+        const empSection = document.getElementById('employee-section');
+        empSection.classList.toggle('hidden', ['New Position', 'Temp Hire'].includes(type));
+    }
+
+    async function lookupEmployee() {
+        const email = document.getElementById('req-employee-email').value;
+        if (!email) return;
+        const res = await fetch(`${API}/api/employee-lookup?email=${email}`);
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('employee-info').innerHTML = `<strong>${data.name}</strong> &mdash; ${data.job_title} at ${data.school}`;
+            document.getElementById('employee-info').classList.remove('hidden');
+            document.getElementById('req-title').value = data.job_title || '';
+            document.getElementById('req-reports').value = data.supervisor || '';
+        } else {
+            document.getElementById('employee-info').innerHTML = '<span class="text-red-500">Employee not found</span>';
+            document.getElementById('employee-info').classList.remove('hidden');
+        }
+    }
+
+    async function submitRequest() {
+        const body = {
+            request_type: document.getElementById('req-type').value,
+            school_year: document.querySelector('input[name="school_year"]:checked')?.value || '',
+            school_id: document.getElementById('req-school').value,
+            job_title: document.getElementById('req-title').value,
+            hours_status: document.getElementById('req-hours').value,
+            reports_to: document.getElementById('req-reports').value,
+            justification: document.getElementById('req-justification').value,
+            sped_reviewed: document.getElementById('req-sped').checked ? 'Yes' : 'No',
+            employee_email: document.getElementById('req-employee-email')?.value || '',
+            requestor_email: '{{ user.email if user else "" }}',
+        };
+        const res = await fetch(`${API}/api/submit`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (res.ok) {
+            alert(`Request submitted! ID: ${data.request_id}`);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    }
+
+    async function lookupRequests() {
+        const email = document.getElementById('lookup-email').value;
+        const data = await fetch(`${API}/api/lookup?email=${email}`).then(r => r.json());
+        const statusColor = s => s === 'Approved' ? 'green' : s === 'Denied' ? 'red' : 'yellow';
+        document.getElementById('lookup-results').innerHTML = data.length ?
+            data.map(r => `<div class="flex justify-between items-center py-3 border-b border-gray-100">
+                <div><span class="font-mono text-xs text-gray-400">${r.request_id}</span>
+                     <span class="ml-2 text-sm">${r.request_type} — ${r.job_title || 'N/A'}</span></div>
+                <span class="tp-badge badge-${statusColor(r.final_status)}">${r.final_status}</span>
+            </div>`).join('') :
+            '<p class="text-gray-400 text-sm py-4">No requests found for this email.</p>';
+    }
+
+    async function loadAdminDashboard() {
+        const [stats, requests] = await Promise.all([
+            fetch(`${API}/api/admin/stats`).then(r => r.json()),
+            fetch(`${API}/api/admin/requests`).then(r => r.json()),
+        ]);
+        document.getElementById('admin-total').textContent = stats.total || 0;
+        document.getElementById('admin-pending').textContent = stats.pending || 0;
+        document.getElementById('admin-approved').textContent = stats.approved || 0;
+        document.getElementById('admin-denied').textContent = stats.denied || 0;
+
+        const statusColor = s => s === 'Approved' ? 'green' : s === 'Denied' ? 'red' : 'yellow';
+        document.getElementById('admin-requests-table').innerHTML = requests.map(r => `
+            <tr class="border-b border-gray-50 hover:bg-gray-50 cursor-pointer">
+                <td class="py-3 font-mono text-xs">${r.request_id}</td>
+                <td>${r.request_type}</td>
+                <td>${r.job_title || 'N/A'}</td>
+                <td>${r.requested_by}</td>
+                <td class="text-xs text-gray-400">${new Date(r.requested_at).toLocaleDateString()}</td>
+                <td><span class="tp-badge badge-${statusColor(r.final_status)}">${r.final_status}</span></td>
+            </tr>
+        `).join('') || '<tr><td colspan="6" class="py-8 text-center text-gray-400">No requests yet.</td></tr>';
+    }
+</script>
+{% endblock %}

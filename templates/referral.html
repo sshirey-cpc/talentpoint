@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Staff Referral Program{% endblock %}
+
+{% block body %}
+<nav class="tp-gradient shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+                {% if logo_url %}<img src="{{ logo_url }}" alt="{{ org_name }}" class="h-8">{% endif %}
+                <span class="text-white font-bold text-lg">TalentPoint</span>
+                <span class="text-white/60 text-sm hidden sm:inline">{{ org_name }}</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/staffing" class="nav-link">Staffing</a>
+                <a href="/referral" class="nav-link active">Referral</a>
+                <a href="/staff-list" class="nav-link">Staff List</a>
+            </div>
+            <div class="flex items-center space-x-3">
+                {% if user %}<span class="text-white text-sm">{{ user.name }}</span>
+                <a href="/logout" class="text-white/70 hover:text-white text-sm">Sign out</a>
+                {% else %}<a href="/login" class="text-white text-sm font-medium">Sign In (Admin)</a>{% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 py-6">
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="flex space-x-8">
+            <button onclick="showTab('submit')" class="tab-btn active" data-tab="submit">Refer Someone</button>
+            <button onclick="showTab('status')" class="tab-btn" data-tab="status">Check Status</button>
+            {% if user and permissions.can_edit %}
+            <button onclick="showTab('admin')" class="tab-btn" data-tab="admin">Admin</button>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- Submit Referral -->
+    <div id="tab-submit" class="tab-pane">
+        <div class="max-w-2xl mx-auto">
+            <!-- Bonus info -->
+            <div class="grid grid-cols-{{ bonus_tiers | length }} gap-4 mb-6">
+                {% for tier in bonus_tiers %}
+                <div class="tp-card text-center">
+                    <div class="text-2xl font-bold" style="color: {{ primary_color }};">${{ tier.bonus_amount }}</div>
+                    <div class="text-xs text-gray-500 mt-1">{{ tier.position_type }} Referral</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="tp-card">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Know someone great?</h2>
+                <p class="text-sm text-gray-500 mb-6">Refer them and earn a bonus when they're hired and stay {{ bonus_tiers[0].retention_days if bonus_tiers else 60 }} days.</p>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                            <input type="text" id="ref-name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Your Email</label>
+                            <input type="email" id="ref-email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                                   onblur="autoFillReferrer()">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Your School/Department</label>
+                        <select id="ref-school" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                            {% for s in schools %}<option value="{{ s.name }}">{{ s.full_name }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Candidate Name</label>
+                            <input type="text" id="cand-name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Candidate Email</label>
+                            <input type="email" id="cand-email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Candidate Phone</label>
+                            <input type="tel" id="cand-phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Position Type</label>
+                            <select id="cand-type" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                                {% for tier in bonus_tiers %}
+                                <option value="{{ tier.position_type }}">{{ tier.position_type }} (${{ tier.bonus_amount }} bonus)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Position / Role</label>
+                        <input type="text" id="cand-position" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="e.g., 3rd Grade Teacher">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">How do you know this person?</label>
+                        <input type="text" id="cand-relationship" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                    </div>
+
+                    <button onclick="submitReferral()"
+                            class="w-full py-3 rounded-lg text-white font-medium transition-all hover:opacity-90"
+                            style="background-color: {{ primary_color }};">
+                        Submit Referral
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check Status -->
+    <div id="tab-status" class="tab-pane hidden">
+        <div class="max-w-2xl mx-auto tp-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Check Your Referrals</h2>
+            <div class="flex space-x-2 mb-6">
+                <input type="email" id="lookup-email" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="Your email">
+                <button onclick="lookupReferrals()" class="px-6 py-2 rounded-lg text-white text-sm font-medium" style="background-color: {{ primary_color }};">Look Up</button>
+            </div>
+            <div id="lookup-stats" class="grid grid-cols-3 gap-4 mb-4 hidden"></div>
+            <div id="lookup-results"></div>
+        </div>
+    </div>
+
+    <!-- Admin -->
+    {% if user and permissions.can_edit %}
+    <div id="tab-admin" class="tab-pane hidden">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold" style="color: {{ secondary_color }};" id="adm-total">--</div>
+                <div class="text-xs text-gray-500 mt-1">Total</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-yellow-600" id="adm-pending">--</div>
+                <div class="text-xs text-gray-500 mt-1">Pending Review</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-green-600" id="adm-paid">--</div>
+                <div class="text-xs text-gray-500 mt-1">Bonuses Paid</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-blue-600" id="adm-pending-amt">--</div>
+                <div class="text-xs text-gray-500 mt-1">Pending Payout</div>
+            </div>
+        </div>
+        <div class="tp-card overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr class="text-left text-gray-500 border-b">
+                    <th class="pb-3 font-medium">Referrer</th>
+                    <th class="pb-3 font-medium">Candidate</th>
+                    <th class="pb-3 font-medium">Position</th>
+                    <th class="pb-3 font-medium">Bonus</th>
+                    <th class="pb-3 font-medium">Status</th>
+                    <th class="pb-3 font-medium">Date</th>
+                </tr></thead>
+                <tbody id="adm-table"></tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+
+<style>
+    .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all; }
+    .nav-link.active { @apply text-white bg-white/15; }
+    .tab-btn { @apply pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-all; }
+    .tab-btn.active { border-color: {{ primary_color }}; color: {{ secondary_color }}; font-weight: 600; }
+    .tp-card { @apply bg-white rounded-lg shadow-sm border border-gray-100 p-6; }
+    .tp-badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+</style>
+
+<script>
+    const API = '/referral';
+
+    function showTab(name) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.remove('hidden');
+        document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+        if (name === 'admin') loadAdmin();
+    }
+
+    async function autoFillReferrer() {
+        const email = document.getElementById('ref-email').value;
+        if (!email) return;
+        const data = await fetch(`${API}/api/staff-lookup?email=${email}`).then(r => r.json());
+        if (data.referrer_name) document.getElementById('ref-name').value = data.referrer_name;
+        if (data.referrer_school) document.getElementById('ref-school').value = data.referrer_school;
+    }
+
+    async function submitReferral() {
+        const body = {
+            referrer_name: document.getElementById('ref-name').value,
+            referrer_email: document.getElementById('ref-email').value,
+            referrer_school: document.getElementById('ref-school').value,
+            candidate_name: document.getElementById('cand-name').value,
+            candidate_email: document.getElementById('cand-email').value,
+            candidate_phone: document.getElementById('cand-phone').value,
+            position_type: document.getElementById('cand-type').value,
+            position: document.getElementById('cand-position').value,
+            relationship: document.getElementById('cand-relationship').value,
+        };
+        const res = await fetch(`${API}/api/submit`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (res.ok) alert(`Referral submitted! ID: ${data.referral_id}. Potential bonus: $${data.bonus_amount}`);
+        else alert('Error: ' + (data.error || 'Unknown'));
+    }
+
+    async function lookupReferrals() {
+        const email = document.getElementById('lookup-email').value;
+        const data = await fetch(`${API}/api/lookup?email=${email}`).then(r => r.json());
+        document.getElementById('lookup-stats').classList.remove('hidden');
+        document.getElementById('lookup-stats').innerHTML = `
+            <div class="tp-card text-center"><div class="text-lg font-bold">${data.total_referrals}</div><div class="text-xs text-gray-500">Referrals</div></div>
+            <div class="tp-card text-center"><div class="text-lg font-bold text-green-600">$${data.total_paid}</div><div class="text-xs text-gray-500">Earned</div></div>
+            <div class="tp-card text-center"><div class="text-lg font-bold text-blue-600">$${data.pending_bonus}</div><div class="text-xs text-gray-500">Pending</div></div>`;
+        const statusColor = s => ['Hired','Eligible','Paid'].includes(s) ? 'green' : ['Not Hired','Ineligible'].includes(s) ? 'red' : 'yellow';
+        document.getElementById('lookup-results').innerHTML = (data.referrals || []).map(r => `
+            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                <div><span class="font-medium">${r.candidate_name}</span><span class="text-gray-400 text-sm ml-2">${r.position}</span></div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-400">$${r.bonus_amount}</span>
+                    <span class="tp-badge badge-${statusColor(r.status)}">${r.status}</span>
+                </div>
+            </div>`).join('') || '<p class="text-gray-400 text-sm py-4">No referrals found.</p>';
+    }
+
+    async function loadAdmin() {
+        const [stats, referrals] = await Promise.all([
+            fetch(`${API}/api/admin/stats`).then(r => r.json()),
+            fetch(`${API}/api/admin/referrals`).then(r => r.json()),
+        ]);
+        document.getElementById('adm-total').textContent = stats.total || 0;
+        document.getElementById('adm-pending').textContent = stats.pending_review || 0;
+        document.getElementById('adm-paid').textContent = stats.bonuses_paid || 0;
+        document.getElementById('adm-pending-amt').textContent = '$' + (stats.total_pending_amount || 0);
+
+        const statusColor = s => ['Hired','Eligible','Paid'].includes(s) ? 'green' : ['Not Hired','Ineligible'].includes(s) ? 'red' : 'yellow';
+        document.getElementById('adm-table').innerHTML = referrals.map(r => `
+            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                <td class="py-3">${r.referrer_name}</td>
+                <td>${r.candidate_name}</td>
+                <td>${r.position}</td>
+                <td>$${r.bonus_amount}</td>
+                <td><span class="tp-badge badge-${statusColor(r.status)}">${r.status}</span></td>
+                <td class="text-xs text-gray-400">${new Date(r.submitted_at).toLocaleDateString()}</td>
+            </tr>`).join('') || '<tr><td colspan="6" class="py-8 text-center text-gray-400">No referrals yet.</td></tr>';
+    }
+</script>
+{% endblock %}

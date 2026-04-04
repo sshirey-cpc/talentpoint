@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block title %}New Hire Onboarding{% endblock %}
+
+{% block body %}
+<nav class="tp-gradient shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+                {% if logo_url %}<img src="{{ logo_url }}" alt="{{ org_name }}" class="h-8">{% endif %}
+                <span class="text-white font-bold text-lg">TalentPoint</span>
+                <span class="text-white/60 text-sm hidden sm:inline">{{ org_name }}</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/staffing" class="nav-link">Staffing</a>
+                <a href="/onboarding" class="nav-link active">Onboarding</a>
+                <a href="/staff-list" class="nav-link">Staff List</a>
+            </div>
+            <div class="flex items-center space-x-3">
+                {% if user %}<span class="text-white text-sm">{{ user.name }}</span>
+                <a href="/logout" class="text-white/70 hover:text-white text-sm">Sign out</a>
+                {% else %}<a href="/login" class="text-white text-sm font-medium">Sign In (Admin)</a>{% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 py-6">
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="flex space-x-8">
+            <button onclick="showTab('form')" class="tab-btn active" data-tab="form">New Hire Form</button>
+            <button onclick="showTab('lookup')" class="tab-btn" data-tab="lookup">Check Status</button>
+            {% if user and permissions.can_edit %}
+            <button onclick="showTab('admin')" class="tab-btn" data-tab="admin">Admin</button>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- New Hire Form -->
+    <div id="tab-form" class="tab-pane">
+        <div class="max-w-2xl mx-auto">
+            <div class="tp-card mb-6 text-center" style="background: linear-gradient(135deg, {{ secondary_color }} 0%, {{ primary_color }} 100%);">
+                <h2 class="text-2xl font-bold text-white mb-2">Welcome to {{ org_name }}!</h2>
+                <p class="text-white/80">Please complete this form before your first day.</p>
+            </div>
+
+            <div class="tp-card">
+                <!-- Section 1: About You -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">About You</h3>
+                <div class="space-y-4 mb-8">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                            <input type="text" id="ob-first" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                            <input type="text" id="ob-last" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Name</label>
+                            <input type="text" id="ob-preferred" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Personal Email *</label>
+                            <input type="email" id="ob-email" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                            <input type="tel" id="ob-phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">School Location *</label>
+                            <select id="ob-school" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                                {% for s in schools %}<option value="{{ s.name }}">{{ s.full_name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mailing Address</label>
+                        <input type="text" id="ob-address" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                </div>
+
+                <!-- Section 2: Preferences -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Preferences</h3>
+                <div class="space-y-4 mb-8">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">T-Shirt Size</label>
+                            <select id="ob-tshirt" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                                <option>XS</option><option>S</option><option selected>M</option>
+                                <option>L</option><option>XL</option><option>2XL</option><option>3XL</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Dietary Needs</label>
+                            <input type="text" id="ob-diet" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="None">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Food Allergies</label>
+                            <input type="text" id="ob-allergies" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="None">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Compliance (custom fields from config) -->
+                {% if custom_fields %}
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Certifications & Compliance</h3>
+                <div class="space-y-4 mb-8">
+                    {% for field in custom_fields %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.field_label }}{% if field.required %} *{% endif %}</label>
+                        {% if field.field_type == 'select' %}
+                        <select id="cf-{{ field.field_name }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                            {% for opt in field.options | tojson | fromjson if field.options %}
+                            <option>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
+                        <input type="text" id="cf-{{ field.field_name }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- ADA -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Accommodations</h3>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Do you need any ADA accommodations?</label>
+                    <textarea id="ob-ada" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="Leave blank if none"></textarea>
+                </div>
+
+                <button onclick="submitOnboarding()"
+                        class="w-full py-3 rounded-lg text-white font-medium transition-all hover:opacity-90"
+                        style="background-color: {{ primary_color }};">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lookup -->
+    <div id="tab-lookup" class="tab-pane hidden">
+        <div class="max-w-2xl mx-auto tp-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Check Your Onboarding Status</h2>
+            <div class="flex space-x-2 mb-4">
+                <input type="email" id="lookup-email" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="Your email">
+                <button onclick="lookupOnboarding()" class="px-6 py-2 rounded-lg text-white text-sm font-medium" style="background-color: {{ primary_color }};">Look Up</button>
+            </div>
+            <div id="lookup-results"></div>
+        </div>
+    </div>
+
+    <!-- Admin -->
+    {% if user and permissions.can_edit %}
+    <div id="tab-admin" class="tab-pane hidden">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold" style="color: {{ secondary_color }};" id="ob-total">--</div>
+                <div class="text-xs text-gray-500 mt-1">Total</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-gray-400" id="ob-not-started">--</div>
+                <div class="text-xs text-gray-500 mt-1">Not Started</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-yellow-600" id="ob-in-progress">--</div>
+                <div class="text-xs text-gray-500 mt-1">In Progress</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-green-600" id="ob-complete">--</div>
+                <div class="text-xs text-gray-500 mt-1">Complete</div>
+            </div>
+            <div class="tp-card text-center">
+                <div class="text-2xl font-bold text-red-600" id="ob-ada">--</div>
+                <div class="text-xs text-gray-500 mt-1">Needs Accommodation</div>
+            </div>
+        </div>
+        <div class="tp-card overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead><tr class="text-left text-gray-500 border-b">
+                    <th class="pb-3 font-medium">Name</th>
+                    <th class="pb-3 font-medium">School</th>
+                    <th class="pb-3 font-medium">Status</th>
+                    <th class="pb-3 font-medium">Badge</th>
+                    <th class="pb-3 font-medium">Equipment</th>
+                    <th class="pb-3 font-medium">Orientation</th>
+                    <th class="pb-3 font-medium">Date</th>
+                </tr></thead>
+                <tbody id="admin-table"></tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+
+<style>
+    .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all; }
+    .nav-link.active { @apply text-white bg-white/15; }
+    .tab-btn { @apply pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 transition-all; }
+    .tab-btn.active { border-color: {{ primary_color }}; color: {{ secondary_color }}; font-weight: 600; }
+    .tp-card { @apply bg-white rounded-lg shadow-sm border border-gray-100 p-6; }
+    .tp-badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+</style>
+
+<script>
+    const API = '/onboarding';
+    const customFields = {{ custom_fields | tojson }};
+
+    function showTab(name) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.remove('hidden');
+        document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+        if (name === 'admin') loadAdmin();
+    }
+
+    async function submitOnboarding() {
+        const body = {
+            first_name: document.getElementById('ob-first').value,
+            last_name: document.getElementById('ob-last').value,
+            preferred_name: document.getElementById('ob-preferred').value,
+            email: document.getElementById('ob-email').value,
+            phone: document.getElementById('ob-phone').value,
+            school_location: document.getElementById('ob-school').value,
+            physical_address: document.getElementById('ob-address').value,
+            tshirt_size: document.getElementById('ob-tshirt').value,
+            dietary_needs: document.getElementById('ob-diet').value,
+            food_allergies: document.getElementById('ob-allergies').value,
+            ada_accommodation: document.getElementById('ob-ada').value,
+        };
+        // Add custom fields
+        customFields.forEach(f => {
+            const el = document.getElementById('cf-' + f.field_name);
+            if (el) body[f.field_name] = el.value;
+        });
+
+        const res = await fetch(`${API}/api/submit`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (res.ok) alert(`Welcome! Your submission ID is ${data.submission_id}. We'll be in touch!`);
+        else alert('Error: ' + (data.error || 'Unknown'));
+    }
+
+    async function lookupOnboarding() {
+        const email = document.getElementById('lookup-email').value;
+        const data = await fetch(`${API}/api/lookup?email=${email}`).then(r => r.json());
+        const statusColor = s => s === 'Complete' ? 'green' : s === 'In Progress' ? 'yellow' : 'gray';
+        document.getElementById('lookup-results').innerHTML = data.map(r => `
+            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                <div><span class="font-medium">${r.first_name} ${r.last_name}</span>
+                     <span class="text-gray-400 text-sm ml-2">${r.school_location}</span></div>
+                <span class="tp-badge badge-${statusColor(r.onboarding_status)}">${r.onboarding_status}</span>
+            </div>`).join('') || '<p class="text-gray-400 text-sm py-4">No submissions found.</p>';
+    }
+
+    async function loadAdmin() {
+        const [stats, subs] = await Promise.all([
+            fetch(`${API}/api/admin/stats`).then(r => r.json()),
+            fetch(`${API}/api/admin/submissions`).then(r => r.json()),
+        ]);
+        document.getElementById('ob-total').textContent = stats.total || 0;
+        document.getElementById('ob-not-started').textContent = stats.not_started || 0;
+        document.getElementById('ob-in-progress').textContent = stats.in_progress || 0;
+        document.getElementById('ob-complete').textContent = stats.complete || 0;
+        document.getElementById('ob-ada').textContent = stats.needs_accommodation || 0;
+
+        const check = v => v === 'Yes' ? '<span class="text-green-500">&#10003;</span>' : '<span class="text-gray-300">&#10005;</span>';
+        const statusColor = s => s === 'Complete' ? 'green' : s === 'In Progress' ? 'yellow' : 'gray';
+        document.getElementById('admin-table').innerHTML = subs.map(s => `
+            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                <td class="py-3 font-medium">${s.first_name} ${s.last_name}</td>
+                <td>${s.school_location}</td>
+                <td><span class="tp-badge badge-${statusColor(s.onboarding_status)}">${s.onboarding_status}</span></td>
+                <td class="text-center">${check(s.badge_printed)}</td>
+                <td class="text-center">${check(s.equipment_issued)}</td>
+                <td class="text-center">${check(s.orientation_complete)}</td>
+                <td class="text-xs text-gray-400">${new Date(s.submitted_at).toLocaleDateString()}</td>
+            </tr>`).join('') || '<tr><td colspan="7" class="py-8 text-center text-gray-400">No submissions yet.</td></tr>';
+    }
+</script>
+{% endblock %}

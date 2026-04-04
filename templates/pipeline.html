@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Hiring Pipeline{% endblock %}
+
+{% block body %}
+<nav class="tp-gradient shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+                {% if logo_url %}<img src="{{ logo_url }}" alt="{{ org_name }}" class="h-8">{% endif %}
+                <span class="text-white font-bold text-lg">TalentPoint</span>
+                <span class="text-white/60 text-sm hidden sm:inline">{{ org_name }}</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/staffing" class="nav-link">Staffing</a>
+                <a href="/requests" class="nav-link">Requests</a>
+                <a href="/pipeline" class="nav-link active">Pipeline</a>
+                <a href="/staff-list" class="nav-link">Staff List</a>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="text-white text-sm">{{ user.name }}</span>
+                <a href="/logout" class="text-white/70 hover:text-white text-sm">Sign out</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="tp-card text-center">
+            <div class="text-2xl font-bold text-red-600" id="pl-open">--</div>
+            <div class="text-xs text-gray-500 mt-1">Open Positions</div>
+        </div>
+        <div class="tp-card text-center">
+            <div class="text-2xl font-bold text-blue-600" id="pl-candidates">--</div>
+            <div class="text-xs text-gray-500 mt-1">Active Candidates</div>
+        </div>
+        <div class="tp-card text-center">
+            <div class="text-2xl font-bold text-green-600" id="pl-hired">--</div>
+            <div class="text-xs text-gray-500 mt-1">Hired</div>
+        </div>
+        <div class="tp-card text-center">
+            <div class="text-2xl font-bold" style="color: {{ primary_color }};" id="pl-pct">--</div>
+            <div class="text-xs text-gray-500 mt-1">Hiring Progress</div>
+        </div>
+    </div>
+
+    <!-- Pipeline Stages -->
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">Pipeline by Stage</h3>
+    <div class="flex space-x-3 mb-8 overflow-x-auto pb-2" id="stage-cards"></div>
+
+    <!-- Open Positions with Candidates -->
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">Open Positions</h3>
+    <div class="space-y-4" id="pipeline-positions"></div>
+</main>
+
+<style>
+    .nav-link { @apply px-3 py-2 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all; }
+    .nav-link.active { @apply text-white bg-white/15; }
+    .tp-card { @apply bg-white rounded-lg shadow-sm border border-gray-100 p-6; }
+    .tp-badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+    .stage-card { @apply flex-shrink-0 w-40 rounded-lg p-4 text-center; }
+</style>
+
+<script>
+    const API = '/pipeline';
+
+    async function loadPipeline() {
+        const [stats, overview] = await Promise.all([
+            fetch(`${API}/api/stats`).then(r => r.json()),
+            fetch(`${API}/api/overview`).then(r => r.json()),
+        ]);
+
+        document.getElementById('pl-open').textContent = stats.open_positions || 0;
+        document.getElementById('pl-candidates').textContent = stats.active_candidates || 0;
+        document.getElementById('pl-hired').textContent = stats.hired || 0;
+        document.getElementById('pl-pct').textContent = (stats.hire_pct || 0) + '%';
+
+        // Stage cards
+        const stages = overview.stages || [];
+        const counts = overview.stage_counts || {};
+        document.getElementById('stage-cards').innerHTML = stages.filter(s => !s.is_terminal).map(s => `
+            <div class="stage-card" style="background-color: ${s.color}15; border: 2px solid ${s.color};">
+                <div class="text-2xl font-bold" style="color: ${s.color};">${counts[s.name] || 0}</div>
+                <div class="text-xs font-medium mt-1" style="color: ${s.color};">${s.name}</div>
+            </div>
+        `).join('');
+
+        // Positions
+        const positions = overview.open_positions || [];
+        document.getElementById('pipeline-positions').innerHTML = positions.map(p => {
+            const candHtml = p.candidates.length ?
+                p.candidates.map(c => `
+                    <div class="flex items-center justify-between py-2 border-b border-gray-50">
+                        <span class="text-sm">${c.first_name} ${c.last_name}</span>
+                        <span class="tp-badge" style="background-color: ${c.stage_color}15; color: ${c.stage_color};">${c.stage_name}</span>
+                    </div>
+                `).join('') :
+                '<p class="text-xs text-gray-400 py-2">No candidates yet</p>';
+
+            return `<div class="tp-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <span class="font-semibold">${p.job_title}</span>
+                        <span class="text-gray-400 text-sm ml-2">${p.school_name}</span>
+                    </div>
+                    <span class="tp-badge bg-gray-100 text-gray-600">${p.candidate_count} candidate${p.candidate_count !== 1 ? 's' : ''}</span>
+                </div>
+                ${candHtml}
+            </div>`;
+        }).join('') || '<p class="text-gray-400 text-sm tp-card">No open positions in the pipeline.</p>';
+    }
+
+    loadPipeline();
+</script>
+{% endblock %}

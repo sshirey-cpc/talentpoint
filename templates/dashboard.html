@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<nav class="tp-gradient shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo & Product Name -->
+            <div class="flex items-center space-x-4">
+                {% if logo_url %}
+                <img src="{{ logo_url }}" alt="{{ org_name }}" class="h-8">
+                {% endif %}
+                <div class="flex items-center space-x-2">
+                    <span class="text-white font-bold text-lg">TalentPoint</span>
+                    <span class="text-white/60 text-sm hidden sm:inline">{{ org_name }}</span>
+                </div>
+            </div>
+
+            <!-- Module Nav Links -->
+            <div class="hidden md:flex items-center space-x-1" id="nav-links">
+                <a href="/" class="nav-link active">Dashboard</a>
+                <a href="/staffing" class="nav-link">Staffing</a>
+                <a href="/requests" class="nav-link">Requests</a>
+                <a href="/pipeline" class="nav-link">Pipeline</a>
+                <a href="/referral" class="nav-link">Referral</a>
+                <a href="/onboarding" class="nav-link">Onboarding</a>
+                {% if permissions.can_view_compensation %}
+                <a href="/compensation" class="nav-link">Compensation</a>
+                {% endif %}
+                <a href="/staff-list" class="nav-link">Staff List</a>
+            </div>
+
+            <!-- User Menu -->
+            <div class="flex items-center space-x-3">
+                <div class="text-right hidden sm:block">
+                    <div class="text-white text-sm font-medium">{{ user.name }}</div>
+                    <div class="text-white/60 text-xs">{{ user.role | replace('_', ' ') | title }}</div>
+                </div>
+                {% if user.picture %}
+                <img src="{{ user.picture }}" alt="" class="w-8 h-8 rounded-full border-2 border-white/30">
+                {% endif %}
+                <a href="/logout" class="text-white/70 hover:text-white text-sm ml-2" title="Sign out">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile Nav -->
+        <div class="md:hidden pb-3 flex flex-wrap gap-1" id="mobile-nav">
+            <a href="/" class="nav-link-mobile active">Dashboard</a>
+            <a href="/staffing" class="nav-link-mobile">Staffing</a>
+            <a href="/requests" class="nav-link-mobile">Requests</a>
+            <a href="/pipeline" class="nav-link-mobile">Pipeline</a>
+            <a href="/staff-list" class="nav-link-mobile">Staff</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Dashboard Content -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Welcome Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">Welcome back, {{ user.name.split(' ')[0] }}</h1>
+        <p class="text-gray-500 mt-1">
+            {% if current_year %}{{ current_year.label }} School Year{% endif %}
+            {% if planning_year %} &mdash; Planning for {{ planning_year.label }}{% endif %}
+        </p>
+    </div>
+
+    <!-- Module Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Staffing Board -->
+        <a href="/staffing" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
+                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Staffing Board</h3>
+            </div>
+            <p class="text-sm text-gray-500">Position management, staffing matrix, and HRIS reconciliation across all schools.</p>
+            <div class="mt-4 flex items-center space-x-4 text-xs text-gray-400">
+                <span id="stat-positions">-- positions</span>
+                <span id="stat-open">-- open</span>
+            </div>
+        </a>
+
+        <!-- Position Requests -->
+        <a href="/requests" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
+                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Position Requests</h3>
+            </div>
+            <p class="text-sm text-gray-500">Submit and track position requests with multi-stage approval workflow.</p>
+            <div class="mt-4 flex items-center space-x-4 text-xs text-gray-400">
+                <span id="stat-pending">-- pending</span>
+            </div>
+        </a>
+
+        <!-- Hiring Pipeline -->
+        <a href="/pipeline" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
+                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Hiring Pipeline</h3>
+            </div>
+            <p class="text-sm text-gray-500">Track candidates from sourcing through hire with configurable pipeline stages.</p>
+            <div class="mt-4 flex items-center space-x-4 text-xs text-gray-400">
+                <span id="stat-candidates">-- in pipeline</span>
+            </div>
+        </a>
+
+        <!-- Staff Referral -->
+        <a href="/referral" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
+                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Staff Referral</h3>
+            </div>
+            <p class="text-sm text-gray-500">Employee referral submissions, bonus tracking, and automated payout workflow.</p>
+        </a>
+
+        <!-- Onboarding -->
+        <a href="/onboarding" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
+                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Onboarding</h3>
+            </div>
+            <p class="text-sm text-gray-500">New hire intake forms and onboarding progress tracking.</p>
+        </a>
+
+        <!-- Compensation (role-gated) -->
+        {% if permissions.can_view_compensation %}
+        <a href="/compensation" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
+                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Compensation</h3>
+            </div>
+            <p class="text-sm text-gray-500">Salary scale calculator and compensation scenario modeling.</p>
+        </a>
+        {% endif %}
+
+        <!-- Staff List -->
+        <a href="/staff-list" class="tp-card hover:shadow-md transition-shadow group cursor-pointer">
+            <div class="flex items-center space-x-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ primary_color }}15;">
+                    <svg class="w-5 h-5" style="color: {{ primary_color }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800 group-hover:text-tp-primary transition-colors">Staff Directory</h3>
+            </div>
+            <p class="text-sm text-gray-500">Customizable staff list with filters, column chooser, and export.</p>
+        </a>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-12 text-center text-xs text-gray-400">
+        <p>TalentPoint &mdash; Built by <a href="https://confluencepointconsulting.com" class="hover:text-gray-600" target="_blank">Confluence Point Consulting</a></p>
+    </div>
+</main>
+
+<style>
+    .nav-link {
+        @apply px-3 py-2 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all;
+    }
+    .nav-link.active {
+        @apply text-white bg-white/15;
+    }
+    .nav-link-mobile {
+        @apply px-2.5 py-1 rounded text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all;
+    }
+    .nav-link-mobile.active {
+        @apply text-white bg-white/15;
+    }
+</style>
+
+<script>
+    // Highlight active nav link based on current path
+    document.querySelectorAll('.nav-link, .nav-link-mobile').forEach(link => {
+        if (link.getAttribute('href') === window.location.pathname ||
+            (link.getAttribute('href') !== '/' && window.location.pathname.startsWith(link.getAttribute('href')))) {
+            link.classList.add('active');
+        } else if (link.getAttribute('href') === '/' && window.location.pathname !== '/') {
+            link.classList.remove('active');
+        }
+    });
+</script>
+{% endblock %}
