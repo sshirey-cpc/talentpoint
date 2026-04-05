@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentPoint — Roster Wall (Wireframe B)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tp: {
+              50: '#f0f4f8', 100: '#d9e2ec', 200: '#bcccdc', 300: '#9fb3c8',
+              400: '#829ab1', 500: '#627d98', 600: '#486581', 700: '#334e68',
+              800: '#243b53', 900: '#102a43', 950: '#0a1f33',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #bcccdc; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9fb3c8; }
+
+    /* Focus mode dimming */
+    .dimmed { opacity: 0.1; filter: grayscale(1); pointer-events: none; transition: all 0.3s ease; }
+    .focused { transition: all 0.3s ease; }
+
+    /* Chip styles */
+    .chip {
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 140px;
+      max-width: 170px;
+      height: 44px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .chip:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(16,42,67,0.12); }
+
+    .chip-filled { border-left: 3px solid #10b981; }
+    .chip-risk { border-left: 3px solid #f59e0b; }
+    .chip-open { border-left: 3px solid #ef4444; border-style: dashed; border-left-style: solid; }
+    .chip-offer { border-left: 3px solid #3b82f6; }
+    .chip-support { border-left: 3px solid #8b5cf6 !important; }
+
+    .chip .chip-name { font-size: 12px; font-weight: 500; color: #1e293b; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chip .chip-meta { font-size: 10px; color: #627d98; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .chip-open .chip-name { color: #dc2626; font-weight: 600; }
+
+    .chip .role-tag {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #7c3aed;
+      background: #ede9fe;
+      border-radius: 2px;
+      padding: 0 3px;
+      line-height: 14px;
+      margin-right: 3px;
+      flex-shrink: 0;
+    }
+
+    /* Status filter buttons */
+    .status-btn { transition: all 0.15s ease; cursor: pointer; border-radius: 6px; padding: 4px 12px; }
+    .status-btn:hover { background: rgba(255,255,255,0.6); }
+    .status-btn.active { background: rgba(255,255,255,0.9); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+    /* Swim lane */
+    .swim-lane { display: flex; align-items: stretch; border-bottom: 1px solid #d9e2ec; }
+    .swim-lane:last-child { border-bottom: none; }
+    .swim-lane:hover { background: #f0f4f8; }
+
+    .grade-label {
+      width: 100px;
+      min-width: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 10px 14px;
+      border-right: 2px solid #d9e2ec;
+    }
+    .grade-label .grade-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+    .grade-label .grade-count { font-size: 10px; color: #627d98; margin-top: 1px; }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 12px;
+      align-items: center;
+      flex: 1;
+    }
+
+    /* Section divider */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px;
+      margin: 0;
+    }
+    .section-divider .divider-line { flex: 1; height: 1px; background: #bcccdc; }
+    .section-divider .divider-text {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #627d98;
+    }
+
+    /* Command bar overlay */
+    .cmd-overlay { background: rgba(16,42,67,0.35); backdrop-filter: blur(8px); }
+    .cmd-input { box-shadow: 0 25px 60px rgba(16,42,67,0.18); }
+
+    /* Detail panel */
+    .detail-panel {
+      position: fixed;
+      right: -400px;
+      top: 0;
+      width: 380px;
+      height: 100vh;
+      background: #fff;
+      box-shadow: -4px 0 24px rgba(16,42,67,0.12);
+      z-index: 50;
+      transition: right 0.25s ease;
+      overflow-y: auto;
+    }
+    .detail-panel.open { right: 0; }
+
+    /* Progress bar */
+    .progress-bar { height: 6px; border-radius: 3px; background: #d9e2ec; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  </style>
+</head>
+<body class="antialiased h-screen flex flex-col overflow-hidden" style="background: #e2e8f0; color: #1e293b;">
+
+  <!-- Top Bar -->
+  <header class="flex items-center justify-between px-5 py-2.5 shrink-0" style="background: #0f1d2f; border-bottom: 3px solid #0d9488;">
+    <div class="flex items-center gap-4">
+      <!-- Logo -->
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-md flex items-center justify-center" style="background: #0d9488;">
+          <span class="text-white font-bold text-sm">TP</span>
+        </div>
+        <span class="text-white font-semibold text-sm tracking-tight">TalentPoint</span>
+      </div>
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-1.5 text-xs">
+        <span class="text-gray-400">Horizon Public Schools</span>
+        <span class="text-gray-500">/</span>
+        <span class="text-white font-medium">Riverside Academy</span>
+        <span class="text-gray-500 ml-1">|</span>
+        <span class="text-teal-300 font-medium ml-1">Roster Wall</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Year toggle -->
+      <div class="flex items-center gap-1 bg-white/10 rounded-md px-2 py-1">
+        <button class="text-xs text-gray-400 hover:text-white px-1.5 py-0.5 rounded">24-25</button>
+        <button class="text-xs text-white bg-white/15 px-1.5 py-0.5 rounded font-medium">25-26</button>
+      </div>
+      <!-- Search -->
+      <button onclick="openSearch()" class="flex items-center gap-1.5 text-gray-400 hover:text-white text-xs bg-white/10 rounded-md px-3 py-1.5 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <span>Search</span>
+        <kbd class="text-[10px] bg-white/10 rounded px-1 ml-1">/</kbd>
+      </button>
+    </div>
+  </header>
+
+  <!-- Status Summary Bar -->
+  <div class="flex items-center justify-between px-5 py-2 shrink-0 border-b" style="background: #edf2f7; border-color: #d9e2ec;">
+    <div class="flex items-center gap-5">
+      <div class="text-xs">
+        <span class="font-semibold text-tp-800 text-sm">52</span>
+        <span class="text-tp-500 ml-1">Total Positions</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="filterStatus('filled')" class="status-btn flex items-center gap-1.5 text-xs" data-status="filled">
+          <span class="w-2 h-2 rounded-full" style="background: #10b981;"></span>
+          <span class="font-medium" style="color: #059669;">39 Filled</span>
+        </button>
+        <button onclick="filterStatus('risk')" class="status-btn flex items-center gap-1.5 text-xs" data-status="risk">
+          <span class="w-2 h-2 rounded-full" style="background: #f59e0b;"></span>
+          <span class="font-medium" style="color: #d97706;">6 At-Risk</span>
+        </button>
+        <button onclick="filterStatus('open')" class="status-btn flex items-center gap-1.5 text-xs" data-status="open">
+          <span class="w-2 h-2 rounded-full" style="background: #ef4444;"></span>
+          <span class="font-medium" style="color: #dc2626;">4 Open</span>
+        </button>
+        <button onclick="filterStatus('offer')" class="status-btn flex items-center gap-1.5 text-xs" data-status="offer">
+          <span class="w-2 h-2 rounded-full" style="background: #3b82f6;"></span>
+          <span class="font-medium" style="color: #2563eb;">3 Offer</span>
+        </button>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="progress-bar w-48">
+        <div class="progress-fill" style="width: 75%; background: linear-gradient(90deg, #10b981 0%, #0d9488 100%);"></div>
+      </div>
+      <span class="text-xs font-medium" style="color: #0d9488;">75% Staffed</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto" id="mainContent">
+    <div class="max-w-full">
+
+      <!-- SELF-CONTAINED GRADES (PreK-2) -->
+      <div class="section-divider">
+        <span class="divider-text">Self-Contained Grades</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- PreK -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">PreK</span>
+          <span class="grade-count">3/4 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="A. Martinez" data-role="Lead Teacher" data-section="PreK-A" data-hire="2021" data-cert="EC-3 Certified" data-note="Strong veteran, mentor for new hires">
+            <div class="chip-name">A. Martinez</div>
+            <div class="chip-meta">PreK-A &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled chip-support" data-status="filled" onclick="openDetail(this)" data-name="R. Gutierrez" data-role="Paraprofessional" data-section="PreK-A" data-hire="2023" data-cert="CDA" data-note="Bilingual Spanish, great with families">
+            <div class="chip-name"><span class="role-tag">PARA</span>R. Gutierrez</div>
+            <div class="chip-meta">PreK-A &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="L. Thomas" data-role="Lead Teacher" data-section="PreK-B" data-hire="2022" data-cert="EC-3 Certified" data-note="">
+            <div class="chip-name">L. Thomas</div>
+            <div class="chip-meta">PreK-B &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-risk chip-support" data-status="risk" onclick="openDetail(this)" data-name="J. Watts" data-role="Paraprofessional" data-section="PreK-B" data-hire="2024" data-cert="In progress" data-note="May not return next year, exploring options">
+            <div class="chip-name"><span class="role-tag">PARA</span>J. Watts</div>
+            <div class="chip-meta">PreK-B &middot; <span style="color:#d97706;">At-Risk</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kinder -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">Kinder</span>
+          <span class="grade-count">1/3 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="M. Johnson" data-role="Lead Teacher" data-section="K-A" data-hire="2019" data-cert="K-3 Certified" data-note="">
+            <div class="chip-name">M. Johnson</div>
+            <div class="chip-meta">K-A &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-risk" data-status="risk" onclick="openDetail(this)" data-name="D. Carter" data-role="Lead Teacher" data-section="K-B" data-hire="2023" data-cert="K-3 Certified" data-note="Contract negotiation pending">
+            <div class="chip-name">D. Carter</div>
+            <div class="chip-meta">K-B &middot; <span style="color:#d97706;">At-Risk</span></div>
+          </div>
+          <div class="chip chip-open" data-status="open" onclick="openDetail(this)" data-name="Open Position" data-role="Lead Teacher" data-section="K-C" data-hire="" data-cert="" data-note="Posted 3/15. 12 applicants, 2 phone screens scheduled.">
+            <div class="chip-name">Open</div>
+            <div class="chip-meta">K-C &middot; <span style="color:#ef4444;">Open</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1st Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">1st Grade</span>
+          <span class="grade-count">3/3 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="L. Park" data-role="Lead Teacher" data-section="1st-A" data-hire="2020" data-cert="1-5 Certified" data-note="">
+            <div class="chip-name">L. Park</div>
+            <div class="chip-meta">1st-A &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="R. Harris" data-role="Lead Teacher" data-section="1st-B" data-hire="2021" data-cert="1-5 Certified" data-note="">
+            <div class="chip-name">R. Harris</div>
+            <div class="chip-meta">1st-B &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="A. Nguyen" data-role="Lead Teacher" data-section="1st-C" data-hire="2022" data-cert="1-5 Certified" data-note="">
+            <div class="chip-name">A. Nguyen</div>
+            <div class="chip-meta">1st-C &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2nd Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">2nd Grade</span>
+          <span class="grade-count">3/3 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="S. Brown" data-role="Lead Teacher" data-section="2nd-A" data-hire="2018" data-cert="1-5 Certified" data-note="Grade chair">
+            <div class="chip-name">S. Brown</div>
+            <div class="chip-meta">2nd-A &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="D. Pham" data-role="Lead Teacher" data-section="2nd-B" data-hire="2023" data-cert="1-5 Certified" data-note="">
+            <div class="chip-name">D. Pham</div>
+            <div class="chip-meta">2nd-B &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled chip-support" data-status="filled" onclick="openDetail(this)" data-name="K. Simmons" data-role="Teaching Asst." data-section="2nd" data-hire="2024" data-cert="" data-note="">
+            <div class="chip-name"><span class="role-tag">TA</span>K. Simmons</div>
+            <div class="chip-meta">2nd &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEPARTMENTALIZED GRADES (3-8) -->
+      <div class="section-divider">
+        <span class="divider-text">Departmentalized Grades</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- 3rd Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">3rd Grade</span>
+          <span class="grade-count">4/4 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="T. Okafor" data-role="Math Teacher" data-section="3rd" data-hire="2020" data-cert="Math 1-6" data-note="">
+            <div class="chip-name">Math: T. Okafor</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="P. Grant" data-role="ELA Teacher" data-section="3rd" data-hire="2021" data-cert="ELA 1-6" data-note="">
+            <div class="chip-name">ELA: P. Grant</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="C. Adams" data-role="Science Teacher" data-section="3rd" data-hire="2022" data-cert="Gen Science" data-note="">
+            <div class="chip-name">Sci: C. Adams</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="D. Long" data-role="Social Studies Teacher" data-section="3rd" data-hire="2019" data-cert="SS 1-6" data-note="">
+            <div class="chip-name">SS: D. Long</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4th Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">4th Grade</span>
+          <span class="grade-count">2/4 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="J. Chen" data-role="Math Teacher" data-section="4th" data-hire="2021" data-cert="Math 1-6" data-note="">
+            <div class="chip-name">Math: J. Chen</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-offer" data-status="offer" onclick="openDetail(this)" data-name="C. Vega" data-role="ELA Teacher" data-section="4th" data-hire="" data-cert="ELA 1-6" data-note="Offer sent 3/28. Awaiting response by 4/10.">
+            <div class="chip-name">ELA: C. Vega</div>
+            <div class="chip-meta"><span style="color:#2563eb;">Offer Out</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="H. Kim" data-role="Science Teacher" data-section="4th" data-hire="2023" data-cert="Gen Science" data-note="">
+            <div class="chip-name">Sci: H. Kim</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-risk" data-status="risk" onclick="openDetail(this)" data-name="K. Mitchell" data-role="Social Studies Teacher" data-section="4th" data-hire="2022" data-cert="SS 1-6" data-note="Exploring transfer to another school">
+            <div class="chip-name">SS: K. Mitchell</div>
+            <div class="chip-meta"><span style="color:#d97706;">At-Risk</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5th Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">5th Grade</span>
+          <span class="grade-count">4/4 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="R. Davis" data-role="Math Teacher" data-section="5th" data-hire="2019" data-cert="Math 4-8" data-note="">
+            <div class="chip-name">Math: R. Davis</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="N. Brooks" data-role="ELA Teacher" data-section="5th" data-hire="2020" data-cert="ELA 4-8" data-note="">
+            <div class="chip-name">ELA: N. Brooks</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="L. Woods" data-role="Science Teacher" data-section="5th" data-hire="2021" data-cert="Gen Science" data-note="">
+            <div class="chip-name">Sci: L. Woods</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="F. Cole" data-role="Social Studies Teacher" data-section="5th" data-hire="2022" data-cert="SS 4-8" data-note="">
+            <div class="chip-name">SS: F. Cole</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6th Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">6th Grade</span>
+          <span class="grade-count">2/4 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-risk" data-status="risk" onclick="openDetail(this)" data-name="W. Foster" data-role="Math Teacher" data-section="6th" data-hire="2023" data-cert="Math 4-8" data-note="Performance concerns, on improvement plan">
+            <div class="chip-name">Math: W. Foster</div>
+            <div class="chip-meta"><span style="color:#d97706;">At-Risk</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="A. Ford" data-role="ELA Teacher" data-section="6th" data-hire="2018" data-cert="ELA 4-8" data-note="">
+            <div class="chip-name">ELA: A. Ford</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="E. Reed" data-role="Science Teacher" data-section="6th" data-hire="2022" data-cert="Science 4-8" data-note="">
+            <div class="chip-name">Sci: E. Reed</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-open" data-status="open" onclick="openDetail(this)" data-name="Open Position" data-role="Social Studies Teacher" data-section="6th" data-hire="" data-cert="" data-note="Posted 3/1. 8 applicants, none advanced yet.">
+            <div class="chip-name">SS: Open</div>
+            <div class="chip-meta"><span style="color:#ef4444;">Open</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7th Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">7th Grade</span>
+          <span class="grade-count">3/4 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="M. Scott" data-role="Math Teacher" data-section="7th" data-hire="2020" data-cert="Math 4-8" data-note="">
+            <div class="chip-name">Math: M. Scott</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-risk" data-status="risk" onclick="openDetail(this)" data-name="S. Dunn" data-role="ELA Teacher" data-section="7th" data-hire="2021" data-cert="ELA 4-8" data-note="Considering move out of state">
+            <div class="chip-name">ELA: S. Dunn</div>
+            <div class="chip-meta"><span style="color:#d97706;">At-Risk</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="T. Quinn" data-role="Science Teacher" data-section="7th" data-hire="2019" data-cert="Science 4-8" data-note="">
+            <div class="chip-name">Sci: T. Quinn</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="R. Webb" data-role="Social Studies Teacher" data-section="7th" data-hire="2022" data-cert="SS 4-8" data-note="">
+            <div class="chip-name">SS: R. Webb</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8th Grade -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">8th Grade</span>
+          <span class="grade-count">2/4 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="K. Bell" data-role="Math Teacher" data-section="8th" data-hire="2020" data-cert="Math 4-8" data-note="">
+            <div class="chip-name">Math: K. Bell</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-open" data-status="open" onclick="openDetail(this)" data-name="Open Position" data-role="ELA Teacher" data-section="8th" data-hire="" data-cert="" data-note="Critical need. Posted 2/20. Interviews in progress.">
+            <div class="chip-name">ELA: Open</div>
+            <div class="chip-meta"><span style="color:#ef4444;">Open</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="B. Nash" data-role="Science Teacher" data-section="8th" data-hire="2021" data-cert="Science 4-8" data-note="">
+            <div class="chip-name">Sci: B. Nash</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-offer" data-status="offer" onclick="openDetail(this)" data-name="J. Hayes" data-role="Social Studies Teacher" data-section="8th" data-hire="" data-cert="SS 4-8" data-note="Offer extended 4/1. Strong candidate from TFA.">
+            <div class="chip-name">SS: J. Hayes</div>
+            <div class="chip-meta"><span style="color:#2563eb;">Offer Out</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUPPORT STAFF -->
+      <div class="section-divider">
+        <span class="divider-text">Support Staff</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- Specialists -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">Specialists</span>
+          <span class="grade-count">5/7 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="C. Flores" data-role="Art Teacher" data-section="K-8" data-hire="2019" data-cert="Art K-12" data-note="">
+            <div class="chip-name">Art: C. Flores</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="M. Washington" data-role="PE Teacher" data-section="K-8" data-hire="2020" data-cert="PE K-12" data-note="">
+            <div class="chip-name">PE: M. Washington</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-risk" data-status="risk" onclick="openDetail(this)" data-name="N. Hernandez" data-role="Music Teacher" data-section="K-8" data-hire="2022" data-cert="Music K-12" data-note="Part-time, may not return to full-time">
+            <div class="chip-name">Music: N. Hernandez</div>
+            <div class="chip-meta"><span style="color:#d97706;">At-Risk</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="J. Lewis" data-role="SPED Teacher" data-section="K-4" data-hire="2018" data-cert="SPED K-12" data-note="">
+            <div class="chip-name">SPED: J. Lewis</div>
+            <div class="chip-meta">K-4 &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="T. Robinson" data-role="SPED Teacher" data-section="5-8" data-hire="2021" data-cert="SPED K-12" data-note="">
+            <div class="chip-name">SPED: T. Robinson</div>
+            <div class="chip-meta">5-8 &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="Y. Chen" data-role="ELL Teacher" data-section="K-4" data-hire="2020" data-cert="ESL K-12" data-note="">
+            <div class="chip-name">ELL: Y. Chen</div>
+            <div class="chip-meta">K-4 &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-offer" data-status="offer" onclick="openDetail(this)" data-name="P. Reyes" data-role="ELL Teacher" data-section="5-8" data-hire="" data-cert="ESL K-12" data-note="Offer sent 3/25. Expected to accept.">
+            <div class="chip-name">ELL: P. Reyes</div>
+            <div class="chip-meta">5-8 &middot; <span style="color:#2563eb;">Offer Out</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paras & TAs -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">Paras & TAs</span>
+          <span class="grade-count">1/2 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled chip-support" data-status="filled" onclick="openDetail(this)" data-name="M. Briggs" data-role="SPED Paraprofessional" data-section="K-2" data-hire="2023" data-cert="CDA" data-note="">
+            <div class="chip-name"><span class="role-tag">PARA</span>M. Briggs</div>
+            <div class="chip-meta">SPED K-2 &middot; <span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-open chip-support" data-status="open" onclick="openDetail(this)" data-name="Open Position" data-role="SPED Paraprofessional" data-section="3-8" data-hire="" data-cert="" data-note="Posted 3/10. Hard to fill role.">
+            <div class="chip-name"><span class="role-tag">PARA</span>Open</div>
+            <div class="chip-meta">SPED 3-8 &middot; <span style="color:#ef4444;">Open</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interventionists -->
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">Interv.</span>
+          <span class="grade-count">1/2 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="D. Odom" data-role="Reading Interventionist" data-section="K-3" data-hire="2021" data-cert="Reading Spec." data-note="">
+            <div class="chip-name">Reading K-3: D. Odom</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-offer" data-status="offer" onclick="openDetail(this)" data-name="T. Ashford" data-role="Math Interventionist" data-section="4-8" data-hire="" data-cert="Math 4-8" data-note="Verbal acceptance, paperwork pending.">
+            <div class="chip-name">Math 4-8: T. Ashford</div>
+            <div class="chip-meta"><span style="color:#2563eb;">Offer Out</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUILDING -->
+      <div class="section-divider">
+        <span class="divider-text">Building Leadership & Operations</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <div class="swim-lane">
+        <div class="grade-label">
+          <span class="grade-name">Building</span>
+          <span class="grade-count">6/7 filled</span>
+        </div>
+        <div class="chips-row">
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="D. Richardson" data-role="School Director" data-section="" data-hire="2017" data-cert="Admin Cert." data-note="Founding director">
+            <div class="chip-name">Director: D. Richardson</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="B. Lewis" data-role="Asst. Director" data-section="" data-hire="2020" data-cert="Admin Cert." data-note="">
+            <div class="chip-name">Asst Dir: B. Lewis</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-open" data-status="open" onclick="openDetail(this)" data-name="Open Position" data-role="Dean of Students" data-section="" data-hire="" data-cert="" data-note="Internal candidates being considered. High priority.">
+            <div class="chip-name">Dean: Open</div>
+            <div class="chip-meta"><span style="color:#ef4444;">Open</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="G. Morales" data-role="Office Manager" data-section="" data-hire="2019" data-cert="" data-note="">
+            <div class="chip-name">Office: G. Morales</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="S. Taylor" data-role="Receptionist" data-section="" data-hire="2023" data-cert="" data-note="">
+            <div class="chip-name">Recept: S. Taylor</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="R. Johnson" data-role="Ops Manager" data-section="" data-hire="2021" data-cert="" data-note="">
+            <div class="chip-name">Ops: R. Johnson</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+          <div class="chip chip-filled" data-status="filled" onclick="openDetail(this)" data-name="E. Dixon" data-role="Custodian" data-section="" data-hire="2022" data-cert="" data-note="">
+            <div class="chip-name">Custodian: E. Dixon</div>
+            <div class="chip-meta"><span style="color:#059669;">Filled</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom padding -->
+      <div class="h-6"></div>
+    </div>
+  </main>
+
+  <!-- Detail Panel (slide-in from right) -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="p-5">
+      <!-- Close button -->
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-tp-800" id="detailTitle">Position Detail</h3>
+        <button onclick="closeDetail()" class="text-tp-400 hover:text-tp-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Status badge -->
+      <div class="mb-4" id="detailStatus"></div>
+
+      <!-- Info rows -->
+      <div class="space-y-3 text-sm" id="detailInfo">
+        <!-- Filled dynamically -->
+      </div>
+
+      <!-- Notes -->
+      <div class="mt-5 pt-4 border-t" style="border-color: #e2e8f0;" id="detailNotes"></div>
+
+      <!-- Action buttons (wireframe) -->
+      <div class="mt-5 pt-4 border-t space-y-2" style="border-color: #e2e8f0;">
+        <button class="w-full py-2 px-3 text-xs font-medium rounded-md text-white" style="background: #0d9488;">View Full Profile</button>
+        <button class="w-full py-2 px-3 text-xs font-medium rounded-md border" style="border-color: #d9e2ec; color: #486581;">Edit Position</button>
+        <button class="w-full py-2 px-3 text-xs font-medium rounded-md border" style="border-color: #d9e2ec; color: #486581;">View Pipeline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail panel backdrop -->
+  <div class="fixed inset-0 bg-black/20 z-40 hidden" id="detailBackdrop" onclick="closeDetail()"></div>
+
+  <!-- Search Overlay -->
+  <div class="fixed inset-0 cmd-overlay z-50 hidden flex items-start justify-center pt-24" id="searchOverlay" onclick="closeSearch(event)">
+    <div class="cmd-input bg-white rounded-xl w-full max-w-lg mx-4" onclick="event.stopPropagation()">
+      <div class="flex items-center gap-3 p-4 border-b" style="border-color: #e2e8f0;">
+        <svg class="w-5 h-5 text-tp-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="searchInput" type="text" placeholder="Search by name, role, or grade..." class="flex-1 text-sm outline-none" style="color: #1e293b;" oninput="handleSearch(this.value)">
+        <kbd class="text-[10px] text-tp-400 bg-tp-50 rounded px-1.5 py-0.5 border" style="border-color: #d9e2ec;">ESC</kbd>
+      </div>
+      <div class="p-3 max-h-64 overflow-y-auto" id="searchResults">
+        <p class="text-xs text-tp-400 text-center py-4">Type to search positions...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Focus mode state
+    let activeFilter = null;
+
+    function filterStatus(status) {
+      const chips = document.querySelectorAll('.chip');
+      const buttons = document.querySelectorAll('.status-btn');
+
+      if (activeFilter === status) {
+        // Clear filter
+        activeFilter = null;
+        chips.forEach(c => { c.classList.remove('dimmed', 'focused'); });
+        buttons.forEach(b => b.classList.remove('active'));
+        return;
+      }
+
+      activeFilter = status;
+      buttons.forEach(b => {
+        b.classList.toggle('active', b.dataset.status === status);
+      });
+
+      chips.forEach(c => {
+        if (c.dataset.status === status) {
+          c.classList.remove('dimmed');
+          c.classList.add('focused');
+        } else {
+          c.classList.add('dimmed');
+          c.classList.remove('focused');
+        }
+      });
+    }
+
+    // Detail panel
+    function openDetail(el) {
+      const panel = document.getElementById('detailPanel');
+      const backdrop = document.getElementById('detailBackdrop');
+      const name = el.dataset.name;
+      const role = el.dataset.role;
+      const section = el.dataset.section;
+      const hire = el.dataset.hire;
+      const cert = el.dataset.cert;
+      const note = el.dataset.note;
+      const status = el.dataset.status;
+
+      document.getElementById('detailTitle').textContent = name === 'Open Position' ? role : name;
+
+      // Status badge
+      const statusColors = { filled: '#10b981', risk: '#f59e0b', open: '#ef4444', offer: '#3b82f6' };
+      const statusLabels = { filled: 'Filled', risk: 'At-Risk', open: 'Open', offer: 'Offer Out' };
+      document.getElementById('detailStatus').innerHTML = `
+        <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full" style="background: ${statusColors[status]}15; color: ${statusColors[status]};">
+          <span class="w-1.5 h-1.5 rounded-full" style="background: ${statusColors[status]};"></span>
+          ${statusLabels[status]}
+        </span>
+      `;
+
+      // Info
+      let infoHtml = '';
+      const addRow = (label, value) => {
+        if (value) infoHtml += `<div class="flex justify-between"><span class="text-tp-500 text-xs">${label}</span><span class="text-tp-800 text-xs font-medium">${value}</span></div>`;
+      };
+      addRow('Role', role);
+      if (section) addRow('Section / Band', section);
+      if (hire) addRow('Hire Year', hire);
+      if (cert) addRow('Certification', cert);
+      document.getElementById('detailInfo').innerHTML = infoHtml;
+
+      // Notes
+      if (note) {
+        document.getElementById('detailNotes').innerHTML = `
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-tp-400 mb-1">Notes</p>
+          <p class="text-xs text-tp-600">${note}</p>
+        `;
+        document.getElementById('detailNotes').style.display = 'block';
+      } else {
+        document.getElementById('detailNotes').style.display = 'none';
+      }
+
+      panel.classList.add('open');
+      backdrop.classList.remove('hidden');
+    }
+
+    function closeDetail() {
+      document.getElementById('detailPanel').classList.remove('open');
+      document.getElementById('detailBackdrop').classList.add('hidden');
+    }
+
+    // Search
+    function openSearch() {
+      document.getElementById('searchOverlay').classList.remove('hidden');
+      document.getElementById('searchOverlay').classList.add('flex');
+      setTimeout(() => document.getElementById('searchInput').focus(), 100);
+    }
+
+    function closeSearch(e) {
+      if (e && e.target !== document.getElementById('searchOverlay')) return;
+      document.getElementById('searchOverlay').classList.add('hidden');
+      document.getElementById('searchOverlay').classList.remove('flex');
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchResults').innerHTML = '<p class="text-xs text-tp-400 text-center py-4">Type to search positions...</p>';
+    }
+
+    function handleSearch(query) {
+      const results = document.getElementById('searchResults');
+      if (!query.trim()) {
+        results.innerHTML = '<p class="text-xs text-tp-400 text-center py-4">Type to search positions...</p>';
+        return;
+      }
+
+      const q = query.toLowerCase();
+      const chips = document.querySelectorAll('.chip');
+      let matches = [];
+
+      chips.forEach(chip => {
+        const name = (chip.dataset.name || '').toLowerCase();
+        const role = (chip.dataset.role || '').toLowerCase();
+        const section = (chip.dataset.section || '').toLowerCase();
+        const chipText = chip.textContent.toLowerCase();
+
+        if (name.includes(q) || role.includes(q) || section.includes(q) || chipText.includes(q)) {
+          matches.push({
+            name: chip.dataset.name,
+            role: chip.dataset.role,
+            section: chip.dataset.section,
+            status: chip.dataset.status,
+            el: chip
+          });
+        }
+      });
+
+      if (matches.length === 0) {
+        results.innerHTML = '<p class="text-xs text-tp-400 text-center py-4">No matches found</p>';
+        return;
+      }
+
+      const statusColors = { filled: '#10b981', risk: '#f59e0b', open: '#ef4444', offer: '#3b82f6' };
+      results.innerHTML = matches.map(m => `
+        <button class="w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-tp-50 transition" onclick="jumpToChip(this)" data-chip-name="${m.name}" data-chip-role="${m.role}">
+          <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: ${statusColors[m.status]};"></span>
+          <div>
+            <div class="text-xs font-medium text-tp-800">${m.name}</div>
+            <div class="text-[10px] text-tp-400">${m.role}${m.section ? ' · ' + m.section : ''}</div>
+          </div>
+        </button>
+      `).join('');
+    }
+
+    function jumpToChip(btn) {
+      const name = btn.dataset.chipName;
+      const role = btn.dataset.chipRole;
+
+      // Close search
+      document.getElementById('searchOverlay').classList.add('hidden');
+      document.getElementById('searchOverlay').classList.remove('flex');
+      document.getElementById('searchInput').value = '';
+
+      // Find the chip and highlight it
+      const chips = document.querySelectorAll('.chip');
+      chips.forEach(chip => {
+        if (chip.dataset.name === name && chip.dataset.role === role) {
+          chip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          chip.style.boxShadow = '0 0 0 3px #0d9488';
+          setTimeout(() => { chip.style.boxShadow = ''; }, 2000);
+          // Open its detail
+          setTimeout(() => openDetail(chip), 400);
+        }
+      });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        const active = document.activeElement;
+        if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') return;
+        e.preventDefault();
+        openSearch();
+      }
+      if (e.key === 'Escape') {
+        const searchOverlay = document.getElementById('searchOverlay');
+        if (!searchOverlay.classList.contains('hidden')) {
+          searchOverlay.classList.add('hidden');
+          searchOverlay.classList.remove('flex');
+          document.getElementById('searchInput').value = '';
+          return;
+        }
+        closeDetail();
+        // Clear filter on Escape too
+        if (activeFilter) {
+          activeFilter = null;
+          document.querySelectorAll('.chip').forEach(c => c.classList.remove('dimmed', 'focused'));
+          document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+        }
+      }
+    });
+  </script>
+</body>
+</html>

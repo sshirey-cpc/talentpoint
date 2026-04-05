@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentPoint — Warm Ember</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tp: {
+              50: '#faf8f5', 100: '#f0ece7', 200: '#e4ddd6', 300: '#d6cfc8',
+              400: '#b0a89f', 500: '#8a827a', 600: '#6b6259', 700: '#5c5046',
+              800: '#3d322c', 900: '#2c2420', 950: '#1a1410',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d6cfc8; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #b0a89f; }
+
+    /* Transitions */
+    .view-transition { transition: opacity 0.2s ease, transform 0.2s ease; }
+    .card-hover { transition: all 0.15s ease; }
+    .card-hover:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(44,36,32,0.12); }
+
+    /* Focus mode dimming */
+    .dimmed { opacity: 0.12; filter: grayscale(1); pointer-events: none; transition: all 0.3s ease; }
+    .focused { transition: all 0.3s ease; }
+    .position-card { transition: opacity 0.3s ease, filter 0.3s ease; }
+
+    /* Command bar */
+    .cmd-overlay { background: rgba(44,36,32,0.35); backdrop-filter: blur(8px); }
+    .cmd-input { box-shadow: 0 25px 60px rgba(44,36,32,0.18); }
+
+    /* Network card hover */
+    .school-row { transition: all 0.1s ease; }
+    .school-row:hover { background: #f5f0eb; }
+
+    /* Zone dividers */
+    .zone-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8a7e72;
+    }
+
+    /* Status bar button active state */
+    .status-btn { transition: all 0.15s ease; }
+    .status-btn:hover { transform: scale(1.02); }
+
+    /* Self-contained card grid */
+    .section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+
+    /* Department grid */
+    .dept-grid { display: grid; }
+    .dept-grid .header-cell { position: sticky; top: 0; z-index: 5; }
+
+    /* Status colors — white cards, colored left border + text */
+    .status-filled { background: #ffffff; border: 1px solid #d6cfc8; border-left: 3px solid #10b981; }
+    .status-filled .name { color: #2c2420; }
+    .status-filled .label { color: #059669; }
+    .status-filled .sublabel { color: #8a827a; }
+
+    .status-risk { background: #ffffff; border: 1px solid #d6cfc8; border-left: 3px solid #f59e0b; }
+    .status-risk .name { color: #2c2420; }
+    .status-risk .label { color: #d97706; }
+    .status-risk .sublabel { color: #8a827a; }
+
+    .status-open { background: #ffffff; border: 1px dashed #d6cfc8; border-left: 3px solid #ef4444; }
+    .status-open .name { color: #dc2626; }
+    .status-open .label { color: #ef4444; }
+    .status-open .sublabel { color: #8a827a; }
+
+    .status-offer { background: #ffffff; border: 1px solid #d6cfc8; border-left: 3px solid #3b82f6; }
+    .status-offer .name { color: #2c2420; }
+    .status-offer .label { color: #2563eb; }
+    .status-offer .sublabel { color: #8a827a; }
+
+    /* Support role cards (TAs/Paras) — double-left border effect */
+    .support-role {
+      border-left: 3px solid #8b5cf6 !important;
+      opacity: 0.92;
+    }
+    .support-role .role-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #7c3aed;
+      background: #ede9fe;
+      border-radius: 3px;
+      padding: 0px 4px;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body class="antialiased h-screen flex flex-col overflow-hidden" style="background: #faf8f5; color: #2c2420;">
+
+  <!-- Top Bar -->
+  <header class="px-5 py-2.5 flex items-center justify-between flex-shrink-0 z-40" style="background: #2c2420; border-bottom: 3px solid #c2652a;">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer" style="background: #c2652a;" onclick="showNetwork()">
+        <span class="text-white font-bold text-[11px]">TP</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-sm" id="breadcrumb">
+        <span style="color: rgba(255,255,255,0.55);" class="cursor-pointer hover:text-white transition-colors" onclick="showNetwork()">Horizon Public Schools</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Year Toggle -->
+      <div class="flex rounded-md p-0.5" id="yearToggle" style="display:none; background: rgba(255,255,255,0.08);">
+        <button class="px-2.5 py-1 text-[11px] font-medium rounded" style="color: rgba(255,255,255,0.4);" onclick="setYear(this)">25-26</button>
+        <button class="px-2.5 py-1 text-[11px] font-medium rounded text-white" style="background: #c2652a;" onclick="setYear(this)">26-27</button>
+      </div>
+
+      <!-- Search trigger -->
+      <button onclick="openCmd()" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5);">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <span>Search</span>
+        <kbd class="text-[10px] rounded px-1 py-0.5 ml-2" style="color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">/</kbd>
+      </button>
+
+      <div class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-medium" style="background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6);">SS</div>
+    </div>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- CMO / NETWORK VIEW -->
+  <!-- ============================================ -->
+  <div id="networkView" class="flex-1 overflow-y-auto">
+    <div class="max-w-5xl mx-auto px-6 py-8">
+
+      <!-- Network header + year toggle -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold mb-1" style="color: #2c2420;">Staffing Board</h1>
+          <p class="text-sm" style="color: #8a7e72;" id="cmoSubtitle">26-27 school year planning</p>
+        </div>
+        <div class="flex rounded-lg p-0.5" style="background: #2c2420;" id="cmoYearToggle">
+          <button class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors" style="color: rgba(255,255,255,0.4);" onclick="setCmoYear('25-26')">25-26</button>
+          <button class="px-3 py-1.5 text-xs font-medium rounded-md text-white" style="background: #c2652a;" onclick="setCmoYear('26-27')">26-27</button>
+        </div>
+      </div>
+
+      <!-- Network summary cards -->
+      <div class="grid grid-cols-5 gap-3 mb-8" id="cmoSummary">
+        <div class="rounded-xl p-4 bg-white" style="border: 1px solid #d6cfc8;">
+          <p class="text-2xl font-semibold" style="color: #2c2420;" id="cmoTotal">178</p>
+          <p class="text-[11px] mt-1" style="color: #8a7e72;">Total Positions</p>
+        </div>
+        <div class="rounded-xl p-4 bg-white" style="border: 1px solid #d6cfc8;">
+          <p class="text-2xl font-semibold" style="color: #059669;" id="cmoFilled">142</p>
+          <p class="text-[11px] mt-1" style="color: #8a7e72;">Returning / Filled</p>
+        </div>
+        <div class="rounded-xl p-4 bg-white" style="border: 1px solid #d6cfc8;">
+          <p class="text-2xl font-semibold" style="color: #d97706;" id="cmoRisk">14</p>
+          <p class="text-[11px] mt-1" style="color: #8a7e72;">At Risk</p>
+        </div>
+        <div class="rounded-xl p-4 bg-white" style="border: 1px solid #d6cfc8;">
+          <p class="text-2xl font-semibold" style="color: #dc2626;" id="cmoOpen">12</p>
+          <p class="text-[11px] mt-1" style="color: #8a7e72;">Open</p>
+        </div>
+        <div class="rounded-xl p-4 bg-white" style="border: 1px solid #d6cfc8;">
+          <p class="text-2xl font-semibold" style="color: #2563eb;" id="cmoOffers">10</p>
+          <p class="text-[11px] mt-1" style="color: #8a7e72;">Offer Out / Finalist</p>
+        </div>
+      </div>
+
+      <!-- School cards -->
+      <div class="grid grid-cols-2 gap-4" id="cmoSchoolCards">
+        <!-- Cards rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SCHOOL VIEW (Matrix) -->
+  <!-- ============================================ -->
+  <div id="schoolView" class="flex-1 overflow-hidden flex flex-col" style="display:none;">
+
+    <!-- Status Bar (Focus Mode) -->
+    <div class="px-5 py-2 flex items-center gap-2 flex-shrink-0" id="statusBar" style="background: #e8e2dc; border-bottom: 1px solid #b0a89f;">
+      <div class="flex items-center gap-1.5 mr-4">
+        <span class="text-sm font-semibold" style="color: #2c2420;" id="schoolTotal">54</span>
+        <span class="text-xs" style="color: #8a7e72;">positions</span>
+      </div>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:bg-emerald-50 hover:border-emerald-200" data-status="filled" onclick="toggleFocus(this, 'filled')">
+        <span class="w-2.5 h-2.5 rounded-full" style="background: #10b981;"></span>
+        <span style="color: #5c5046;"><span class="font-semibold" style="color: #059669;">42</span> Filled</span>
+      </button>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:bg-amber-50 hover:border-amber-200" data-status="at-risk" onclick="toggleFocus(this, 'at-risk')">
+        <span class="w-2.5 h-2.5 rounded-full" style="background: #f59e0b;"></span>
+        <span style="color: #5c5046;"><span class="font-semibold" style="color: #d97706;">5</span> At Risk</span>
+      </button>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:bg-red-50 hover:border-red-200" data-status="open" onclick="toggleFocus(this, 'open')">
+        <span class="w-2.5 h-2.5 rounded-full" style="background: #ef4444;"></span>
+        <span style="color: #5c5046;"><span class="font-semibold" style="color: #dc2626;">4</span> Open</span>
+      </button>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:bg-blue-50 hover:border-blue-200" data-status="offer" onclick="toggleFocus(this, 'offer')">
+        <span class="w-2.5 h-2.5 rounded-full" style="background: #3b82f6;"></span>
+        <span style="color: #5c5046;"><span class="font-semibold" style="color: #2563eb;">3</span> Offer Out</span>
+      </button>
+
+      <div class="flex-1"></div>
+
+      <!-- Progress -->
+      <div class="flex items-center gap-2">
+        <div class="w-32 h-2 rounded-full overflow-hidden" style="background: #d6cfc8;">
+          <div class="h-full rounded-full" style="width:77.8%; background: #10b981;"></div>
+        </div>
+        <span class="text-xs font-semibold" style="color: #5c5046;">77.8%</span>
+      </div>
+    </div>
+
+    <!-- Matrix Content -->
+    <div class="flex-1 overflow-y-auto px-5 py-5" id="matrixContent">
+
+      <!-- ==================== -->
+      <!-- ZONE 1: CLASSROOMS   -->
+      <!-- ==================== -->
+
+      <!-- Band: PreK-2 (Self-Contained) -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">Classrooms</span>
+          <div class="h-px flex-1" style="background: #e4ddd6;"></div>
+        </div>
+
+        <!-- PreK -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">PreK</h3>
+            <span class="text-[10px]" style="color: #a89e96;">2 sections &middot; 4 positions (2 lead + 2 para)</span>
+          </div>
+          <div class="section-grid">
+            <!-- PreK-A: Lead + Para stacked -->
+            <div class="space-y-1.5">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled" onclick="openDetail()">
+                <p class="text-[10px] sublabel">PreK-A</p>
+                <p class="text-[11px] font-medium name">A. Martinez</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover support-role status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <span class="role-tag">Para</span>
+                <p class="text-[10px] sublabel">PreK-A</p>
+                <p class="text-[11px] font-medium name">R. Gutierrez</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+            </div>
+            <!-- PreK-B: Lead + Para stacked -->
+            <div class="space-y-1.5">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">PreK-B</p>
+                <p class="text-[11px] font-medium name">L. Thomas</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover support-role status-risk rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                <span class="role-tag">Para</span>
+                <p class="text-[10px] sublabel">PreK-B</p>
+                <p class="text-[11px] font-medium name">J. Watts</p>
+                <p class="text-[10px] font-medium label">Possible Open</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kindergarten -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">Kindergarten</h3>
+            <span class="text-[10px]" style="color: #a89e96;">3 sections &middot; 2/3 filled</span>
+          </div>
+          <div class="section-grid">
+            <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] sublabel">K-A</p>
+              <p class="text-[11px] font-medium name">M. Johnson</p>
+              <p class="text-[10px] font-medium label">Return</p>
+            </div>
+            <div class="position-card card-hover status-risk rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+              <p class="text-[10px] sublabel">K-B</p>
+              <p class="text-[11px] font-medium name">D. Carter</p>
+              <p class="text-[10px] font-medium label">Possible Open</p>
+            </div>
+            <div class="position-card card-hover status-open rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+              <p class="text-[10px] sublabel">K-C</p>
+              <p class="text-[11px] font-medium name">Open</p>
+              <p class="text-[10px] font-medium label">Vacant</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1st Grade -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">1st Grade</h3>
+            <span class="text-[10px]" style="color: #a89e96;">3 sections &middot; 3/3 filled</span>
+          </div>
+          <div class="section-grid">
+            <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] sublabel">1st-A</p>
+              <p class="text-[11px] font-medium name">L. Park</p>
+              <p class="text-[10px] font-medium label">Return</p>
+            </div>
+            <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] sublabel">1st-B</p>
+              <p class="text-[11px] font-medium name">R. Harris</p>
+              <p class="text-[10px] font-medium label">Return</p>
+            </div>
+            <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] sublabel">1st-C</p>
+              <p class="text-[11px] font-medium name">A. Nguyen</p>
+              <p class="text-[10px] font-medium label">Return</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2nd Grade -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">2nd Grade</h3>
+            <span class="text-[10px]" style="color: #a89e96;">2 sections &middot; 2/2 filled</span>
+          </div>
+          <div class="section-grid">
+            <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] sublabel">2nd-A</p>
+              <p class="text-[11px] font-medium name">S. Brown</p>
+              <p class="text-[10px] font-medium label">Return</p>
+            </div>
+            <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] sublabel">2nd-B</p>
+              <p class="text-[11px] font-medium name">D. Pham</p>
+              <p class="text-[10px] font-medium label">Return</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Band: 3-8 (Departmentalized) -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">Upper Grades — Departmentalized</span>
+          <div class="h-px flex-1" style="background: #e4ddd6;"></div>
+        </div>
+
+        <div class="bg-white rounded-xl overflow-hidden" style="border: 1px solid #d6cfc8;">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr style="border-bottom: 1px solid #e4ddd6;">
+                  <th class="text-[11px] font-semibold uppercase tracking-wider text-left px-4 py-2.5 w-28" style="color: #5c5046; background: #f0ece7;">Subject</th>
+                  <th class="text-[11px] font-semibold text-center px-3 py-2.5" style="color: #5c5046; background: #f0ece7;">3rd</th>
+                  <th class="text-[11px] font-semibold text-center px-3 py-2.5" style="color: #5c5046; background: #f0ece7;">4th</th>
+                  <th class="text-[11px] font-semibold text-center px-3 py-2.5" style="color: #5c5046; background: #f0ece7;">5th</th>
+                  <th class="text-[11px] font-semibold text-center px-3 py-2.5" style="color: #5c5046; background: #f0ece7;">6th</th>
+                  <th class="text-[11px] font-semibold text-center px-3 py-2.5" style="color: #5c5046; background: #f0ece7;">7th</th>
+                  <th class="text-[11px] font-semibold text-center px-3 py-2.5" style="color: #5c5046; background: #f0ece7;">8th</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Math row -->
+                <tr style="border-bottom: 1px solid #f0ece7;">
+                  <td class="px-4 py-2 text-xs font-medium" style="color: #5c5046;">Math</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">T. Okafor</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">J. Chen</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">R. Davis</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-risk rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                      <p class="text-[11px] font-medium name">W. Foster</p>
+                      <p class="text-[10px] font-medium label">Possible Open</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">M. Scott</p>
+                      <p class="text-[10px] font-medium label">Filled</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">K. Bell</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                </tr>
+                <!-- ELA row -->
+                <tr style="border-bottom: 1px solid #f0ece7;">
+                  <td class="px-4 py-2 text-xs font-medium" style="color: #5c5046;">ELA</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">P. Grant</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-offer rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="offer">
+                      <p class="text-[11px] font-medium name">C. Vega</p>
+                      <p class="text-[10px] font-medium label">Offer Out</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">N. Brooks</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">A. Ford</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-risk rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                      <p class="text-[11px] font-medium name">S. Dunn</p>
+                      <p class="text-[10px] font-medium label">Possible Open</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-open rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+                      <p class="text-[11px] font-medium name">Open</p>
+                      <p class="text-[10px] font-medium label">Vacant</p>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Science row -->
+                <tr style="border-bottom: 1px solid #f0ece7;">
+                  <td class="px-4 py-2 text-xs font-medium" style="color: #5c5046;">Science</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">C. Adams</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">H. Kim</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">L. Woods</p>
+                      <p class="text-[10px] font-medium label">Filled</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">E. Reed</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">T. Quinn</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">B. Nash</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Social Studies row -->
+                <tr>
+                  <td class="px-4 py-2 text-xs font-medium" style="color: #5c5046;">S. Studies</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">D. Long</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-risk rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                      <p class="text-[11px] font-medium name">K. Mitchell</p>
+                      <p class="text-[10px] font-medium label">Possible Open</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">F. Cole</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-open rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+                      <p class="text-[11px] font-medium name">Open</p>
+                      <p class="text-[10px] font-medium label">Vacant</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium name">R. Webb</p>
+                      <p class="text-[10px] font-medium label">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card status-offer rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="offer">
+                      <p class="text-[11px] font-medium name">J. Hayes</p>
+                      <p class="text-[10px] font-medium label">Offer Out</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- ZONE 2: SPECIALISTS       -->
+      <!-- ========================= -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">Specialists &amp; Support</span>
+          <div class="h-px flex-1" style="background: #e4ddd6;"></div>
+        </div>
+
+        <div class="grid grid-cols-5 gap-4">
+          <!-- Enrichment -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">Enrichment</h3>
+              <span class="text-[10px]" style="color: #a89e96;">2/3</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Art &middot; All Grades</p>
+                <p class="text-[11px] font-medium name">C. Flores</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">PE &middot; All Grades</p>
+                <p class="text-[11px] font-medium name">M. Washington</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-risk rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                <p class="text-[10px] sublabel">Music &middot; All Grades</p>
+                <p class="text-[11px] font-medium name">N. Hernandez</p>
+                <p class="text-[10px] font-medium label">Possible Open</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SPED -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">SPED</h3>
+              <span class="text-[10px]" style="color: #a89e96;">2/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Coordinator &middot; K-8</p>
+                <p class="text-[11px] font-medium name">J. Lewis</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Teacher &middot; K-4</p>
+                <p class="text-[11px] font-medium name">T. Robinson</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ELL -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">ELL</h3>
+              <span class="text-[10px]" style="color: #a89e96;">1/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Specialist &middot; K-2</p>
+                <p class="text-[11px] font-medium name">Y. Chen</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-offer rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="offer">
+                <p class="text-[10px] sublabel">Specialist &middot; 3-5</p>
+                <p class="text-[11px] font-medium name">P. Reyes</p>
+                <p class="text-[10px] font-medium label">Offer Out</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paras & TAs (shared / grade-level) -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">Paras &amp; TAs</h3>
+              <span class="text-[10px]" style="color: #a89e96;">2/3</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover support-role status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <span class="role-tag">TA</span>
+                <p class="text-[10px] sublabel">2nd Grade</p>
+                <p class="text-[11px] font-medium name">K. Simmons</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover support-role status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <span class="role-tag">Para</span>
+                <p class="text-[10px] sublabel">SPED &middot; K-2</p>
+                <p class="text-[11px] font-medium name">M. Briggs</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover support-role status-open rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+                <span class="role-tag">Para</span>
+                <p class="text-[10px] sublabel">SPED &middot; 3-8</p>
+                <p class="text-[11px] font-medium name">Open</p>
+                <p class="text-[10px] font-medium label">Vacant</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interventionists -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">Interventionists</h3>
+              <span class="text-[10px]" style="color: #a89e96;">1/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Reading &middot; K-3</p>
+                <p class="text-[11px] font-medium name">D. Odom</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-offer rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="offer">
+                <p class="text-[10px] sublabel">Math &middot; 4-8</p>
+                <p class="text-[11px] font-medium name">T. Ashford</p>
+                <p class="text-[10px] font-medium label">Offer Out</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- ZONE 3: THE BUILDING      -->
+      <!-- ========================= -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">The Building</span>
+          <div class="h-px flex-1" style="background: #e4ddd6;"></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <!-- Leadership -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">Leadership</h3>
+              <span class="text-[10px]" style="color: #a89e96;">2/3</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">School Director</p>
+                <p class="text-[11px] font-medium name">D. Richardson</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Asst. Director</p>
+                <p class="text-[11px] font-medium name">B. Lewis</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-open rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+                <p class="text-[10px] sublabel">Dean of Students</p>
+                <p class="text-[11px] font-medium name">Open</p>
+                <p class="text-[10px] font-medium label">Vacant</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Front Office -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">Front Office</h3>
+              <span class="text-[10px]" style="color: #a89e96;">2/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Office Manager</p>
+                <p class="text-[11px] font-medium name">G. Morales</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Receptionist</p>
+                <p class="text-[11px] font-medium name">S. Taylor</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Operations -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold uppercase tracking-wide" style="color: #5c5046;">Operations</h3>
+              <span class="text-[10px]" style="color: #a89e96;">2/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Ops Manager</p>
+                <p class="text-[11px] font-medium name">R. Johnson</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+              <div class="position-card card-hover status-filled rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] sublabel">Custodian</p>
+                <p class="text-[11px] font-medium name">E. Dixon</p>
+                <p class="text-[10px] font-medium label">Return</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- COMMAND BAR                                  -->
+  <!-- ============================================ -->
+  <div id="cmdOverlay" class="fixed inset-0 cmd-overlay z-50 flex items-start justify-center pt-[20vh] hidden" onclick="if(event.target===this)closeCmd()">
+    <div class="cmd-input bg-white rounded-2xl w-full max-w-xl mx-4 overflow-hidden" style="border: 1px solid #d6cfc8;">
+      <div class="flex items-center gap-3 px-5 py-4" style="border-bottom: 1px solid #f0ece7;">
+        <svg class="w-5 h-5 flex-shrink-0" style="color: #b0a89f;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="cmdInput" type="text" placeholder="Search positions, people, schools..." class="flex-1 text-base bg-transparent outline-none" style="color: #2c2420;" autofocus oninput="handleSearch(this.value)">
+        <kbd class="text-[10px] rounded px-1.5 py-0.5" style="color: #8a7e72; background: #f0ece7; border: 1px solid #d6cfc8;">ESC</kbd>
+      </div>
+      <div id="cmdResults" class="max-h-80 overflow-y-auto">
+        <div class="px-4 py-3 text-xs" style="color: #8a7e72;">
+          <p class="mb-2 font-medium" style="color: #5c5046;">Quick actions</p>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-red-50 cursor-pointer">
+              <span class="w-5 h-5 bg-red-50 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-red-500"></span></span>
+              <span class="text-sm" style="color: #3d322c;">Show all open positions</span>
+              <span class="text-[10px] ml-auto" style="color: #a89e96;">3 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-amber-50 cursor-pointer">
+              <span class="w-5 h-5 bg-amber-50 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-amber-400"></span></span>
+              <span class="text-sm" style="color: #3d322c;">Show all at-risk positions</span>
+              <span class="text-[10px] ml-auto" style="color: #a89e96;">4 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-blue-50 cursor-pointer">
+              <span class="w-5 h-5 bg-blue-50 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-blue-500"></span></span>
+              <span class="text-sm" style="color: #3d322c;">Show all offers out</span>
+              <span class="text-[10px] ml-auto" style="color: #a89e96;">2 across network</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- DETAIL SLIDE-OVER                           -->
+  <!-- ============================================ -->
+  <div id="detailPanel" class="fixed inset-y-0 right-0 w-[380px] bg-white shadow-2xl z-40 transform translate-x-full transition-transform duration-200 ease-out" style="border-left: 1px solid #e4ddd6;">
+    <div class="h-full overflow-y-auto p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-base font-semibold" style="color: #2c2420;">Position Detail</h2>
+        <button onclick="closeDetail()" class="p-1" style="color: #b0a89f;">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mb-6 pb-5" style="border-bottom: 1px solid #f0ece7;">
+        <div class="status-filled rounded-lg px-3 py-2 text-center mb-3">
+          <p class="text-[10px] sublabel">PreK-A &middot; Lead Teacher</p>
+          <p class="text-sm font-semibold name">A. Martinez</p>
+          <p class="text-[11px] font-medium label">Return</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">School</p>
+            <p class="text-xs" style="color: #3d322c;">Riverside Academy</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">Grade</p>
+            <p class="text-xs" style="color: #3d322c;">PreK</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">Section</p>
+            <p class="text-xs" style="color: #3d322c;">PreK-A</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">Category</p>
+            <p class="text-xs" style="color: #3d322c;">Teacher</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">Employee ID</p>
+            <p class="text-xs" style="color: #3d322c;">EID-3847</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">ITR Response</p>
+            <p class="text-xs" style="color: #3d322c;">Yes</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">Start Year</p>
+            <p class="text-xs" style="color: #3d322c;">21-22</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-wide mb-0.5" style="color: #a89e96;">Email</p>
+            <p class="text-xs" style="color: #3d322c;">a.martinez@riverside.edu</p>
+          </div>
+        </div>
+
+        <div class="pt-4" style="border-top: 1px solid #f0ece7;">
+          <p class="text-[10px] font-medium uppercase tracking-wide mb-2" style="color: #a89e96;">Position History</p>
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full" style="background: #10b981;"></span>
+              <span class="w-10" style="color: #a89e96;">26-27</span>
+              <span style="color: #3d322c;">Ana Martinez — Return</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full" style="background: #d6cfc8;"></span>
+              <span class="w-10" style="color: #a89e96;">25-26</span>
+              <span style="color: #3d322c;">Ana Martinez — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full" style="background: #d6cfc8;"></span>
+              <span class="w-10" style="color: #a89e96;">24-25</span>
+              <span style="color: #3d322c;">Ana Martinez — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full" style="background: #d6cfc8;"></span>
+              <span class="w-10" style="color: #a89e96;">23-24</span>
+              <span style="color: #3d322c;">Ana Martinez — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full" style="background: #e4ddd6;"></span>
+              <span class="w-10" style="color: #a89e96;">22-23</span>
+              <span style="color: #b0a89f;">Position Created</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4" style="border-top: 1px solid #f0ece7;">
+          <p class="text-[10px] font-medium uppercase tracking-wide mb-1" style="color: #a89e96;">Notes</p>
+          <p class="text-xs leading-relaxed" style="color: #8a7e72;">5th year at Riverside. Leads PreK team planning. Mentor for new hires.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-2">
+        <button class="flex-1 px-3 py-2 text-xs text-white rounded-lg font-medium transition-colors" style="background: #c2652a;">Edit Position</button>
+        <button class="px-3 py-2 text-xs font-medium rounded-lg transition-colors" style="color: #5c5046; border: 1px solid #d6cfc8;">Full History</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- JAVASCRIPT                                   -->
+  <!-- ============================================ -->
+  <script>
+    // ---- View switching ----
+    let currentFocus = null;
+
+    function showNetwork() {
+      document.getElementById('networkView').style.display = '';
+      document.getElementById('schoolView').style.display = 'none';
+      document.getElementById('yearToggle').style.display = 'none';
+      document.getElementById('breadcrumb').innerHTML =
+        '<span style="color: rgba(255,255,255,0.55);" class="cursor-pointer hover:text-white transition-colors" onclick="showNetwork()">Horizon Public Schools</span>';
+      closeDetail();
+      clearFocus();
+      renderCmoView(currentCmoYear);
+    }
+
+    function showSchool(name) {
+      document.getElementById('networkView').style.display = 'none';
+      document.getElementById('schoolView').style.display = '';
+      document.getElementById('yearToggle').style.display = '';
+      document.getElementById('breadcrumb').innerHTML =
+        '<span style="color: rgba(255,255,255,0.55);" class="cursor-pointer hover:text-white transition-colors" onclick="showNetwork()">Horizon Public Schools</span>' +
+        '<svg class="w-3.5 h-3.5 mx-1" style="color: rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>' +
+        '<span class="font-medium text-white">' + name + '</span>';
+      closeDetail();
+      clearFocus();
+    }
+
+    // ---- Year toggle ----
+    function setYear(btn) {
+      btn.parentElement.querySelectorAll('button').forEach(b => {
+        b.style.background = 'transparent';
+        b.classList.remove('text-white');
+        b.style.color = 'rgba(255,255,255,0.4)';
+      });
+      btn.style.background = '#c2652a';
+      btn.classList.add('text-white');
+      btn.style.color = '';
+    }
+
+    // ---- Focus Mode ----
+    function toggleFocus(btn, status) {
+      const cards = document.querySelectorAll('.position-card');
+      const buttons = document.querySelectorAll('.status-btn');
+
+      if (currentFocus === status) {
+        clearFocus();
+        return;
+      }
+
+      currentFocus = status;
+
+      buttons.forEach(b => {
+        b.style.opacity = '0.4';
+        b.style.background = '';
+        b.style.borderColor = 'transparent';
+      });
+      btn.style.opacity = '1';
+
+      const hoverMap = {
+        'filled': { bg: '#f0fdf4', border: '#10b981' },
+        'at-risk': { bg: '#fffbeb', border: '#f59e0b' },
+        'open': { bg: '#fef2f2', border: '#ef4444' },
+        'offer': { bg: '#eff6ff', border: '#3b82f6' }
+      };
+      if (hoverMap[status]) {
+        btn.style.background = hoverMap[status].bg;
+        btn.style.borderColor = hoverMap[status].border;
+      }
+
+      cards.forEach(card => {
+        if (card.dataset.status === status) {
+          card.classList.remove('dimmed');
+          card.classList.add('focused');
+        } else {
+          card.classList.add('dimmed');
+          card.classList.remove('focused');
+        }
+      });
+    }
+
+    function clearFocus() {
+      currentFocus = null;
+      const cards = document.querySelectorAll('.position-card');
+      const buttons = document.querySelectorAll('.status-btn');
+
+      cards.forEach(card => {
+        card.classList.remove('dimmed', 'focused');
+      });
+      buttons.forEach(b => {
+        b.style.opacity = '1';
+        b.style.background = '';
+        b.style.borderColor = 'transparent';
+      });
+    }
+
+    // ---- Detail Panel ----
+    function openDetail() {
+      document.getElementById('detailPanel').style.transform = 'translateX(0)';
+    }
+    function closeDetail() {
+      document.getElementById('detailPanel').style.transform = 'translateX(100%)';
+    }
+
+    // ---- Command Bar ----
+    function openCmd() {
+      document.getElementById('cmdOverlay').classList.remove('hidden');
+      setTimeout(() => document.getElementById('cmdInput').focus(), 50);
+    }
+    function closeCmd() {
+      document.getElementById('cmdOverlay').classList.add('hidden');
+      document.getElementById('cmdInput').value = '';
+      resetCmdResults();
+    }
+
+    function handleSearch(query) {
+      const results = document.getElementById('cmdResults');
+      if (!query.trim()) {
+        resetCmdResults();
+        return;
+      }
+
+      const q = query.toLowerCase();
+      const matches = allPositions.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.role.toLowerCase().includes(q) ||
+        p.school.toLowerCase().includes(q) ||
+        p.status.toLowerCase().includes(q) ||
+        p.grade.toLowerCase().includes(q)
+      );
+
+      if (matches.length === 0) {
+        results.innerHTML = '<div class="px-5 py-4 text-sm" style="color: #a89e96;">No results found</div>';
+        return;
+      }
+
+      const statusColors = {
+        'Return': 'background:#10b981', 'Filled': 'background:#10b981',
+        'Possible Open': 'background:#f59e0b', 'Open': 'background:#ef4444',
+        'Offer Out': 'background:#3b82f6'
+      };
+
+      results.innerHTML = matches.slice(0, 8).map(p => `
+        <div class="flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 cursor-pointer" style="border-bottom: 1px solid #f0ece7;">
+          <span class="w-2 h-2 rounded-full flex-shrink-0" style="${statusColors[p.status] || 'background:#b0a89f'}"></span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium truncate" style="color: #3d322c;">${p.name}</p>
+            <p class="text-[11px]" style="color: #a89e96;">${p.role} &middot; ${p.grade} &middot; ${p.school}</p>
+          </div>
+          <span class="text-[10px] flex-shrink-0" style="color: #a89e96;">${p.status}</span>
+        </div>
+      `).join('');
+    }
+
+    function resetCmdResults() {
+      document.getElementById('cmdResults').innerHTML = `
+        <div class="px-4 py-3 text-xs" style="color: #8a7e72;">
+          <p class="mb-2 font-medium" style="color: #5c5046;">Quick actions</p>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-red-50 cursor-pointer">
+              <span class="w-5 h-5 bg-red-50 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-red-500"></span></span>
+              <span class="text-sm" style="color: #3d322c;">Show all open positions</span>
+              <span class="text-[10px] ml-auto" style="color: #a89e96;">3 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-amber-50 cursor-pointer">
+              <span class="w-5 h-5 bg-amber-50 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-amber-400"></span></span>
+              <span class="text-sm" style="color: #3d322c;">Show all at-risk positions</span>
+              <span class="text-[10px] ml-auto" style="color: #a89e96;">4 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-blue-50 cursor-pointer">
+              <span class="w-5 h-5 bg-blue-50 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-blue-500"></span></span>
+              <span class="text-sm" style="color: #3d322c;">Show all offers out</span>
+              <span class="text-[10px] ml-auto" style="color: #a89e96;">2 across network</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ---- School data by year ----
+    const schoolData = {
+      '25-26': [
+        { name: 'Riverside Academy', grades: 'PreK-8', positions: 47, filled: 43, risk: 2, open: 1, offers: 1, teachers: [38,36], support: [4,3], leadership: [3,3], ops: [2,1] },
+        { name: 'Oakwood Preparatory', grades: 'PreK-8', positions: 52, filled: 48, risk: 2, open: 1, offers: 1, teachers: [42,39], support: [4,4], leadership: [3,3], ops: [3,2] },
+        { name: 'Magnolia Elementary', grades: 'K-5', positions: 41, filled: 38, risk: 1, open: 1, offers: 1, teachers: [32,30], support: [4,4], leadership: [3,3], ops: [2,1] },
+        { name: 'Harbor View K-8', grades: 'PreK-8', positions: 38, filled: 34, risk: 2, open: 1, offers: 1, teachers: [30,27], support: [3,3], leadership: [3,3], ops: [2,1] },
+      ],
+      '26-27': [
+        { name: 'Riverside Academy', grades: 'PreK-8', positions: 47, filled: 38, risk: 4, open: 3, offers: 2, teachers: [38,32], support: [4,3], leadership: [3,2], ops: [2,1] },
+        { name: 'Oakwood Preparatory', grades: 'PreK-8', positions: 52, filled: 44, risk: 3, open: 3, offers: 2, teachers: [42,36], support: [4,3], leadership: [3,3], ops: [3,2] },
+        { name: 'Magnolia Elementary', grades: 'K-5', positions: 41, filled: 32, risk: 4, open: 4, offers: 1, teachers: [32,25], support: [4,3], leadership: [3,3], ops: [2,1] },
+        { name: 'Harbor View K-8', grades: 'PreK-8', positions: 38, filled: 28, risk: 3, open: 2, offers: 5, teachers: [30,22], support: [3,2], leadership: [3,3], ops: [2,1] },
+      ]
+    };
+
+    let currentCmoYear = '26-27';
+
+    function renderCmoView(year) {
+      const schools = schoolData[year];
+      const totals = schools.reduce((acc, s) => ({
+        positions: acc.positions + s.positions,
+        filled: acc.filled + s.filled,
+        risk: acc.risk + s.risk,
+        open: acc.open + s.open,
+        offers: acc.offers + s.offers
+      }), { positions: 0, filled: 0, risk: 0, open: 0, offers: 0 });
+
+      document.getElementById('cmoTotal').textContent = totals.positions;
+      document.getElementById('cmoFilled').textContent = totals.filled;
+      document.getElementById('cmoRisk').textContent = totals.risk;
+      document.getElementById('cmoOpen').textContent = totals.open;
+      document.getElementById('cmoOffers').textContent = totals.offers;
+      document.getElementById('cmoSubtitle').textContent = year + ' school year' + (year === '26-27' ? ' planning' : ' — current');
+
+      const container = document.getElementById('cmoSchoolCards');
+      container.innerHTML = schools.map(s => {
+        const pct = Math.round((s.filled / s.positions) * 1000) / 10;
+        const urgency = s.open + s.risk;
+        return `
+        <div class="bg-white rounded-xl p-5 cursor-pointer card-hover" style="border: 1px solid #d6cfc8;" onclick="showSchool('${s.name}')">
+          <!-- School header -->
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <p class="text-sm font-semibold" style="color: #2c2420;">${s.name}</p>
+              <p class="text-[11px]" style="color: #8a7e72;">${s.grades} &middot; ${s.positions} positions</p>
+            </div>
+            <span class="text-lg font-bold ${pct >= 90 ? '' : pct >= 80 ? '' : pct >= 70 ? '' : ''}" style="color: ${pct >= 90 ? '#059669' : pct >= 80 ? '#2c2420' : pct >= 70 ? '#d97706' : '#dc2626'};">${pct}%</span>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="w-full h-2 rounded-full overflow-hidden mb-4" style="background: #f0ece7;">
+            <div class="h-full rounded-full transition-all duration-500" style="width:${pct}%; background: ${pct >= 90 ? '#10b981' : pct >= 80 ? '#10b981' : pct >= 70 ? '#f59e0b' : '#ef4444'};"></div>
+          </div>
+
+          <!-- Category breakdown -->
+          <div class="grid grid-cols-4 gap-2 mb-4">
+            <div class="text-center">
+              <p class="text-xs font-semibold" style="color: #5c5046;">${s.teachers[1]}/${s.teachers[0]}</p>
+              <p class="text-[10px]" style="color: #a89e96;">Teachers</p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs font-semibold" style="color: #5c5046;">${s.support[1]}/${s.support[0]}</p>
+              <p class="text-[10px]" style="color: #a89e96;">Support</p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs font-semibold" style="color: #5c5046;">${s.leadership[1]}/${s.leadership[0]}</p>
+              <p class="text-[10px]" style="color: #a89e96;">Leadership</p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs font-semibold" style="color: #5c5046;">${s.ops[1]}/${s.ops[0]}</p>
+              <p class="text-[10px]" style="color: #a89e96;">Operations</p>
+            </div>
+          </div>
+
+          <!-- Status summary -->
+          <div class="flex items-center gap-3 pt-3" style="border-top: 1px solid #f0ece7;">
+            ${s.risk > 0 ? `<span class="flex items-center gap-1 text-[11px] font-medium" style="color: #d97706;"><span class="w-2 h-2 rounded-full" style="background:#f59e0b;"></span>${s.risk} at risk</span>` : ''}
+            ${s.open > 0 ? `<span class="flex items-center gap-1 text-[11px] font-medium" style="color: #dc2626;"><span class="w-2 h-2 rounded-full" style="background:#ef4444;"></span>${s.open} open</span>` : ''}
+            ${s.offers > 0 ? `<span class="flex items-center gap-1 text-[11px] font-medium" style="color: #2563eb;"><span class="w-2 h-2 rounded-full" style="background:#3b82f6;"></span>${s.offers} offers out</span>` : ''}
+            ${urgency === 0 ? `<span class="text-[11px] font-medium" style="color: #059669;">Fully staffed</span>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function setCmoYear(year) {
+      currentCmoYear = year;
+      const toggle = document.getElementById('cmoYearToggle');
+      toggle.querySelectorAll('button').forEach(b => {
+        b.style.background = 'transparent';
+        b.classList.remove('text-white');
+        b.style.color = 'rgba(255,255,255,0.4)';
+      });
+      event.target.style.background = '#c2652a';
+      event.target.classList.add('text-white');
+      event.target.style.color = '';
+      renderCmoView(year);
+    }
+
+    // Initial render
+    renderCmoView('26-27');
+
+    // ---- Searchable data ----
+    const allPositions = [
+      { name: 'Ana Martinez', role: 'Lead Teacher', grade: 'PreK-A', school: 'Riverside', status: 'Return' },
+      { name: 'Linda Thomas', role: 'Lead Teacher', grade: 'PreK-B', school: 'Riverside', status: 'Return' },
+      { name: 'Maria Johnson', role: 'Lead Teacher', grade: 'K-A', school: 'Riverside', status: 'Return' },
+      { name: 'Devin Carter', role: 'Lead Teacher', grade: 'K-B', school: 'Riverside', status: 'Possible Open' },
+      { name: 'Open Position', role: 'Lead Teacher', grade: 'K-C', school: 'Riverside', status: 'Open' },
+      { name: 'Lisa Park', role: 'Lead Teacher', grade: '1st-A', school: 'Riverside', status: 'Return' },
+      { name: 'Robert Harris', role: 'Lead Teacher', grade: '1st-B', school: 'Riverside', status: 'Return' },
+      { name: 'Angela Nguyen', role: 'Lead Teacher', grade: '1st-C', school: 'Riverside', status: 'Return' },
+      { name: 'Sandra Brown', role: 'Lead Teacher', grade: '2nd-A', school: 'Riverside', status: 'Return' },
+      { name: 'David Pham', role: 'Lead Teacher', grade: '2nd-B', school: 'Riverside', status: 'Return' },
+      { name: 'Temi Okafor', role: 'Math Teacher', grade: '3rd', school: 'Riverside', status: 'Return' },
+      { name: 'James Chen', role: 'Math Teacher', grade: '4th', school: 'Riverside', status: 'Return' },
+      { name: 'Rachel Davis', role: 'Math Teacher', grade: '5th', school: 'Riverside', status: 'Return' },
+      { name: 'William Foster', role: 'Math Teacher', grade: '6th', school: 'Riverside', status: 'Possible Open' },
+      { name: 'Michael Scott', role: 'Math Teacher', grade: '7th', school: 'Riverside', status: 'Filled' },
+      { name: 'Keisha Bell', role: 'Math Teacher', grade: '8th', school: 'Riverside', status: 'Return' },
+      { name: 'Patricia Grant', role: 'ELA Teacher', grade: '3rd', school: 'Riverside', status: 'Return' },
+      { name: 'Carmen Vega', role: 'ELA Teacher', grade: '4th', school: 'Riverside', status: 'Offer Out' },
+      { name: 'Nina Brooks', role: 'ELA Teacher', grade: '5th', school: 'Riverside', status: 'Return' },
+      { name: 'Carmen Flores', role: 'Art Teacher', grade: 'All Grades', school: 'Riverside', status: 'Return' },
+      { name: 'Marcus Washington', role: 'PE Teacher', grade: 'All Grades', school: 'Riverside', status: 'Return' },
+      { name: 'Nina Hernandez', role: 'Music Teacher', grade: 'All Grades', school: 'Riverside', status: 'Possible Open' },
+      { name: 'Yolanda Chen', role: 'ELL Specialist', grade: 'K-2', school: 'Riverside', status: 'Return' },
+      { name: 'Patricia Reyes', role: 'ELL Specialist', grade: '3-5', school: 'Riverside', status: 'Offer Out' },
+      { name: 'Diana Richardson', role: 'School Director', grade: 'Leadership', school: 'Riverside', status: 'Return' },
+      { name: 'Brian Lewis', role: 'Asst. Director', grade: 'Leadership', school: 'Riverside', status: 'Return' },
+      { name: 'Open Position', role: 'Dean of Students', grade: 'Leadership', school: 'Riverside', status: 'Open' },
+      { name: 'Gloria Morales', role: 'Office Manager', grade: 'Front Office', school: 'Riverside', status: 'Return' },
+      { name: 'Rosa Gutierrez', role: 'Paraprofessional', grade: 'PreK-A', school: 'Riverside', status: 'Return' },
+      { name: 'Janelle Watts', role: 'Paraprofessional', grade: 'PreK-B', school: 'Riverside', status: 'Possible Open' },
+      { name: 'Keisha Simmons', role: 'Teacher Assistant', grade: '2nd Grade', school: 'Riverside', status: 'Return' },
+      { name: 'Monica Briggs', role: 'SPED Paraprofessional', grade: 'K-2', school: 'Riverside', status: 'Return' },
+      { name: 'Open Position', role: 'SPED Paraprofessional', grade: '3-8', school: 'Riverside', status: 'Open' },
+      { name: 'Denise Odom', role: 'Reading Interventionist', grade: 'K-3', school: 'Riverside', status: 'Return' },
+      { name: 'Terrence Ashford', role: 'Math Interventionist', grade: '4-8', school: 'Riverside', status: 'Offer Out' },
+    ];
+
+    // ---- Keyboard shortcuts ----
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        openCmd();
+      }
+      if (e.key === 'Escape') {
+        closeCmd();
+        closeDetail();
+        clearFocus();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        openCmd();
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentPoint — The Dashboard (Wireframe A)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tp: {
+              50: '#f0f4f8', 100: '#d9e2ec', 200: '#bcccdc', 300: '#9fb3c8',
+              400: '#829ab1', 500: '#627d98', 600: '#486581', 700: '#334e68',
+              800: '#243b53', 900: '#102a43', 950: '#0a1f33',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #bcccdc; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9fb3c8; }
+
+    .grade-card { transition: all 0.2s ease; cursor: pointer; }
+    .grade-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(16,42,67,0.12); }
+
+    .expand-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.35s ease;
+      opacity: 0;
+    }
+    .expand-content.open {
+      max-height: 1200px;
+      opacity: 1;
+    }
+
+    .chevron-icon { transition: transform 0.25s ease; }
+    .chevron-icon.rotated { transform: rotate(180deg); }
+
+    .position-card {
+      border: 1px solid #d1d5db;
+      border-left: 3px solid #10b981;
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 8px 10px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .position-card:hover { box-shadow: 0 2px 8px rgba(16,42,67,0.1); transform: translateY(-1px); }
+    .position-card.status-filled { border-left-color: #10b981; }
+    .position-card.status-risk { border-left-color: #f59e0b; }
+    .position-card.status-open { border-left-color: #ef4444; border-style: dashed; border-left-style: solid; }
+    .position-card.status-offer { border-left-color: #3b82f6; }
+
+    .progress-bar-bg { background: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+
+    .summary-section { transition: all 0.2s ease; cursor: pointer; }
+    .summary-section:hover { box-shadow: 0 2px 12px rgba(16,42,67,0.1); }
+
+    /* Para/TA role tag */
+    .role-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #7c3aed;
+      background: #ede9fe;
+      border-radius: 3px;
+      padding: 0px 4px;
+      margin-right: 4px;
+    }
+
+    /* Grade cards with issues get a subtle accent */
+    .grade-card.has-issues { border-left: 3px solid #f59e0b; }
+    .grade-card.has-open { border-left: 3px solid #ef4444; }
+
+    /* Focus mode */
+    .dimmed { opacity: 0.15; filter: grayscale(1); pointer-events: none; transition: all 0.3s ease; }
+    .position-card { transition: opacity 0.3s ease, filter 0.3s ease, transform 0.15s ease, box-shadow 0.15s ease; }
+
+    /* Status filter buttons in summary */
+    .status-filter { cursor: pointer; border-radius: 8px; padding: 4px 8px; transition: all 0.15s ease; border: 2px solid transparent; }
+    .status-filter:hover { background: rgba(16,42,67,0.04); }
+    .status-filter.active { background: rgba(16,42,67,0.06); }
+  </style>
+</head>
+<body class="bg-[#e2e8f0] min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-[#0f1d2f] border-b-[3px] border-[#0d9488]">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <!-- Logo -->
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#0d9488] flex items-center justify-center">
+            <span class="text-white font-bold text-sm">TP</span>
+          </div>
+          <span class="text-white font-semibold text-lg tracking-tight">TalentPoint</span>
+        </div>
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 ml-6 text-sm">
+          <span class="text-[#9fb3c8]">Horizon Public Schools</span>
+          <svg class="w-3 h-3 text-[#627d98]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          <span class="text-white font-medium">Riverside Academy</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <!-- Year toggle -->
+        <div class="flex items-center bg-[#1a2d44] rounded-lg overflow-hidden text-sm">
+          <button class="px-3 py-1.5 text-[#627d98] hover:text-white transition-colors">2025-26</button>
+          <button class="px-3 py-1.5 bg-[#0d9488] text-white font-medium">2026-27</button>
+        </div>
+        <!-- Search -->
+        <button class="flex items-center gap-2 bg-[#1a2d44] hover:bg-[#243b53] text-[#9fb3c8] rounded-lg px-3 py-1.5 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span>Search</span>
+          <kbd class="text-xs bg-[#0f1d2f] px-1.5 py-0.5 rounded ml-1">/</kbd>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-6">
+
+    <!-- Status Summary Bar -->
+    <div class="bg-white rounded-xl border border-[#c4ced9] p-4 mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-8">
+          <!-- Total -->
+          <div>
+            <div class="text-2xl font-bold text-[#1e293b]">68</div>
+            <div class="text-xs text-[#627d98] uppercase tracking-wide font-medium">Total Positions</div>
+          </div>
+          <div class="w-px h-10 bg-[#e2e8f0]"></div>
+          <!-- Filled -->
+          <div class="status-filter flex items-center gap-2" data-filter="filled" onclick="toggleFilter('filled')">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span>
+            <div>
+              <div class="text-lg font-semibold text-[#1e293b]">52</div>
+              <div class="text-xs text-[#627d98]">Filled</div>
+            </div>
+          </div>
+          <!-- At Risk -->
+          <div class="status-filter flex items-center gap-2" data-filter="risk" onclick="toggleFilter('risk')">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span>
+            <div>
+              <div class="text-lg font-semibold text-[#1e293b]">6</div>
+              <div class="text-xs text-[#627d98]">At Risk</div>
+            </div>
+          </div>
+          <!-- Open -->
+          <div class="status-filter flex items-center gap-2" data-filter="open" onclick="toggleFilter('open')">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></span>
+            <div>
+              <div class="text-lg font-semibold text-[#1e293b]">5</div>
+              <div class="text-xs text-[#627d98]">Open</div>
+            </div>
+          </div>
+          <!-- Offer -->
+          <div class="status-filter flex items-center gap-2" data-filter="offer" onclick="toggleFilter('offer')">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
+            <div>
+              <div class="text-lg font-semibold text-[#1e293b]">5</div>
+              <div class="text-xs text-[#627d98]">Offer Out</div>
+            </div>
+          </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-64">
+          <div class="flex justify-between text-xs text-[#627d98] mb-1">
+            <span>Staffing Progress</span>
+            <span class="font-medium text-[#1e293b]">76%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill bg-[#10b981]" style="width: 76%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expand/Collapse Controls -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-[#1e293b]">Grade Levels</h2>
+      <div class="flex items-center gap-2">
+        <button onclick="expandAll()" class="text-sm text-[#627d98] hover:text-[#0d9488] transition-colors px-3 py-1 rounded-md hover:bg-white">Expand All</button>
+        <span class="text-[#c4ced9]">|</span>
+        <button onclick="collapseAll()" class="text-sm text-[#627d98] hover:text-[#0d9488] transition-colors px-3 py-1 rounded-md hover:bg-white">Collapse All</button>
+      </div>
+    </div>
+
+    <!-- Grade Grid -->
+    <div class="grid grid-cols-4 gap-4 mb-6" id="gradeGrid">
+      <!-- Cards injected by JS -->
+    </div>
+
+    <!-- Specialists & Support -->
+    <div class="mb-4">
+      <div class="summary-section bg-white rounded-xl border border-[#c4ced9] overflow-hidden" id="specialistsSection">
+        <div class="p-4 flex items-center justify-between" onclick="toggleSection('specialists')">
+          <div class="flex items-center gap-3">
+            <h3 class="font-semibold text-[#1e293b]">Specialists &amp; Support</h3>
+            <span class="text-sm text-[#627d98]">11 positions</span>
+            <div class="flex items-center gap-2 ml-2">
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>1 at-risk</span>
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#ef4444]"></span>1 open</span>
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span>2 offer</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium text-[#1e293b]">7/11</span>
+            <div class="w-24 progress-bar-bg"><div class="progress-bar-fill bg-[#10b981]" style="width: 64%"></div></div>
+            <svg class="w-5 h-5 text-[#627d98] chevron-icon" id="chevron-specialists" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="expand-content" id="content-specialists">
+          <div class="px-4 pb-4">
+            <div class="grid grid-cols-3 gap-3" id="specialistCards"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Building -->
+    <div class="mb-6">
+      <div class="summary-section bg-white rounded-xl border border-[#c4ced9] overflow-hidden" id="buildingSection">
+        <div class="p-4 flex items-center justify-between" onclick="toggleSection('building')">
+          <div class="flex items-center gap-3">
+            <h3 class="font-semibold text-[#1e293b]">The Building</h3>
+            <span class="text-sm text-[#627d98]">7 positions</span>
+            <div class="flex items-center gap-2 ml-2">
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#ef4444]"></span>1 open</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium text-[#1e293b]">6/7</span>
+            <div class="w-24 progress-bar-bg"><div class="progress-bar-fill bg-[#10b981]" style="width: 86%"></div></div>
+            <svg class="w-5 h-5 text-[#627d98] chevron-icon" id="chevron-building" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="expand-content" id="content-building">
+          <div class="px-4 pb-4">
+            <div class="grid grid-cols-3 gap-3" id="buildingCards"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // --- DATA ---
+    const gradeData = [
+      {
+        name: 'PreK', type: 'self-contained', label: '2 sections',
+        positions: [
+          { name: 'A. Martinez', role: 'PreK-A Lead', status: 'filled' },
+          { name: 'R. Gutierrez', role: 'PreK-A Para', status: 'filled' },
+          { name: 'L. Thomas', role: 'PreK-B Lead', status: 'filled' },
+          { name: 'J. Watts', role: 'PreK-B Para', status: 'risk' },
+        ]
+      },
+      {
+        name: 'Kindergarten', type: 'self-contained', label: '3 sections',
+        positions: [
+          { name: 'M. Johnson', role: 'K-A', status: 'filled' },
+          { name: 'D. Carter', role: 'K-B', status: 'risk' },
+          { name: 'Open', role: 'K-C', status: 'open' },
+        ]
+      },
+      {
+        name: '1st Grade', type: 'self-contained', label: '3 sections',
+        positions: [
+          { name: 'L. Park', role: '1st-A', status: 'filled' },
+          { name: 'R. Harris', role: '1st-B', status: 'filled' },
+          { name: 'A. Nguyen', role: '1st-C', status: 'filled' },
+        ]
+      },
+      {
+        name: '2nd Grade', type: 'self-contained', label: '2 sections + TA',
+        positions: [
+          { name: 'S. Brown', role: '2nd-A', status: 'filled' },
+          { name: 'D. Pham', role: '2nd-B', status: 'filled' },
+          { name: 'K. Simmons', role: '2nd Grade TA', status: 'filled' },
+        ]
+      },
+      {
+        name: '3rd Grade', type: 'departmentalized', label: '4 subjects',
+        positions: [
+          { name: 'T. Okafor', role: 'Math', status: 'filled' },
+          { name: 'P. Grant', role: 'ELA', status: 'filled' },
+          { name: 'C. Adams', role: 'Science', status: 'filled' },
+          { name: 'D. Long', role: 'S. Studies', status: 'filled' },
+        ]
+      },
+      {
+        name: '4th Grade', type: 'departmentalized', label: '4 subjects',
+        positions: [
+          { name: 'J. Chen', role: 'Math', status: 'filled' },
+          { name: 'C. Vega', role: 'ELA', status: 'offer' },
+          { name: 'H. Kim', role: 'Science', status: 'filled' },
+          { name: 'K. Mitchell', role: 'S. Studies', status: 'risk' },
+        ]
+      },
+      {
+        name: '5th Grade', type: 'departmentalized', label: '4 subjects',
+        positions: [
+          { name: 'R. Davis', role: 'Math', status: 'filled' },
+          { name: 'N. Brooks', role: 'ELA', status: 'filled' },
+          { name: 'L. Woods', role: 'Science', status: 'filled' },
+          { name: 'F. Cole', role: 'S. Studies', status: 'filled' },
+        ]
+      },
+      {
+        name: '6th Grade', type: 'departmentalized', label: '4 subjects',
+        positions: [
+          { name: 'W. Foster', role: 'Math', status: 'risk' },
+          { name: 'A. Ford', role: 'ELA', status: 'filled' },
+          { name: 'E. Reed', role: 'Science', status: 'filled' },
+          { name: 'Open', role: 'S. Studies', status: 'open' },
+        ]
+      },
+      {
+        name: '7th Grade', type: 'departmentalized', label: '4 subjects',
+        positions: [
+          { name: 'M. Scott', role: 'Math', status: 'filled' },
+          { name: 'S. Dunn', role: 'ELA', status: 'risk' },
+          { name: 'T. Quinn', role: 'Science', status: 'filled' },
+          { name: 'R. Webb', role: 'S. Studies', status: 'filled' },
+        ]
+      },
+      {
+        name: '8th Grade', type: 'departmentalized', label: '4 subjects',
+        positions: [
+          { name: 'K. Bell', role: 'Math', status: 'filled' },
+          { name: 'Open', role: 'ELA', status: 'open' },
+          { name: 'B. Nash', role: 'Science', status: 'filled' },
+          { name: 'J. Hayes', role: 'S. Studies', status: 'offer' },
+        ]
+      },
+    ];
+
+    const specialistData = [
+      { name: 'C. Flores', role: 'Art', status: 'filled', group: 'Enrichment' },
+      { name: 'M. Washington', role: 'PE', status: 'filled', group: 'Enrichment' },
+      { name: 'N. Hernandez', role: 'Music', status: 'risk', group: 'Enrichment' },
+      { name: 'J. Lewis', role: 'SPED Coord', status: 'filled', group: 'SPED' },
+      { name: 'T. Robinson', role: 'SPED Teacher', status: 'filled', group: 'SPED' },
+      { name: 'Y. Chen', role: 'ELL K-2', status: 'filled', group: 'ELL' },
+      { name: 'P. Reyes', role: 'ELL 3-5', status: 'offer', group: 'ELL' },
+      { name: 'M. Briggs', role: 'SPED Para K-2', status: 'filled', group: 'Paras & TAs' },
+      { name: 'Open', role: 'SPED Para 3-8', status: 'open', group: 'Paras & TAs' },
+      { name: 'D. Odom', role: 'Reading Interventionist', status: 'filled', group: 'Interventionists' },
+      { name: 'T. Ashford', role: 'Math Interventionist', status: 'offer', group: 'Interventionists' },
+    ];
+
+    const buildingData = [
+      { name: 'D. Richardson', role: 'Director', status: 'filled', group: 'Leadership' },
+      { name: 'B. Lewis', role: 'Asst Director', status: 'filled', group: 'Leadership' },
+      { name: 'Open', role: 'Dean', status: 'open', group: 'Leadership' },
+      { name: 'G. Morales', role: 'Office Manager', status: 'filled', group: 'Front Office' },
+      { name: 'S. Taylor', role: 'Receptionist', status: 'filled', group: 'Front Office' },
+      { name: 'R. Johnson', role: 'Ops Manager', status: 'filled', group: 'Operations' },
+      { name: 'E. Dixon', role: 'Custodian', status: 'filled', group: 'Operations' },
+    ];
+
+    // --- HELPERS ---
+    const statusColors = {
+      filled: { border: '#10b981', text: '#059669', label: 'Filled', bg: '#ecfdf5' },
+      risk:   { border: '#f59e0b', text: '#d97706', label: 'At Risk', bg: '#fffbeb' },
+      open:   { border: '#ef4444', text: '#dc2626', label: 'Open', bg: '#fef2f2' },
+      offer:  { border: '#3b82f6', text: '#2563eb', label: 'Offer Out', bg: '#eff6ff' },
+    };
+
+    function countByStatus(positions, status) {
+      return positions.filter(p => p.status === status).length;
+    }
+
+    function filledCount(positions) {
+      return positions.filter(p => p.status === 'filled').length;
+    }
+
+    function progressPct(positions) {
+      return Math.round((filledCount(positions) / positions.length) * 100);
+    }
+
+    function miniStatusHTML(positions) {
+      const tags = [];
+      const counts = { open: 0, risk: 0, offer: 0 };
+      positions.forEach(p => { if (counts[p.status] !== undefined) counts[p.status]++; });
+      if (counts.open > 0) tags.push(`<span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#ef4444]"></span><span class="text-[#dc2626]">${counts.open} open</span></span>`);
+      if (counts.risk > 0) tags.push(`<span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span><span class="text-[#d97706]">${counts.risk} at-risk</span></span>`);
+      if (counts.offer > 0) tags.push(`<span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span><span class="text-[#2563eb]">${counts.offer} offer</span></span>`);
+      return tags.join(' ');
+    }
+
+    function positionCardHTML(p) {
+      const s = statusColors[p.status];
+      const isOpen = p.status === 'open';
+      const isPara = p.role.toLowerCase().includes('para');
+      const isTA = p.role.toLowerCase().includes('ta') && !p.role.toLowerCase().includes('studies');
+      const roleTag = isPara ? '<span class="role-tag">Para</span>' : isTA ? '<span class="role-tag">TA</span>' : '';
+      return `
+        <div class="position-card status-${p.status}" data-status="${p.status}" style="border-left-color: ${s.border}">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium ${isOpen ? 'text-[#dc2626]' : 'text-[#1e293b]'}">${roleTag}${p.name}</div>
+              <div class="text-xs text-[#627d98]">${p.role}</div>
+            </div>
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full" style="color: ${s.text}; background: ${s.bg}">${s.label}</span>
+          </div>
+        </div>`;
+    }
+
+    // --- RENDER GRADE CARDS ---
+    function renderGrades() {
+      const grid = document.getElementById('gradeGrid');
+      grid.innerHTML = '';
+
+      gradeData.forEach((grade, i) => {
+        const filled = filledCount(grade.positions);
+        const total = grade.positions.length;
+        const pct = progressPct(grade.positions);
+        const allFilled = filled === total;
+        const mini = miniStatusHTML(grade.positions);
+
+        const hasOpen = grade.positions.some(p => p.status === 'open');
+        const hasIssues = grade.positions.some(p => p.status === 'risk' || p.status === 'offer');
+        const issueClass = hasOpen ? 'has-open' : hasIssues ? 'has-issues' : '';
+
+        const card = document.createElement('div');
+        card.className = `grade-card bg-white rounded-xl border border-[#c4ced9] overflow-hidden ${issueClass}`;
+        card.dataset.index = i;
+
+        card.innerHTML = `
+          <!-- Collapsed header -->
+          <div class="p-4" onclick="toggleGrade(${i})">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold text-[#1e293b]">${grade.name}</h3>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold ${allFilled ? 'text-[#059669]' : 'text-[#1e293b]'}">${filled}/${total}</span>
+                <svg class="w-4 h-4 text-[#627d98] chevron-icon" id="chevron-grade-${i}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+            </div>
+            <div class="progress-bar-bg mb-2">
+              <div class="progress-bar-fill" style="width: ${pct}%; background: ${allFilled ? '#10b981' : pct >= 75 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444'}"></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-[#627d98]">${grade.label}</span>
+              <div class="flex items-center gap-2">${mini}</div>
+            </div>
+          </div>
+          <!-- Expanded content -->
+          <div class="expand-content" id="expand-grade-${i}">
+            <div class="px-4 pb-4 border-t border-[#e2e8f0]">
+              <div class="pt-3 grid ${grade.type === 'self-contained' ? 'grid-cols-2' : 'grid-cols-2'} gap-2">
+                ${grade.positions.map(p => positionCardHTML(p)).join('')}
+              </div>
+            </div>
+          </div>`;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // --- RENDER SPECIALIST + BUILDING ---
+    function renderGroupedCards(data, containerId) {
+      const container = document.getElementById(containerId);
+      const groups = {};
+      data.forEach(p => {
+        if (!groups[p.group]) groups[p.group] = [];
+        groups[p.group].push(p);
+      });
+
+      let html = '';
+      for (const [groupName, positions] of Object.entries(groups)) {
+        html += `<div class="col-span-3 mt-2 first:mt-0">
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-[#627d98] mb-2 ml-1">${groupName}</div>
+          <div class="grid grid-cols-3 gap-2">
+            ${positions.map(p => positionCardHTML(p)).join('')}
+          </div>
+        </div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    // --- TOGGLE LOGIC ---
+    function toggleGrade(i) {
+      const el = document.getElementById(`expand-grade-${i}`);
+      const chevron = document.getElementById(`chevron-grade-${i}`);
+      el.classList.toggle('open');
+      chevron.classList.toggle('rotated');
+    }
+
+    function toggleSection(name) {
+      const el = document.getElementById(`content-${name}`);
+      const chevron = document.getElementById(`chevron-${name}`);
+      el.classList.toggle('open');
+      chevron.classList.toggle('rotated');
+    }
+
+    function expandAll() {
+      gradeData.forEach((_, i) => {
+        document.getElementById(`expand-grade-${i}`).classList.add('open');
+        document.getElementById(`chevron-grade-${i}`).classList.add('rotated');
+      });
+      ['specialists', 'building'].forEach(name => {
+        document.getElementById(`content-${name}`).classList.add('open');
+        document.getElementById(`chevron-${name}`).classList.add('rotated');
+      });
+    }
+
+    function collapseAll() {
+      gradeData.forEach((_, i) => {
+        document.getElementById(`expand-grade-${i}`).classList.remove('open');
+        document.getElementById(`chevron-grade-${i}`).classList.remove('rotated');
+      });
+      ['specialists', 'building'].forEach(name => {
+        document.getElementById(`content-${name}`).classList.remove('open');
+        document.getElementById(`chevron-${name}`).classList.remove('rotated');
+      });
+    }
+
+    // --- FOCUS MODE ---
+    let activeFilter = null;
+
+    function toggleFilter(status) {
+      const filters = document.querySelectorAll('.status-filter');
+      const cards = document.querySelectorAll('.position-card');
+
+      if (activeFilter === status) {
+        // Clear filter
+        activeFilter = null;
+        filters.forEach(f => f.classList.remove('active'));
+        cards.forEach(c => c.classList.remove('dimmed'));
+        // Expand all sections that have matching positions, collapse none
+        return;
+      }
+
+      activeFilter = status;
+      filters.forEach(f => {
+        f.classList.toggle('active', f.dataset.filter === status);
+      });
+
+      cards.forEach(card => {
+        if (card.dataset.status === status) {
+          card.classList.remove('dimmed');
+        } else {
+          card.classList.add('dimmed');
+        }
+      });
+
+      // Auto-expand grades that have matching positions
+      gradeData.forEach((grade, i) => {
+        if (grade.positions.some(p => p.status === status)) {
+          document.getElementById(`expand-grade-${i}`).classList.add('open');
+          document.getElementById(`chevron-grade-${i}`).classList.add('rotated');
+        }
+      });
+
+      // Auto-expand specialists/building if they have matches
+      if (specialistData.some(p => p.status === status)) {
+        document.getElementById('content-specialists').classList.add('open');
+        document.getElementById('chevron-specialists').classList.add('rotated');
+      }
+      if (buildingData.some(p => p.status === status)) {
+        document.getElementById('content-building').classList.add('open');
+        document.getElementById('chevron-building').classList.add('rotated');
+      }
+    }
+
+    // Keyboard: Escape clears filter
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeFilter) {
+        toggleFilter(activeFilter);
+      }
+    });
+
+    // --- INIT ---
+    renderGrades();
+    renderGroupedCards(specialistData, 'specialistCards');
+    renderGroupedCards(buildingData, 'buildingCards');
+  </script>
+
+</body>
+</html>
