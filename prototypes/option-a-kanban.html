@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentPoint – Option A: Kanban Board</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tp: {
+              50: '#f0f4ff',
+              100: '#e0e9ff',
+              200: '#c2d4fe',
+              300: '#94b3fd',
+              400: '#6490fa',
+              500: '#3b6cf5',
+              600: '#2550e0',
+              700: '#1e3fbe',
+              800: '#1e369a',
+              900: '#1e3179',
+              950: '#151f4a',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .column-scroll { max-height: calc(100vh - 220px); overflow-y: auto; }
+    .card-hover { transition: all 0.15s ease; }
+    .card-hover:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+
+  <!-- Top Nav -->
+  <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-tp-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">T</span>
+        </div>
+        <span class="font-semibold text-gray-900 text-lg">TalentPoint</span>
+      </div>
+      <span class="text-gray-300">|</span>
+      <span class="text-gray-600 text-sm font-medium">Staffing Board</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- School Selector -->
+      <select id="schoolFilter" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-tp-500 focus:border-transparent">
+        <option value="all">All Schools</option>
+        <option value="arthur-ashe" selected>Arthur Ashe Charter</option>
+        <option value="samuel-green">Samuel J. Green</option>
+        <option value="langston-hughes">Langston Hughes</option>
+        <option value="phillis-wheatley">Phillis Wheatley</option>
+      </select>
+
+      <!-- Year Toggle -->
+      <div class="flex bg-gray-100 rounded-lg p-0.5">
+        <button class="px-3 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-gray-700 transition-colors" onclick="setYear(this, '25-26')">25-26</button>
+        <button class="px-3 py-1 text-xs font-medium rounded-md bg-white text-gray-900 shadow-sm" onclick="setYear(this, '26-27')">26-27</button>
+      </div>
+
+      <!-- Search -->
+      <div class="relative">
+        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" placeholder="Search positions..." class="pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg w-52 focus:outline-none focus:ring-2 focus:ring-tp-500 focus:border-transparent">
+      </div>
+
+      <div class="w-8 h-8 bg-tp-100 text-tp-700 rounded-full flex items-center justify-center text-sm font-medium">SS</div>
+    </div>
+  </header>
+
+  <!-- Stats Bar -->
+  <div class="bg-white border-b border-gray-100 px-6 py-3 flex items-center gap-8">
+    <div class="flex items-center gap-6">
+      <div>
+        <span class="text-2xl font-semibold text-gray-900">47</span>
+        <span class="text-sm text-gray-500 ml-1.5">positions</span>
+      </div>
+      <div class="h-8 w-px bg-gray-200"></div>
+      <div class="flex items-center gap-1.5">
+        <div class="status-dot bg-emerald-500"></div>
+        <span class="text-sm text-gray-600"><span class="font-medium text-gray-900">38</span> filled</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <div class="status-dot bg-amber-400"></div>
+        <span class="text-sm text-gray-600"><span class="font-medium text-gray-900">4</span> at risk</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <div class="status-dot bg-red-400"></div>
+        <span class="text-sm text-gray-600"><span class="font-medium text-gray-900">3</span> open</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <div class="status-dot bg-blue-400"></div>
+        <span class="text-sm text-gray-600"><span class="font-medium text-gray-900">2</span> offer out</span>
+      </div>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <!-- Progress bar -->
+    <div class="flex items-center gap-3 w-64">
+      <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500" style="width: 80.8%"></div>
+      </div>
+      <span class="text-sm font-medium text-gray-900">80.8%</span>
+    </div>
+  </div>
+
+  <!-- Kanban Board -->
+  <div class="px-6 py-4 flex gap-4 overflow-x-auto scrollbar-thin">
+
+    <!-- Column: Kindergarten -->
+    <div class="flex-shrink-0 w-72">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-semibold text-gray-700">Kindergarten</h3>
+          <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">5</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+      <div class="column-scroll space-y-2 scrollbar-thin">
+        <!-- Filled Card -->
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer" onclick="openModal(this)">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">MJ</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 leading-tight">Maria Johnson</p>
+                <p class="text-xs text-gray-500">Lead Teacher</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">K — Math</span>
+          </div>
+        </div>
+
+        <!-- Filled Card -->
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">TW</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 leading-tight">Tanya Williams</p>
+                <p class="text-xs text-gray-500">Lead Teacher</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">K — ELA</span>
+          </div>
+        </div>
+
+        <!-- At Risk Card -->
+        <div class="bg-white rounded-xl p-3.5 border border-amber-200 card-hover cursor-pointer">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-semibold">DC</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900 leading-tight">Devin Carter</p>
+                <p class="text-xs text-gray-500">Lead Teacher</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-amber-400" style="width:6px;height:6px"></div>
+              Possible Open
+            </span>
+            <span class="text-xs text-gray-400">K — Science</span>
+          </div>
+        </div>
+
+        <!-- Open Card -->
+        <div class="bg-white rounded-xl p-3.5 border border-red-200 border-dashed card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-red-600 leading-tight">Open Position</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-red-400" style="width:6px;height:6px"></div>
+              Open
+            </span>
+            <span class="text-xs text-gray-400">K — Social Studies</span>
+          </div>
+        </div>
+
+        <!-- Offer Out Card -->
+        <div class="bg-white rounded-xl p-3.5 border border-blue-200 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-semibold">JR</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">James Robinson</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-blue-500" style="width:6px;height:6px"></div>
+              Offer Out
+            </span>
+            <span class="text-xs text-gray-400">K — Enrichment</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column: First Grade -->
+    <div class="flex-shrink-0 w-72">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-semibold text-gray-700">First Grade</h3>
+          <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">4</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+      <div class="column-scroll space-y-2 scrollbar-thin">
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">LP</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Lisa Park</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">1st — Math</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">RH</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Robert Harris</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">1st — ELA</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">AN</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Angela Nguyen</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">1st — Science</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-amber-200 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-semibold">KM</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Keith Mitchell</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-amber-400" style="width:6px;height:6px"></div>
+              Possible Open
+            </span>
+            <span class="text-xs text-gray-400">1st — Social Studies</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column: Second Grade -->
+    <div class="flex-shrink-0 w-72">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-semibold text-gray-700">Second Grade</h3>
+          <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">4</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+      <div class="column-scroll space-y-2 scrollbar-thin">
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">SB</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Sandra Brown</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">2nd — ELA</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">DP</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">David Pham</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">2nd — Math</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-red-200 border-dashed card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-red-600 leading-tight">Open Position</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-red-400" style="width:6px;height:6px"></div>
+              Open
+            </span>
+            <span class="text-xs text-gray-400">2nd — Science</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">JT</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Jessica Torres</p>
+              <p class="text-xs text-gray-500">Lead Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Filled
+            </span>
+            <span class="text-xs text-gray-400">2nd — Social Studies</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column: Enrichment -->
+    <div class="flex-shrink-0 w-72">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-semibold text-gray-700">Enrichment</h3>
+          <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">3</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+      <div class="column-scroll space-y-2 scrollbar-thin">
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">CF</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Carmen Flores</p>
+              <p class="text-xs text-gray-500">Art Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">Art</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">MW</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Marcus Washington</p>
+              <p class="text-xs text-gray-500">PE Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">Physical Ed</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-amber-200 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-semibold">NH</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Nina Hernandez</p>
+              <p class="text-xs text-gray-500">Music Teacher</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-amber-400" style="width:6px;height:6px"></div>
+              Possible Open
+            </span>
+            <span class="text-xs text-gray-400">Music</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column: ELL -->
+    <div class="flex-shrink-0 w-72">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-semibold text-gray-700">ELL</h3>
+          <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">2</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+      <div class="column-scroll space-y-2 scrollbar-thin">
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">YC</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Yolanda Chen</p>
+              <p class="text-xs text-gray-500">ELL Specialist</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+            <span class="text-xs text-gray-400">ELL — K-2</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-blue-200 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-semibold">PR</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Patricia Reyes</p>
+              <p class="text-xs text-gray-500">ELL Specialist</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-blue-500" style="width:6px;height:6px"></div>
+              Offer Out
+            </span>
+            <span class="text-xs text-gray-400">ELL — 3-5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column: Leadership -->
+    <div class="flex-shrink-0 w-72">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-semibold text-gray-700">Leadership</h3>
+          <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">3</span>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+      <div class="column-scroll space-y-2 scrollbar-thin">
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">DR</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Diana Richardson</p>
+              <p class="text-xs text-gray-500">School Director</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-gray-150 card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">BL</div>
+            <div>
+              <p class="text-sm font-medium text-gray-900 leading-tight">Brian Lewis</p>
+              <p class="text-xs text-gray-500">Assistant Director</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-emerald-500" style="width:6px;height:6px"></div>
+              Return
+            </span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3.5 border border-red-200 border-dashed card-hover cursor-pointer">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-7 h-7 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-red-600 leading-tight">Open Position</p>
+              <p class="text-xs text-gray-500">Dean of Students</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+              <div class="status-dot bg-red-400" style="width:6px;height:6px"></div>
+              Open
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Edit Modal (hidden) -->
+  <div id="editModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="if(event.target===this)closeModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Edit Position</h2>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Employee</label>
+            <input type="text" value="Maria Johnson" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tp-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Job Title</label>
+            <input type="text" value="Lead Teacher" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tp-500">
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Grade</label>
+            <select class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tp-500 bg-white">
+              <option selected>Kindergarten</option>
+              <option>First Grade</option>
+              <option>Second Grade</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Subject</label>
+            <select class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tp-500 bg-white">
+              <option selected>Math</option>
+              <option>ELA</option>
+              <option>Science</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
+            <select class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tp-500 bg-white">
+              <option selected>Return</option>
+              <option>Possible Open</option>
+              <option>Open</option>
+              <option>Offer Out</option>
+              <option>Filled</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-500 mb-1">Notes</label>
+          <textarea rows="2" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tp-500 resize-none" placeholder="Optional notes..."></textarea>
+        </div>
+      </div>
+      <div class="px-6 py-4 bg-gray-50 flex items-center justify-between">
+        <button class="text-sm text-red-500 hover:text-red-700 font-medium">Delete Position</button>
+        <div class="flex gap-2">
+          <button onclick="closeModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium">Cancel</button>
+          <button class="px-4 py-2 text-sm bg-tp-600 text-white rounded-lg hover:bg-tp-700 font-medium">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+    function closeModal() {
+      document.getElementById('editModal').classList.add('hidden');
+    }
+    function setYear(btn, year) {
+      btn.parentElement.querySelectorAll('button').forEach(b => {
+        b.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        b.classList.add('text-gray-500');
+      });
+      btn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+      btn.classList.remove('text-gray-500');
+    }
+  </script>
+</body>
+</html>

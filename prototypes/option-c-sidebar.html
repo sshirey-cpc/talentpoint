@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentPoint – Option C: Sidebar + Cards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tp: {
+              50: '#f0f4ff', 100: '#e0e9ff', 200: '#c2d4fe', 300: '#94b3fd',
+              400: '#6490fa', 500: '#3b6cf5', 600: '#2550e0', 700: '#1e3fbe',
+              800: '#1e369a', 900: '#1e3179', 950: '#0f172a',
+            }
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    .sidebar-item { transition: all 0.1s ease; }
+    .sidebar-item:hover { background: rgba(255,255,255,0.08); }
+    .sidebar-item.active { background: rgba(255,255,255,0.12); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .pos-card { transition: all 0.12s ease; }
+    .pos-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); transform: translateY(-1px); }
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+    .group-section + .group-section { margin-top: 24px; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased flex h-screen overflow-hidden">
+
+  <!-- Dark Sidebar -->
+  <aside class="w-56 bg-tp-950 flex flex-col flex-shrink-0">
+    <!-- Brand -->
+    <div class="px-4 py-4 flex items-center gap-2.5 border-b border-white/10">
+      <div class="w-7 h-7 bg-tp-500 rounded-lg flex items-center justify-center">
+        <span class="text-white font-bold text-xs">T</span>
+      </div>
+      <div>
+        <span class="text-white font-semibold text-sm">TalentPoint</span>
+        <p class="text-white/40 text-[10px]">Staffing Board</p>
+      </div>
+    </div>
+
+    <!-- School Nav -->
+    <div class="px-3 pt-4 pb-2">
+      <p class="text-[10px] font-semibold text-white/30 uppercase tracking-wider px-2 mb-2">Schools</p>
+      <div class="space-y-0.5">
+        <button class="sidebar-item active w-full text-left px-2.5 py-2 rounded-md flex items-center justify-between">
+          <span class="text-sm text-white/90 font-medium">Arthur Ashe</span>
+          <span class="text-[10px] text-white/40 bg-white/10 px-1.5 py-0.5 rounded">47</span>
+        </button>
+        <button class="sidebar-item w-full text-left px-2.5 py-2 rounded-md flex items-center justify-between">
+          <span class="text-sm text-white/60">Samuel J. Green</span>
+          <span class="text-[10px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded">52</span>
+        </button>
+        <button class="sidebar-item w-full text-left px-2.5 py-2 rounded-md flex items-center justify-between">
+          <span class="text-sm text-white/60">Langston Hughes</span>
+          <span class="text-[10px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded">41</span>
+        </button>
+        <button class="sidebar-item w-full text-left px-2.5 py-2 rounded-md flex items-center justify-between">
+          <span class="text-sm text-white/60">Phillis Wheatley</span>
+          <span class="text-[10px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded">38</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="px-3 pt-3 pb-2">
+      <p class="text-[10px] font-semibold text-white/30 uppercase tracking-wider px-2 mb-2">Filter</p>
+      <div class="space-y-0.5">
+        <button class="sidebar-item w-full text-left px-2.5 py-1.5 rounded-md flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="text-xs text-white/60">Filled</span>
+          <span class="text-[10px] text-white/30 ml-auto">38</span>
+        </button>
+        <button class="sidebar-item w-full text-left px-2.5 py-1.5 rounded-md flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span class="text-xs text-white/60">At Risk</span>
+          <span class="text-[10px] text-white/30 ml-auto">4</span>
+        </button>
+        <button class="sidebar-item w-full text-left px-2.5 py-1.5 rounded-md flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-red-400"></span>
+          <span class="text-xs text-white/60">Open</span>
+          <span class="text-[10px] text-white/30 ml-auto">3</span>
+        </button>
+        <button class="sidebar-item w-full text-left px-2.5 py-1.5 rounded-md flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+          <span class="text-xs text-white/60">Offer Out</span>
+          <span class="text-[10px] text-white/30 ml-auto">2</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom -->
+    <div class="mt-auto px-3 py-3 border-t border-white/10">
+      <div class="flex items-center gap-2 px-2">
+        <div class="w-6 h-6 bg-tp-600 rounded-full flex items-center justify-center text-[10px] font-semibold text-white">SS</div>
+        <span class="text-xs text-white/50">Scott Shirey</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+    <!-- Top Bar -->
+    <header class="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <h1 class="text-lg font-semibold text-gray-900">Arthur Ashe Charter</h1>
+        <div class="flex bg-gray-100 rounded-md p-0.5">
+          <button class="px-2.5 py-1 text-xs font-medium rounded text-gray-400">25-26</button>
+          <button class="px-2.5 py-1 text-xs font-medium rounded bg-gray-900 text-white">26-27</button>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <!-- Progress -->
+        <div class="flex items-center gap-2">
+          <div class="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-emerald-500" style="width:80.8%"></div>
+          </div>
+          <span class="text-xs font-semibold text-gray-700">80.8% staffed</span>
+        </div>
+        <div class="h-5 w-px bg-gray-200"></div>
+        <!-- Search -->
+        <div class="relative">
+          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" placeholder="Search..." class="pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg w-44 focus:outline-none focus:ring-2 focus:ring-tp-500 focus:border-transparent">
+        </div>
+        <button class="text-xs font-medium text-tp-600 hover:text-tp-700 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Add Position
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto px-6 py-5 scrollbar-thin">
+
+      <!-- Grade Group: Kindergarten -->
+      <div class="group-section">
+        <div class="flex items-center gap-3 mb-3">
+          <h2 class="text-sm font-semibold text-gray-800">Kindergarten</h2>
+          <div class="h-px flex-1 bg-gray-100"></div>
+          <span class="text-[11px] text-gray-400 font-medium">4 / 5 filled</span>
+        </div>
+        <div class="card-grid">
+          <!-- Filled -->
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer" onclick="openDetail(this)">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">MJ</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">Maria Johnson</p>
+                  <p class="text-[11px] text-gray-400">Lead Teacher — Math</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">TW</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">Tanya Williams</p>
+                  <p class="text-[11px] text-gray-400">Lead Teacher — ELA</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <!-- At Risk -->
+          <div class="pos-card bg-white rounded-xl border border-amber-200 p-3.5 cursor-pointer">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-semibold">DC</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">Devin Carter</p>
+                  <p class="text-[11px] text-gray-400">Lead Teacher — Science</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                Possible Open
+              </span>
+              <span class="text-[10px] text-amber-400">ITR: Unsure</span>
+            </div>
+          </div>
+
+          <!-- Offer Out -->
+          <div class="pos-card bg-white rounded-xl border border-blue-200 p-3.5 cursor-pointer">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-semibold">JR</div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">James Robinson</p>
+                  <p class="text-[11px] text-gray-400">Lead Teacher — Enrichment</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                Offer Out
+              </span>
+              <span class="text-[10px] text-gray-300">Candidate</span>
+            </div>
+          </div>
+
+          <!-- Open -->
+          <div class="pos-card bg-white rounded-xl border border-dashed border-red-200 p-3.5 cursor-pointer">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-red-600">Open Position</p>
+                  <p class="text-[11px] text-gray-400">Lead Teacher — Social Studies</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                Open
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade Group: First Grade -->
+      <div class="group-section">
+        <div class="flex items-center gap-3 mb-3">
+          <h2 class="text-sm font-semibold text-gray-800">First Grade</h2>
+          <div class="h-px flex-1 bg-gray-100"></div>
+          <span class="text-[11px] text-gray-400 font-medium">3 / 4 filled</span>
+        </div>
+        <div class="card-grid">
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">LP</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Lisa Park</p>
+                <p class="text-[11px] text-gray-400">Lead Teacher — Math</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">RH</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Robert Harris</p>
+                <p class="text-[11px] text-gray-400">Lead Teacher — ELA</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">AN</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Angela Nguyen</p>
+                <p class="text-[11px] text-gray-400">Lead Teacher — Science</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-amber-200 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-semibold">KM</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Keith Mitchell</p>
+                <p class="text-[11px] text-gray-400">Lead Teacher — Social Studies</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Possible Open
+              </span>
+              <span class="text-[10px] text-amber-400">ITR: Unsure</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade Group: Enrichment -->
+      <div class="group-section">
+        <div class="flex items-center gap-3 mb-3">
+          <h2 class="text-sm font-semibold text-gray-800">Enrichment</h2>
+          <div class="h-px flex-1 bg-gray-100"></div>
+          <span class="text-[11px] text-gray-400 font-medium">2 / 3 filled</span>
+        </div>
+        <div class="card-grid">
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">CF</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Carmen Flores</p>
+                <p class="text-[11px] text-gray-400">Art Teacher</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">MW</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Marcus Washington</p>
+                <p class="text-[11px] text-gray-400">PE Teacher</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-amber-200 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-semibold">NH</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Nina Hernandez</p>
+                <p class="text-[11px] text-gray-400">Music Teacher</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Possible Open
+              </span>
+              <span class="text-[10px] text-amber-400">ITR: Unsure</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade Group: Leadership -->
+      <div class="group-section">
+        <div class="flex items-center gap-3 mb-3">
+          <h2 class="text-sm font-semibold text-gray-800">Leadership</h2>
+          <div class="h-px flex-1 bg-gray-100"></div>
+          <span class="text-[11px] text-gray-400 font-medium">2 / 3 filled</span>
+        </div>
+        <div class="card-grid">
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">DR</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Diana Richardson</p>
+                <p class="text-[11px] text-gray-400">School Director</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">BL</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Brian Lewis</p>
+                <p class="text-[11px] text-gray-400">Assistant Director</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-dashed border-red-200 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-red-600">Open Position</p>
+                <p class="text-[11px] text-gray-400">Dean of Students</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Open
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ELL -->
+      <div class="group-section">
+        <div class="flex items-center gap-3 mb-3">
+          <h2 class="text-sm font-semibold text-gray-800">ELL</h2>
+          <div class="h-px flex-1 bg-gray-100"></div>
+          <span class="text-[11px] text-gray-400 font-medium">1 / 2 filled</span>
+        </div>
+        <div class="card-grid">
+          <div class="pos-card bg-white rounded-xl border border-gray-100 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-semibold">YC</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Yolanda Chen</p>
+                <p class="text-[11px] text-gray-400">ELL Specialist — K-2</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Return
+              </span>
+              <span class="text-[10px] text-gray-300">ITR: Yes</span>
+            </div>
+          </div>
+
+          <div class="pos-card bg-white rounded-xl border border-blue-200 p-3.5 cursor-pointer">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-semibold">PR</div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Patricia Reyes</p>
+                <p class="text-[11px] text-gray-400">ELL Specialist — 3-5</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Offer Out
+              </span>
+              <span class="text-[10px] text-gray-300">Candidate: P. Reyes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Detail Slide-over (hidden by default) -->
+  <div id="detailPanel" class="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl border-l border-gray-100 z-50 transform translate-x-full transition-transform duration-200 ease-out">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-semibold text-gray-900">Position Details</h2>
+        <button onclick="closeDetail()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-semibold">MJ</div>
+        <div>
+          <p class="text-base font-semibold text-gray-900">Maria Johnson</p>
+          <p class="text-sm text-gray-500">Lead Teacher — Math</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">School</label>
+            <p class="text-sm text-gray-900">Arthur Ashe Charter</p>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Grade Level</label>
+            <p class="text-sm text-gray-900">Kindergarten</p>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Status</label>
+            <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Return</span>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">ITR Response</label>
+            <p class="text-sm text-gray-900">Yes</p>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Employee ID</label>
+            <p class="text-sm text-gray-900">EID-4021</p>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Start Year</label>
+            <p class="text-sm text-gray-900">22-23</p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-100">
+          <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-2">Position History</label>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+              <span class="text-gray-500">25-26</span>
+              <span class="text-gray-700">Maria Johnson — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+              <span class="text-gray-500">24-25</span>
+              <span class="text-gray-700">Maria Johnson — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+              <span class="text-gray-500">23-24</span>
+              <span class="text-gray-700">Maria Johnson — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+              <span class="text-gray-500">22-23</span>
+              <span class="text-gray-700">Sarah Chen — Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-100">
+          <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Notes</label>
+          <p class="text-sm text-gray-600">Strong mentor, leads K team PLC. Considering grade lead role for 27-28.</p>
+        </div>
+      </div>
+
+      <div class="mt-8 flex gap-2">
+        <button class="flex-1 px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium">Edit Position</button>
+        <button class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg font-medium">History</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openDetail() {
+      document.getElementById('detailPanel').style.transform = 'translateX(0)';
+    }
+    function closeDetail() {
+      document.getElementById('detailPanel').style.transform = 'translateX(100%)';
+    }
+  </script>
+</body>
+</html>

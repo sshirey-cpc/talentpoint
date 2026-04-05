@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentPoint — Deep Navy</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tp: {
+              50: '#f0f4ff', 100: '#e0e9ff', 200: '#c2d4fe', 300: '#94b3fd',
+              400: '#6490fa', 500: '#3b6cf5', 600: '#2550e0', 700: '#1e3fbe',
+              800: '#1e369a', 900: '#1e3179', 950: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* Transitions */
+    .view-transition { transition: opacity 0.2s ease, transform 0.2s ease; }
+    .card-hover { transition: all 0.12s ease; }
+    .card-hover:hover { transform: translateY(-1px); box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+
+    /* Focus mode dimming */
+    .dimmed { opacity: 0.12; filter: grayscale(1); pointer-events: none; transition: all 0.3s ease; }
+    .focused { transition: all 0.3s ease; }
+    .position-card { transition: opacity 0.3s ease, filter 0.3s ease; }
+
+    /* Command bar */
+    .cmd-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+    .cmd-input { box-shadow: 0 25px 60px rgba(0,0,0,0.2); }
+
+    /* Network card hover */
+    .school-row { transition: all 0.1s ease; }
+    .school-row:hover { background: #1e293b; }
+
+    /* Zone dividers */
+    .zone-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    /* Status bar button active state */
+    .status-btn { transition: all 0.15s ease; }
+    .status-btn:hover { transform: scale(1.02); }
+    .status-btn.active-filter { ring: 2px; }
+
+    /* Self-contained card grid */
+    .section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+
+    /* Department grid */
+    .dept-grid { display: grid; }
+    .dept-grid .header-cell { position: sticky; top: 0; z-index: 5; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased h-screen flex flex-col overflow-hidden">
+
+  <!-- Top Bar -->
+  <header class="bg-slate-900 border-b border-slate-800 px-5 py-2.5 flex items-center justify-between flex-shrink-0 z-40">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center cursor-pointer" onclick="showNetwork()">
+        <span class="text-white font-bold text-[11px]">TP</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-sm" id="breadcrumb">
+        <span class="text-slate-500 cursor-pointer hover:text-slate-300" onclick="showNetwork()">Horizon Public Schools</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Year Toggle -->
+      <div class="flex bg-slate-800 rounded-md p-0.5" id="yearToggle" style="display:none;">
+        <button class="px-2.5 py-1 text-[11px] font-medium rounded text-slate-400" onclick="setYear(this)">25-26</button>
+        <button class="px-2.5 py-1 text-[11px] font-medium rounded bg-indigo-500 text-white" onclick="setYear(this)">26-27</button>
+      </div>
+
+      <!-- Search trigger -->
+      <button onclick="openCmd()" class="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-600 hover:text-slate-300 transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <span>Search</span>
+        <kbd class="text-[10px] text-slate-500 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 ml-2">/</kbd>
+      </button>
+
+      <div class="w-7 h-7 bg-slate-700 rounded-full flex items-center justify-center text-[11px] font-medium text-slate-300">SS</div>
+    </div>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- CMO / NETWORK VIEW -->
+  <!-- ============================================ -->
+  <div id="networkView" class="flex-1 overflow-y-auto">
+    <div class="max-w-5xl mx-auto px-6 py-8">
+
+      <!-- Network header + year toggle -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold text-white mb-1">Staffing Board</h1>
+          <p class="text-sm text-slate-400" id="cmoSubtitle">26-27 school year planning</p>
+        </div>
+        <div class="flex bg-slate-800 rounded-lg p-0.5" id="cmoYearToggle">
+          <button class="px-3 py-1.5 text-xs font-medium rounded-md text-slate-400 hover:text-slate-300 transition-colors" onclick="setCmoYear('25-26')">25-26</button>
+          <button class="px-3 py-1.5 text-xs font-medium rounded-md bg-indigo-500 text-white" onclick="setCmoYear('26-27')">26-27</button>
+        </div>
+      </div>
+
+      <!-- Network summary cards -->
+      <div class="grid grid-cols-5 gap-3 mb-8" id="cmoSummary">
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+          <p class="text-2xl font-semibold text-white" id="cmoTotal">178</p>
+          <p class="text-[11px] text-slate-400 mt-1">Total Positions</p>
+        </div>
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+          <p class="text-2xl font-semibold text-emerald-400" id="cmoFilled">142</p>
+          <p class="text-[11px] text-slate-400 mt-1">Returning / Filled</p>
+        </div>
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+          <p class="text-2xl font-semibold text-amber-400" id="cmoRisk">14</p>
+          <p class="text-[11px] text-slate-400 mt-1">At Risk</p>
+        </div>
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+          <p class="text-2xl font-semibold text-red-400" id="cmoOpen">12</p>
+          <p class="text-[11px] text-slate-400 mt-1">Open</p>
+        </div>
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-4">
+          <p class="text-2xl font-semibold text-blue-400" id="cmoOffers">10</p>
+          <p class="text-[11px] text-slate-400 mt-1">Offer Out / Finalist</p>
+        </div>
+      </div>
+
+      <!-- School cards -->
+      <div class="grid grid-cols-2 gap-4" id="cmoSchoolCards">
+        <!-- Cards rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SCHOOL VIEW (Matrix) -->
+  <!-- ============================================ -->
+  <div id="schoolView" class="flex-1 overflow-hidden flex flex-col" style="display:none;">
+
+    <!-- Status Bar (Focus Mode) -->
+    <div class="bg-slate-900 border-b border-slate-800 px-5 py-2 flex items-center gap-2 flex-shrink-0" id="statusBar">
+      <div class="flex items-center gap-1.5 mr-4">
+        <span class="text-sm font-semibold text-white" id="schoolTotal">47</span>
+        <span class="text-xs text-slate-400">positions</span>
+      </div>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:border-emerald-800 hover:bg-emerald-950" data-status="filled" onclick="toggleFocus(this, 'filled')">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+        <span class="text-slate-300"><span class="font-semibold text-emerald-400">38</span> Filled</span>
+      </button>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:border-amber-800 hover:bg-amber-950" data-status="at-risk" onclick="toggleFocus(this, 'at-risk')">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+        <span class="text-slate-300"><span class="font-semibold text-amber-400">4</span> At Risk</span>
+      </button>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:border-red-800 hover:bg-red-950" data-status="open" onclick="toggleFocus(this, 'open')">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+        <span class="text-slate-300"><span class="font-semibold text-red-400">3</span> Open</span>
+      </button>
+
+      <button class="status-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-transparent hover:border-blue-800 hover:bg-blue-950" data-status="offer" onclick="toggleFocus(this, 'offer')">
+        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+        <span class="text-slate-300"><span class="font-semibold text-blue-400">2</span> Offer Out</span>
+      </button>
+
+      <div class="flex-1"></div>
+
+      <!-- Progress -->
+      <div class="flex items-center gap-2">
+        <div class="w-32 h-2 bg-slate-800 rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-emerald-500" style="width:80.8%"></div>
+        </div>
+        <span class="text-xs font-semibold text-slate-300">80.8%</span>
+      </div>
+    </div>
+
+    <!-- Matrix Content -->
+    <div class="flex-1 overflow-y-auto px-5 py-5" id="matrixContent">
+
+      <!-- ==================== -->
+      <!-- ZONE 1: THE HALLWAY  -->
+      <!-- ==================== -->
+
+      <!-- Band: PreK-2 (Self-Contained) -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">Classrooms</span>
+          <div class="h-px flex-1 bg-slate-800"></div>
+        </div>
+
+        <!-- PreK -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">PreK</h3>
+            <span class="text-[10px] text-slate-600">2 sections &middot; 2/2 filled</span>
+          </div>
+          <div class="section-grid">
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled" onclick="openDetail()">
+              <p class="text-[10px] text-slate-400">PreK-A</p>
+              <p class="text-[11px] font-medium text-emerald-300">A. Martinez</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] text-slate-400">PreK-B</p>
+              <p class="text-[11px] font-medium text-emerald-300">L. Thomas</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kindergarten -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Kindergarten</h3>
+            <span class="text-[10px] text-slate-600">3 sections &middot; 2/3 filled</span>
+          </div>
+          <div class="section-grid">
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] text-slate-400">K-A</p>
+              <p class="text-[11px] font-medium text-emerald-300">M. Johnson</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+            <div class="position-card card-hover bg-amber-950 border border-amber-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+              <p class="text-[10px] text-slate-400">K-B</p>
+              <p class="text-[11px] font-medium text-amber-300">D. Carter</p>
+              <p class="text-[10px] text-amber-400 font-medium">Possible Open</p>
+            </div>
+            <div class="position-card card-hover bg-red-950 border border-dashed border-red-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+              <p class="text-[10px] text-slate-400">K-C</p>
+              <p class="text-[11px] font-medium text-red-500">Open</p>
+              <p class="text-[10px] text-red-400 font-medium">Vacant</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1st Grade -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">1st Grade</h3>
+            <span class="text-[10px] text-slate-600">3 sections &middot; 3/3 filled</span>
+          </div>
+          <div class="section-grid">
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] text-slate-400">1st-A</p>
+              <p class="text-[11px] font-medium text-emerald-300">L. Park</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] text-slate-400">1st-B</p>
+              <p class="text-[11px] font-medium text-emerald-300">R. Harris</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] text-slate-400">1st-C</p>
+              <p class="text-[11px] font-medium text-emerald-300">A. Nguyen</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2nd Grade -->
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2 px-1">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">2nd Grade</h3>
+            <span class="text-[10px] text-slate-600">2 sections &middot; 2/2 filled</span>
+          </div>
+          <div class="section-grid">
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] text-slate-400">2nd-A</p>
+              <p class="text-[11px] font-medium text-emerald-300">S. Brown</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+            <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+              <p class="text-[10px] text-slate-400">2nd-B</p>
+              <p class="text-[11px] font-medium text-emerald-300">D. Pham</p>
+              <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Band: 3-4 (Departmentalized) -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">Upper Grades — Departmentalized</span>
+          <div class="h-px flex-1 bg-slate-800"></div>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-slate-800">
+                  <th class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-left px-4 py-2.5 w-28 bg-slate-800/50">Subject</th>
+                  <th class="text-[11px] font-semibold text-slate-400 text-center px-3 py-2.5 bg-slate-800/50">3rd</th>
+                  <th class="text-[11px] font-semibold text-slate-400 text-center px-3 py-2.5 bg-slate-800/50">4th</th>
+                  <th class="text-[11px] font-semibold text-slate-400 text-center px-3 py-2.5 bg-slate-800/50">5th</th>
+                  <th class="text-[11px] font-semibold text-slate-400 text-center px-3 py-2.5 bg-slate-800/50">6th</th>
+                  <th class="text-[11px] font-semibold text-slate-400 text-center px-3 py-2.5 bg-slate-800/50">7th</th>
+                  <th class="text-[11px] font-semibold text-slate-400 text-center px-3 py-2.5 bg-slate-800/50">8th</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Math row -->
+                <tr class="border-b border-slate-800">
+                  <td class="px-4 py-2 text-xs font-medium text-slate-400">Math</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">T. Okafor</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">J. Chen</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">R. Davis</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-amber-950 border border-amber-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                      <p class="text-[11px] font-medium text-amber-300">W. Foster</p>
+                      <p class="text-[10px] text-amber-400 font-medium">Possible Open</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">M. Scott</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Filled</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">K. Bell</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                </tr>
+                <!-- ELA row -->
+                <tr class="border-b border-slate-800">
+                  <td class="px-4 py-2 text-xs font-medium text-slate-400">ELA</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">P. Grant</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-blue-950 border border-blue-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="offer">
+                      <p class="text-[11px] font-medium text-blue-300">C. Vega</p>
+                      <p class="text-[10px] text-blue-400 font-medium">Offer Out</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">N. Brooks</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">A. Ford</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-amber-950 border border-amber-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                      <p class="text-[11px] font-medium text-amber-300">S. Dunn</p>
+                      <p class="text-[10px] text-amber-400 font-medium">Possible Open</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-red-950 border border-dashed border-red-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+                      <p class="text-[11px] font-medium text-red-500">Open</p>
+                      <p class="text-[10px] text-red-400 font-medium">Vacant</p>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Science row -->
+                <tr class="border-b border-slate-800">
+                  <td class="px-4 py-2 text-xs font-medium text-slate-400">Science</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">C. Adams</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">H. Kim</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">L. Woods</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Filled</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">E. Reed</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">T. Quinn</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">B. Nash</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Social Studies row -->
+                <tr>
+                  <td class="px-4 py-2 text-xs font-medium text-slate-400">S. Studies</td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">D. Long</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-amber-950 border border-amber-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                      <p class="text-[11px] font-medium text-amber-300">K. Mitchell</p>
+                      <p class="text-[10px] text-amber-400 font-medium">Possible Open</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">F. Cole</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-red-950 border border-dashed border-red-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+                      <p class="text-[11px] font-medium text-red-500">Open</p>
+                      <p class="text-[10px] text-red-400 font-medium">Vacant</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                      <p class="text-[11px] font-medium text-emerald-300">R. Webb</p>
+                      <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1.5">
+                    <div class="position-card bg-blue-950 border border-blue-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="offer">
+                      <p class="text-[11px] font-medium text-blue-300">J. Hayes</p>
+                      <p class="text-[10px] text-blue-400 font-medium">Offer Out</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- ZONE 2: THE FLOATERS      -->
+      <!-- ========================= -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">Specialists &amp; Support</span>
+          <div class="h-px flex-1 bg-slate-800"></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <!-- Enrichment -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Enrichment</h3>
+              <span class="text-[10px] text-slate-600">2/3</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Art &middot; All Grades</p>
+                <p class="text-[11px] font-medium text-emerald-300">C. Flores</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">PE &middot; All Grades</p>
+                <p class="text-[11px] font-medium text-emerald-300">M. Washington</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-amber-950 border border-amber-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="at-risk">
+                <p class="text-[10px] text-slate-400">Music &middot; All Grades</p>
+                <p class="text-[11px] font-medium text-amber-300">N. Hernandez</p>
+                <p class="text-[10px] text-amber-400 font-medium">Possible Open</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SPED -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">SPED</h3>
+              <span class="text-[10px] text-slate-600">2/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Coordinator &middot; K-8</p>
+                <p class="text-[11px] font-medium text-emerald-300">J. Lewis</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Teacher &middot; K-4</p>
+                <p class="text-[11px] font-medium text-emerald-300">T. Robinson</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ELL -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">ELL</h3>
+              <span class="text-[10px] text-slate-600">1/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Specialist &middot; K-2</p>
+                <p class="text-[11px] font-medium text-emerald-300">Y. Chen</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-blue-950 border border-blue-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="offer">
+                <p class="text-[10px] text-slate-400">Specialist &middot; 3-5</p>
+                <p class="text-[11px] font-medium text-blue-300">P. Reyes</p>
+                <p class="text-[10px] text-blue-400 font-medium">Offer Out</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!-- ZONE 3: THE BUILDING      -->
+      <!-- ========================= -->
+      <div class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="zone-label">The Building</span>
+          <div class="h-px flex-1 bg-slate-800"></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <!-- Leadership -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Leadership</h3>
+              <span class="text-[10px] text-slate-600">2/3</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">School Director</p>
+                <p class="text-[11px] font-medium text-emerald-300">D. Richardson</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Asst. Director</p>
+                <p class="text-[11px] font-medium text-emerald-300">B. Lewis</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-red-950 border border-dashed border-red-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="open">
+                <p class="text-[10px] text-slate-400">Dean of Students</p>
+                <p class="text-[11px] font-medium text-red-500">Open</p>
+                <p class="text-[10px] text-red-400 font-medium">Vacant</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Front Office -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Front Office</h3>
+              <span class="text-[10px] text-slate-600">2/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Office Manager</p>
+                <p class="text-[11px] font-medium text-emerald-300">G. Morales</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Receptionist</p>
+                <p class="text-[11px] font-medium text-emerald-300">S. Taylor</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Operations -->
+          <div>
+            <div class="flex items-center gap-2 mb-2 px-1">
+              <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Operations</h3>
+              <span class="text-[10px] text-slate-600">2/2</span>
+            </div>
+            <div class="space-y-2">
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Ops Manager</p>
+                <p class="text-[11px] font-medium text-emerald-300">R. Johnson</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+              <div class="position-card card-hover bg-emerald-950 border border-emerald-800 rounded-lg px-2.5 py-1.5 text-center cursor-pointer" data-status="filled">
+                <p class="text-[10px] text-slate-400">Custodian</p>
+                <p class="text-[11px] font-medium text-emerald-300">E. Dixon</p>
+                <p class="text-[10px] text-emerald-400 font-medium">Return</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- COMMAND BAR                                  -->
+  <!-- ============================================ -->
+  <div id="cmdOverlay" class="fixed inset-0 cmd-overlay z-50 flex items-start justify-center pt-[20vh] hidden" onclick="if(event.target===this)closeCmd()">
+    <div class="cmd-input bg-slate-900 rounded-2xl w-full max-w-xl mx-4 overflow-hidden border border-slate-800">
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-800">
+        <svg class="w-5 h-5 text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input id="cmdInput" type="text" placeholder="Search positions, people, schools..." class="flex-1 text-base text-white bg-transparent outline-none placeholder-slate-500" autofocus oninput="handleSearch(this.value)">
+        <kbd class="text-[10px] text-slate-500 bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5">ESC</kbd>
+      </div>
+      <div id="cmdResults" class="max-h-80 overflow-y-auto">
+        <div class="px-4 py-3 text-xs text-slate-500">
+          <p class="mb-2 font-medium text-slate-400">Quick actions</p>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-800 cursor-pointer">
+              <span class="w-5 h-5 bg-red-950 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-red-500"></span></span>
+              <span class="text-sm text-slate-300">Show all open positions</span>
+              <span class="text-[10px] text-slate-600 ml-auto">3 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-800 cursor-pointer">
+              <span class="w-5 h-5 bg-amber-950 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-amber-400"></span></span>
+              <span class="text-sm text-slate-300">Show all at-risk positions</span>
+              <span class="text-[10px] text-slate-600 ml-auto">4 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-800 cursor-pointer">
+              <span class="w-5 h-5 bg-blue-950 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-blue-500"></span></span>
+              <span class="text-sm text-slate-300">Show all offers out</span>
+              <span class="text-[10px] text-slate-600 ml-auto">2 across network</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- DETAIL SLIDE-OVER                           -->
+  <!-- ============================================ -->
+  <div id="detailPanel" class="fixed inset-y-0 right-0 w-[380px] bg-slate-900 shadow-2xl border-l border-slate-800 z-40 transform translate-x-full transition-transform duration-200 ease-out">
+    <div class="h-full overflow-y-auto p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-base font-semibold text-white">Position Detail</h2>
+        <button onclick="closeDetail()" class="text-slate-500 hover:text-slate-300 p-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mb-6 pb-5 border-b border-slate-800">
+        <div class="bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-center mb-3">
+          <p class="text-[10px] text-slate-400">PreK-A &middot; Lead Teacher</p>
+          <p class="text-sm font-semibold text-emerald-300">A. Martinez</p>
+          <p class="text-[11px] text-emerald-400 font-medium">Return</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">School</p>
+            <p class="text-xs text-slate-200">Riverside Academy</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">Grade</p>
+            <p class="text-xs text-slate-200">PreK</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">Section</p>
+            <p class="text-xs text-slate-200">PreK-A</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">Category</p>
+            <p class="text-xs text-slate-200">Teacher</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">Employee ID</p>
+            <p class="text-xs text-slate-200">EID-3847</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">ITR Response</p>
+            <p class="text-xs text-slate-200">Yes</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">Start Year</p>
+            <p class="text-xs text-slate-200">21-22</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-0.5">Email</p>
+            <p class="text-xs text-slate-200">a.martinez@riverside.edu</p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800">
+          <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-2">Position History</p>
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span class="text-slate-500 w-10">26-27</span>
+              <span class="text-slate-200">Ana Martinez — Return</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+              <span class="text-slate-500 w-10">25-26</span>
+              <span class="text-slate-200">Ana Martinez — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+              <span class="text-slate-500 w-10">24-25</span>
+              <span class="text-slate-200">Ana Martinez — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+              <span class="text-slate-500 w-10">23-24</span>
+              <span class="text-slate-200">Ana Martinez — Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px]">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+              <span class="text-slate-500 w-10">22-23</span>
+              <span class="text-slate-500">Position Created</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800">
+          <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Notes</p>
+          <p class="text-xs text-slate-400 leading-relaxed">5th year at Riverside. Leads PreK team planning. Mentor for new hires.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-2">
+        <button class="flex-1 px-3 py-2 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 font-medium transition-colors">Edit Position</button>
+        <button class="px-3 py-2 text-xs text-slate-400 border border-slate-700 rounded-lg hover:bg-slate-800 font-medium transition-colors">Full History</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- JAVASCRIPT                                   -->
+  <!-- ============================================ -->
+  <script>
+    // ---- View switching ----
+    let currentFocus = null;
+
+    function showNetwork() {
+      document.getElementById('networkView').style.display = '';
+      document.getElementById('schoolView').style.display = 'none';
+      document.getElementById('yearToggle').style.display = 'none';
+      document.getElementById('breadcrumb').innerHTML =
+        '<span class="text-slate-500">Horizon Public Schools</span>';
+      closeDetail();
+      clearFocus();
+      renderCmoView(currentCmoYear);
+    }
+
+    function showSchool(name) {
+      document.getElementById('networkView').style.display = 'none';
+      document.getElementById('schoolView').style.display = '';
+      document.getElementById('yearToggle').style.display = '';
+      document.getElementById('breadcrumb').innerHTML =
+        '<span class="text-slate-500 cursor-pointer hover:text-slate-300" onclick="showNetwork()">Horizon Public Schools</span>' +
+        '<svg class="w-3.5 h-3.5 text-slate-600 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>' +
+        '<span class="text-white font-medium">' + name + '</span>';
+      closeDetail();
+      clearFocus();
+    }
+
+    // ---- Year toggle ----
+    function setYear(btn) {
+      btn.parentElement.querySelectorAll('button').forEach(b => {
+        b.classList.remove('bg-indigo-500', 'text-white');
+        b.classList.add('text-slate-400');
+      });
+      btn.classList.add('bg-indigo-500', 'text-white');
+      btn.classList.remove('text-slate-400');
+    }
+
+    // ---- Focus Mode ----
+    function toggleFocus(btn, status) {
+      const cards = document.querySelectorAll('.position-card');
+      const buttons = document.querySelectorAll('.status-btn');
+
+      if (currentFocus === status) {
+        // Clear focus
+        clearFocus();
+        return;
+      }
+
+      currentFocus = status;
+
+      // Update button states
+      buttons.forEach(b => {
+        b.classList.remove('bg-emerald-950', 'border-emerald-800', 'bg-amber-950', 'border-amber-800',
+          'bg-red-950', 'border-red-800', 'bg-blue-950', 'border-blue-800');
+        b.style.opacity = '0.4';
+      });
+      btn.style.opacity = '1';
+
+      // Highlight matching status color on active button
+      const colorMap = {
+        'filled': ['bg-emerald-950', 'border-emerald-800'],
+        'at-risk': ['bg-amber-950', 'border-amber-800'],
+        'open': ['bg-red-950', 'border-red-800'],
+        'offer': ['bg-blue-950', 'border-blue-800']
+      };
+      if (colorMap[status]) {
+        btn.classList.add(...colorMap[status]);
+      }
+
+      // Dim / focus cards
+      cards.forEach(card => {
+        if (card.dataset.status === status) {
+          card.classList.remove('dimmed');
+          card.classList.add('focused');
+        } else {
+          card.classList.add('dimmed');
+          card.classList.remove('focused');
+        }
+      });
+    }
+
+    function clearFocus() {
+      currentFocus = null;
+      const cards = document.querySelectorAll('.position-card');
+      const buttons = document.querySelectorAll('.status-btn');
+
+      cards.forEach(card => {
+        card.classList.remove('dimmed', 'focused');
+      });
+      buttons.forEach(b => {
+        b.style.opacity = '1';
+        b.classList.remove('bg-emerald-950', 'border-emerald-800', 'bg-amber-950', 'border-amber-800',
+          'bg-red-950', 'border-red-800', 'bg-blue-950', 'border-blue-800');
+      });
+    }
+
+    // ---- Detail Panel ----
+    function openDetail() {
+      document.getElementById('detailPanel').style.transform = 'translateX(0)';
+    }
+    function closeDetail() {
+      document.getElementById('detailPanel').style.transform = 'translateX(100%)';
+    }
+
+    // ---- Command Bar ----
+    function openCmd() {
+      document.getElementById('cmdOverlay').classList.remove('hidden');
+      setTimeout(() => document.getElementById('cmdInput').focus(), 50);
+    }
+    function closeCmd() {
+      document.getElementById('cmdOverlay').classList.add('hidden');
+      document.getElementById('cmdInput').value = '';
+      resetCmdResults();
+    }
+
+    function handleSearch(query) {
+      const results = document.getElementById('cmdResults');
+      if (!query.trim()) {
+        resetCmdResults();
+        return;
+      }
+
+      const q = query.toLowerCase();
+      const matches = allPositions.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.role.toLowerCase().includes(q) ||
+        p.school.toLowerCase().includes(q) ||
+        p.status.toLowerCase().includes(q) ||
+        p.grade.toLowerCase().includes(q)
+      );
+
+      if (matches.length === 0) {
+        results.innerHTML = '<div class="px-5 py-4 text-sm text-slate-500">No results found</div>';
+        return;
+      }
+
+      const statusColors = {
+        'Return': 'bg-emerald-500', 'Filled': 'bg-emerald-500',
+        'Possible Open': 'bg-amber-400', 'Open': 'bg-red-500',
+        'Offer Out': 'bg-blue-500'
+      };
+
+      results.innerHTML = matches.slice(0, 8).map(p => `
+        <div class="flex items-center gap-3 px-5 py-2.5 hover:bg-slate-800 cursor-pointer border-b border-slate-800">
+          <span class="w-2 h-2 rounded-full ${statusColors[p.status] || 'bg-slate-500'} flex-shrink-0"></span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-slate-200 font-medium truncate">${p.name}</p>
+            <p class="text-[11px] text-slate-500">${p.role} &middot; ${p.grade} &middot; ${p.school}</p>
+          </div>
+          <span class="text-[10px] text-slate-500 flex-shrink-0">${p.status}</span>
+        </div>
+      `).join('');
+    }
+
+    function resetCmdResults() {
+      document.getElementById('cmdResults').innerHTML = `
+        <div class="px-4 py-3 text-xs text-slate-500">
+          <p class="mb-2 font-medium text-slate-400">Quick actions</p>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-800 cursor-pointer">
+              <span class="w-5 h-5 bg-red-950 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-red-500"></span></span>
+              <span class="text-sm text-slate-300">Show all open positions</span>
+              <span class="text-[10px] text-slate-600 ml-auto">3 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-800 cursor-pointer">
+              <span class="w-5 h-5 bg-amber-950 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-amber-400"></span></span>
+              <span class="text-sm text-slate-300">Show all at-risk positions</span>
+              <span class="text-[10px] text-slate-600 ml-auto">4 across network</span>
+            </div>
+            <div class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-800 cursor-pointer">
+              <span class="w-5 h-5 bg-blue-950 rounded flex items-center justify-center"><span class="w-2 h-2 rounded-full bg-blue-500"></span></span>
+              <span class="text-sm text-slate-300">Show all offers out</span>
+              <span class="text-[10px] text-slate-600 ml-auto">2 across network</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ---- School data by year ----
+    const schoolData = {
+      '25-26': [
+        { name: 'Riverside Academy', grades: 'PreK–8', positions: 47, filled: 43, risk: 2, open: 1, offers: 1, teachers: [38,36], support: [4,3], leadership: [3,3], ops: [2,1] },
+        { name: 'Oakwood Preparatory', grades: 'PreK–8', positions: 52, filled: 48, risk: 2, open: 1, offers: 1, teachers: [42,39], support: [4,4], leadership: [3,3], ops: [3,2] },
+        { name: 'Magnolia Elementary', grades: 'K–5', positions: 41, filled: 38, risk: 1, open: 1, offers: 1, teachers: [32,30], support: [4,4], leadership: [3,3], ops: [2,1] },
+        { name: 'Harbor View K-8', grades: 'PreK–8', positions: 38, filled: 34, risk: 2, open: 1, offers: 1, teachers: [30,27], support: [3,3], leadership: [3,3], ops: [2,1] },
+      ],
+      '26-27': [
+        { name: 'Riverside Academy', grades: 'PreK–8', positions: 47, filled: 38, risk: 4, open: 3, offers: 2, teachers: [38,32], support: [4,3], leadership: [3,2], ops: [2,1] },
+        { name: 'Oakwood Preparatory', grades: 'PreK–8', positions: 52, filled: 44, risk: 3, open: 3, offers: 2, teachers: [42,36], support: [4,3], leadership: [3,3], ops: [3,2] },
+        { name: 'Magnolia Elementary', grades: 'K–5', positions: 41, filled: 32, risk: 4, open: 4, offers: 1, teachers: [32,25], support: [4,3], leadership: [3,3], ops: [2,1] },
+        { name: 'Harbor View K-8', grades: 'PreK–8', positions: 38, filled: 28, risk: 3, open: 2, offers: 5, teachers: [30,22], support: [3,2], leadership: [3,3], ops: [2,1] },
+      ]
+    };
+
+    let currentCmoYear = '26-27';
+
+    function renderCmoView(year) {
+      const schools = schoolData[year];
+      const totals = schools.reduce((acc, s) => ({
+        positions: acc.positions + s.positions,
+        filled: acc.filled + s.filled,
+        risk: acc.risk + s.risk,
+        open: acc.open + s.open,
+        offers: acc.offers + s.offers
+      }), { positions: 0, filled: 0, risk: 0, open: 0, offers: 0 });
+
+      document.getElementById('cmoTotal').textContent = totals.positions;
+      document.getElementById('cmoFilled').textContent = totals.filled;
+      document.getElementById('cmoRisk').textContent = totals.risk;
+      document.getElementById('cmoOpen').textContent = totals.open;
+      document.getElementById('cmoOffers').textContent = totals.offers;
+      document.getElementById('cmoSubtitle').textContent = year + ' school year' + (year === '26-27' ? ' planning' : ' — current');
+
+      const container = document.getElementById('cmoSchoolCards');
+      container.innerHTML = schools.map(s => {
+        const pct = Math.round((s.filled / s.positions) * 1000) / 10;
+        const urgency = s.open + s.risk;
+        return `
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-5 cursor-pointer card-hover" onclick="showSchool('${s.name}')">
+          <!-- School header -->
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <p class="text-sm font-semibold text-white">${s.name}</p>
+              <p class="text-[11px] text-slate-400">${s.grades} &middot; ${s.positions} positions</p>
+            </div>
+            <span class="text-lg font-bold ${pct >= 90 ? 'text-emerald-400' : pct >= 80 ? 'text-white' : pct >= 70 ? 'text-amber-400' : 'text-red-400'}">${pct}%</span>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-4">
+            <div class="h-full rounded-full transition-all duration-500 ${pct >= 90 ? 'bg-emerald-500' : pct >= 80 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-400' : 'bg-red-400'}" style="width:${pct}%"></div>
+          </div>
+
+          <!-- Category breakdown -->
+          <div class="grid grid-cols-4 gap-2 mb-4">
+            <div class="text-center">
+              <p class="text-xs font-semibold text-slate-300">${s.teachers[1]}/${s.teachers[0]}</p>
+              <p class="text-[10px] text-slate-500">Teachers</p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs font-semibold text-slate-300">${s.support[1]}/${s.support[0]}</p>
+              <p class="text-[10px] text-slate-500">Support</p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs font-semibold text-slate-300">${s.leadership[1]}/${s.leadership[0]}</p>
+              <p class="text-[10px] text-slate-500">Leadership</p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs font-semibold text-slate-300">${s.ops[1]}/${s.ops[0]}</p>
+              <p class="text-[10px] text-slate-500">Operations</p>
+            </div>
+          </div>
+
+          <!-- Status summary -->
+          <div class="flex items-center gap-3 pt-3 border-t border-slate-800">
+            ${s.risk > 0 ? `<span class="flex items-center gap-1 text-[11px] text-amber-400 font-medium"><span class="w-2 h-2 rounded-full bg-amber-400"></span>${s.risk} at risk</span>` : ''}
+            ${s.open > 0 ? `<span class="flex items-center gap-1 text-[11px] text-red-400 font-medium"><span class="w-2 h-2 rounded-full bg-red-500"></span>${s.open} open</span>` : ''}
+            ${s.offers > 0 ? `<span class="flex items-center gap-1 text-[11px] text-blue-400 font-medium"><span class="w-2 h-2 rounded-full bg-blue-500"></span>${s.offers} offers out</span>` : ''}
+            ${urgency === 0 ? `<span class="text-[11px] text-emerald-400 font-medium">Fully staffed</span>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function setCmoYear(year) {
+      currentCmoYear = year;
+      const toggle = document.getElementById('cmoYearToggle');
+      toggle.querySelectorAll('button').forEach(b => {
+        b.classList.remove('bg-indigo-500', 'text-white');
+        b.classList.add('text-slate-400');
+      });
+      event.target.classList.add('bg-indigo-500', 'text-white');
+      event.target.classList.remove('text-slate-400');
+      renderCmoView(year);
+    }
+
+    // Initial render
+    renderCmoView('26-27');
+
+    // ---- Searchable data ----
+    const allPositions = [
+      { name: 'Ana Martinez', role: 'Lead Teacher', grade: 'PreK-A', school: 'Riverside', status: 'Return' },
+      { name: 'Linda Thomas', role: 'Lead Teacher', grade: 'PreK-B', school: 'Riverside', status: 'Return' },
+      { name: 'Maria Johnson', role: 'Lead Teacher', grade: 'K-A', school: 'Riverside', status: 'Return' },
+      { name: 'Devin Carter', role: 'Lead Teacher', grade: 'K-B', school: 'Riverside', status: 'Possible Open' },
+      { name: 'Open Position', role: 'Lead Teacher', grade: 'K-C', school: 'Riverside', status: 'Open' },
+      { name: 'Lisa Park', role: 'Lead Teacher', grade: '1st-A', school: 'Riverside', status: 'Return' },
+      { name: 'Robert Harris', role: 'Lead Teacher', grade: '1st-B', school: 'Riverside', status: 'Return' },
+      { name: 'Angela Nguyen', role: 'Lead Teacher', grade: '1st-C', school: 'Riverside', status: 'Return' },
+      { name: 'Sandra Brown', role: 'Lead Teacher', grade: '2nd-A', school: 'Riverside', status: 'Return' },
+      { name: 'David Pham', role: 'Lead Teacher', grade: '2nd-B', school: 'Riverside', status: 'Return' },
+      { name: 'Temi Okafor', role: 'Math Teacher', grade: '3rd', school: 'Riverside', status: 'Return' },
+      { name: 'James Chen', role: 'Math Teacher', grade: '4th', school: 'Riverside', status: 'Return' },
+      { name: 'Rachel Davis', role: 'Math Teacher', grade: '5th', school: 'Riverside', status: 'Return' },
+      { name: 'William Foster', role: 'Math Teacher', grade: '6th', school: 'Riverside', status: 'Possible Open' },
+      { name: 'Michael Scott', role: 'Math Teacher', grade: '7th', school: 'Riverside', status: 'Filled' },
+      { name: 'Keisha Bell', role: 'Math Teacher', grade: '8th', school: 'Riverside', status: 'Return' },
+      { name: 'Patricia Grant', role: 'ELA Teacher', grade: '3rd', school: 'Riverside', status: 'Return' },
+      { name: 'Carmen Vega', role: 'ELA Teacher', grade: '4th', school: 'Riverside', status: 'Offer Out' },
+      { name: 'Nina Brooks', role: 'ELA Teacher', grade: '5th', school: 'Riverside', status: 'Return' },
+      { name: 'Carmen Flores', role: 'Art Teacher', grade: 'All Grades', school: 'Riverside', status: 'Return' },
+      { name: 'Marcus Washington', role: 'PE Teacher', grade: 'All Grades', school: 'Riverside', status: 'Return' },
+      { name: 'Nina Hernandez', role: 'Music Teacher', grade: 'All Grades', school: 'Riverside', status: 'Possible Open' },
+      { name: 'Yolanda Chen', role: 'ELL Specialist', grade: 'K-2', school: 'Riverside', status: 'Return' },
+      { name: 'Patricia Reyes', role: 'ELL Specialist', grade: '3-5', school: 'Riverside', status: 'Offer Out' },
+      { name: 'Diana Richardson', role: 'School Director', grade: 'Leadership', school: 'Riverside', status: 'Return' },
+      { name: 'Brian Lewis', role: 'Asst. Director', grade: 'Leadership', school: 'Riverside', status: 'Return' },
+      { name: 'Open Position', role: 'Dean of Students', grade: 'Leadership', school: 'Riverside', status: 'Open' },
+      { name: 'Gloria Morales', role: 'Office Manager', grade: 'Front Office', school: 'Riverside', status: 'Return' },
+    ];
+
+    // ---- Keyboard shortcuts ----
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        openCmd();
+      }
+      if (e.key === 'Escape') {
+        closeCmd();
+        closeDetail();
+        clearFocus();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        openCmd();
+      }
+    });
+  </script>
+
+</body>
+</html>
