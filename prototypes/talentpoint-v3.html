@@ -1424,9 +1424,8 @@ body:not(.phone-mode) .quick-actions { display: none; }
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;" id="peopleFilters">
           <button class="view-tab active" data-people-filter="all">All (530)</button>
-          <button class="view-tab" data-people-filter="at-risk">At Risk</button>
-          <button class="view-tab" data-people-filter="open">Open</button>
-          <button class="view-tab" data-people-filter="low-touch">Low Touch</button>
+          <button class="view-tab" data-people-filter="open">Open Positions</button>
+          <button class="view-tab" data-people-filter="low-touch">Needs Connection</button>
           <button class="view-tab" data-people-filter="itr-pending">ITR Pending</button>
         </div>
         <input type="text" class="search-input" placeholder="Filter by name, role, school..." id="peopleSearch" style="max-width:300px;padding:8px 12px;">
@@ -1479,7 +1478,7 @@ body:not(.phone-mode) .quick-actions { display: none; }
 
     <!-- Retention Health Trend -->
     <div class="panel-section">
-      <div class="panel-section-title">Retention Health</div>
+      <div class="panel-section-title">Staffing Trend</div>
       <div style="display:flex;align-items:flex-end;gap:4px;height:60px;margin-bottom:8px;" id="healthBars">
       </div>
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
@@ -1501,7 +1500,7 @@ body:not(.phone-mode) .quick-actions { display: none; }
     <!-- Retention Signals (Stream 5) -->
     <div class="panel-section" id="retentionPanel">
       <div class="panel-section-title">
-        Retention Signals
+        Longest Since Connected
         <span class="count" id="retentionCount">0</span>
       </div>
       <div id="retentionList">
@@ -1568,9 +1567,8 @@ body:not(.phone-mode) .quick-actions { display: none; }
   <input type="text" class="search-input" placeholder="Search people..." id="mobilePeopleSearch" style="margin-bottom:12px;padding:10px 12px;">
   <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px;" id="mobilePeopleChips">
     <span class="form-chip selected" data-mfilter="all">All</span>
-    <span class="form-chip" data-mfilter="at-risk">At Risk</span>
-    <span class="form-chip" data-mfilter="open">Open</span>
-    <span class="form-chip" data-mfilter="low-touch">Needs Touch</span>
+    <span class="form-chip" data-mfilter="open">Open Positions</span>
+    <span class="form-chip" data-mfilter="low-touch">Needs Connection</span>
     <span class="form-chip" data-mfilter="itr-pending">ITR Pending</span>
   </div>
   <div id="mobilePeopleList"></div>
@@ -1672,8 +1670,8 @@ body:not(.phone-mode) .quick-actions { display: none; }
         <label class="form-label">Concern Level</label>
         <div class="form-chips" id="flagLevel">
           <span class="form-chip selected" data-value="monitor">Monitor</span>
-          <span class="form-chip" data-value="at-risk">At Risk</span>
-          <span class="form-chip" data-value="urgent">Urgent — may leave</span>
+          <span class="form-chip" data-value="at-risk">Needs Attention</span>
+          <span class="form-chip" data-value="urgent">Likely Leaving</span>
         </div>
       </div>
       <div class="form-group">
@@ -1998,7 +1996,7 @@ const app = {
             priority: 3,
             icon: '👁️',
             type: 'info',
-            text: `<strong>Observation overdue: ${s.name}</strong> — ${days < 999 ? days + ' days since last observation' : 'none logged this year'}`,
+            text: `<strong>${s.name}</strong> — ${days < 999 ? days + ' days since last observation' : 'no observation logged yet'}`,
             meta: `${s.school} · ${s.role}`,
             personId: s.id
           });
@@ -2084,18 +2082,11 @@ const app = {
         <div class="stat-value red">${open}</div>
         <div class="stat-label">Open</div>
       </div>
-      <div class="stat-card" data-filter="at-risk">
-        <div class="stat-value amber">${atRisk}</div>
-        <div class="stat-label">At Risk</div>
-      </div>
-      <div class="stat-card" data-filter="offer-out">
-        <div class="stat-value blue">${offers}</div>
-        <div class="stat-label">Offers Out</div>
-      </div>
+      ${seasonConfig.features.find(f => f.id === 'itr')?.active ? `
       <div class="stat-card" data-filter="not-asked">
-        <div class="stat-value amber">${notAskedITR + undecided}</div>
+        <div class="stat-value">${notAskedITR + undecided}</div>
         <div class="stat-label">ITR Pending</div>
-      </div>
+      </div>` : ''}
     `;
   },
 
@@ -2125,12 +2116,11 @@ const app = {
         ? Math.round(staff.filter(s => s.surveyEngagement).reduce((a,s) => a + s.surveyEngagement, 0) / staff.filter(s => s.surveyEngagement).length)
         : null;
 
-      // Bar widths
+      // Bar widths — simple: filled, offer, open (resigned counts as open)
+      const totalOpen = open + resigned;
       const pctFilled = (filled / total * 100).toFixed(1);
       const pctOffer = (offers / total * 100).toFixed(1);
-      const pctRisk = (atRisk / total * 100).toFixed(1);
-      const pctOpen = (open / total * 100).toFixed(1);
-      const pctResigned = (resigned / total * 100).toFixed(1);
+      const pctOpen = (totalOpen / total * 100).toFixed(1);
 
       // Mini donut for card — shows % staffed
       const cardR = 20;
@@ -2142,7 +2132,7 @@ const app = {
           <div class="school-card-header">
             <div style="flex:1;">
               <div class="school-name">${school.name}</div>
-              <div class="school-grades">${school.gradeSpan} · ${total} staff · ${school.enrollment} students</div>
+              <div class="school-grades">${school.gradeSpan} · ${total} staff</div>
             </div>
             <svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg);flex-shrink:0;">
               <circle cx="28" cy="28" r="${cardR}" fill="none" stroke="var(--border)" stroke-width="6"/>
@@ -2154,28 +2144,24 @@ const app = {
             <div class="staffing-bar">
               <div class="filled" style="width:${pctFilled}%"></div>
               <div class="offer" style="width:${pctOffer}%"></div>
-              <div class="at-risk" style="width:${pctRisk}%"></div>
               <div class="open" style="width:${pctOpen}%"></div>
-              <div class="resigned" style="width:${pctResigned}%"></div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0;text-align:center;">
+          <div style="display:grid;grid-template-columns:repeat(${seasonConfig.features.find(f => f.id === 'itr')?.active ? 3 : 2},1fr);gap:8px;margin:12px 0;text-align:center;">
             <div style="padding:6px;background:var(--surface-alt);border-radius:6px;">
               <div style="font-size:16px;font-weight:700;color:${staffedColor};">${pctStaffed}%</div>
               <div style="font-size:10px;color:var(--text-muted);">Staffed</div>
             </div>
+            ${seasonConfig.features.find(f => f.id === 'itr')?.active ? `
             <div style="padding:6px;background:var(--surface-alt);border-radius:6px;">
               <div style="font-size:16px;font-weight:700;color:${itrColor};">${pctITR}%</div>
               <div style="font-size:10px;color:var(--text-muted);">ITR Yes</div>
-            </div>
+            </div>` : ''}
             <div style="padding:6px;background:var(--surface-alt);border-radius:6px;">
-              <div style="font-size:16px;font-weight:700;color:${atRisk > 0 ? 'var(--amber)' : 'var(--green)'}">${atRisk}</div>
-              <div style="font-size:10px;color:var(--text-muted);">At Risk</div>
+              <div style="font-size:16px;font-weight:700;">${open}</div>
+              <div style="font-size:10px;color:var(--text-muted);">To Fill</div>
             </div>
           </div>
-          ${alerts.length ? `<div class="school-alerts">${alerts.map(a => `
-            <div class="school-alert ${a.type}"><span>${a.icon}</span> ${a.text}</div>
-          `).join('')}</div>` : ''}
           <div class="school-card-footer">
             <span>View school</span>
             <span class="arrow">→</span>
@@ -2303,12 +2289,11 @@ const app = {
 
     // Donut chart SVG
     const total = staff.length;
+    const totalOpen = open + staff.filter(s => s.status === 'resigned').length;
     const segments = [
       { count: filled, color: '#10b981', label: 'Filled' },
       { count: offers, color: '#3b82f6', label: 'Offers' },
-      { count: atRisk, color: '#f59e0b', label: 'At Risk' },
-      { count: open, color: '#ef4444', label: 'Open' },
-      { count: staff.filter(s => s.status === 'resigned').length, color: '#d1d5db', label: 'Resigned' },
+      { count: totalOpen, color: '#ef4444', label: 'Open' },
     ];
     let donutOffset = 0;
     const donutCircumference = 2 * Math.PI * 40;
@@ -2329,14 +2314,12 @@ const app = {
           </svg>
           <div>
             <div style="display:flex;gap:16px;font-size:13px;color:var(--text-secondary);flex-wrap:wrap;margin-bottom:8px;">
-              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;"></span><strong style="color:var(--green)">${filled}</strong> filled</span>
-              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:4px;"></span><strong style="color:var(--red)">${open}</strong> open</span>
-              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);margin-right:4px;"></span><strong style="color:var(--amber)">${atRisk}</strong> at risk</span>
-              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:4px;"></span><strong style="color:var(--blue)">${offers}</strong> offers</span>
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;"></span><strong>${filled}</strong> filled</span>
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:4px;"></span><strong>${totalOpen}</strong> open</span>
+              ${offers > 0 ? `<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:4px;"></span><strong>${offers}</strong> offers</span>` : ''}
             </div>
             <div style="display:flex;gap:16px;font-size:13px;color:var(--text-secondary);flex-wrap:wrap;">
-              <span>ITR: <strong style="color:var(--green)">${itrYes}</strong> yes · <strong style="color:var(--amber)">${itrUndecided + itrNotAsked}</strong> pending</span>
-              <span>Avg Engagement: <strong>${avgEngagement}</strong>/100</span>
+              ${seasonConfig.features.find(f => f.id === 'itr')?.active ? `<span>ITR: <strong>${itrYes}</strong> yes · <strong>${itrUndecided + itrNotAsked}</strong> pending</span>` : ''}
             </div>
           </div>
         </div>
@@ -2348,17 +2331,15 @@ const app = {
       <div class="grade-grid">
         ${sortedKeys.map(key => {
           const members = groups[key];
-          const openCount = members.filter(m => m.status === 'open').length;
-          const riskCount = members.filter(m => m.retentionRisk === 'high' || m.status === 'at-risk').length;
-          const borderClass = openCount > 0 ? 'has-issues' : riskCount > 0 ? 'has-risk' : 'healthy';
+          const openCount = members.filter(m => m.status === 'open' || m.status === 'resigned').length;
+          const borderClass = openCount > 0 ? 'has-issues' : 'healthy';
 
           return `
             <div class="grade-card ${borderClass}" data-grade="${key}">
               <div class="grade-card-title"><span>${this.formatGradeLabel(key)}</span><span class="chevron">▼</span></div>
               <div class="grade-card-stats">
                 <span>${members.length} staff</span>
-                ${openCount ? `<span class="issue">${openCount} open</span>` : ''}
-                ${riskCount ? `<span class="risk">${riskCount} at risk</span>` : ''}
+                ${openCount ? `<span class="issue">${openCount} to fill</span>` : ''}
               </div>
               <div class="grade-expanded">
                 ${members.map(m => {
@@ -2368,7 +2349,7 @@ const app = {
                   const touchDot = m.status === 'open' ? '' :
                     touchDays <= 14 ? '<span style="color:var(--green);font-size:8px;" title="Touchpoint recent">●</span>' :
                     touchDays <= 30 ? '<span style="color:var(--amber);font-size:8px;" title="Touchpoint aging">●</span>' :
-                    '<span style="color:var(--red);font-size:8px;" title="Touchpoint overdue">●</span>';
+                    '<span style="color:var(--red);font-size:8px;" title="30+ days since connection">●</span>';
                   const riskDot = m.retentionRisk === 'high' ? '<span style="color:var(--red);font-size:10px;" title="High risk">▲</span>' :
                     m.retentionRisk === 'moderate' ? '<span style="color:var(--amber);font-size:10px;" title="Moderate risk">▲</span>' : '';
                   return `
@@ -2423,24 +2404,21 @@ const app = {
     const panel = document.getElementById('personPanel');
 
     const statusClass = `status-${person.status}`;
-    const riskClass = person.retentionRisk === 'high' ? 'status-at-risk' : person.retentionRisk === 'moderate' ? 'status-offer-out' : '';
 
-    // Engagement bar
+    // Engagement
     const engScore = person.surveyEngagement || 0;
-    const engColor = engScore >= 75 ? 'var(--green)' : engScore >= 50 ? 'var(--amber)' : engScore > 0 ? 'var(--red)' : 'var(--border)';
+    const engColor = engScore > 0 ? 'var(--accent)' : 'var(--border)';
 
-    // Touchpoint staleness
+    // Connection timeline
     const daysSinceTouch = person.lastTouchpoint
       ? Math.floor((new Date('2026-03-15') - new Date(person.lastTouchpoint)) / 86400000)
       : 999;
-    const touchColor = daysSinceTouch <= 14 ? 'var(--green)' : daysSinceTouch <= 30 ? 'var(--amber)' : 'var(--red)';
-    const touchLabel = daysSinceTouch <= 14 ? 'Recent' : daysSinceTouch <= 30 ? `${daysSinceTouch}d ago` : daysSinceTouch < 999 ? `${daysSinceTouch}d ago — overdue` : 'Never';
+    const touchLabel = daysSinceTouch <= 14 ? 'Recent' : daysSinceTouch < 999 ? `${daysSinceTouch} days ago` : 'Not yet';
 
-    // Observation staleness
     const daysSinceObs = person.lastObservation
       ? Math.floor((new Date('2026-03-15') - new Date(person.lastObservation)) / 86400000)
       : 999;
-    const obsLabel = daysSinceObs < 999 ? `${daysSinceObs}d ago` : 'None logged';
+    const obsLabel = daysSinceObs < 999 ? `${daysSinceObs} days ago` : 'Not yet';
 
     panel.innerHTML = `
       <div class="person-header">
@@ -2449,21 +2427,38 @@ const app = {
         <div class="person-title">${person.role} · ${person.school}</div>
         <div class="person-tags">
           <span class="person-tag ${statusClass}">${this.formatStatus(person.status)}</span>
-          ${person.retentionRisk ? `<span class="person-tag ${riskClass}">${person.retentionRisk} risk</span>` : ''}
-          ${person.intentToReturn ? `<span class="person-tag" style="background:var(--surface-alt)">ITR: ${person.intentToReturn}</span>` : ''}
+          ${person.intentToReturn && person.intentToReturn !== 'not-asked' ? `<span class="person-tag" style="background:var(--surface-alt)">ITR: ${person.intentToReturn}</span>` : ''}
+          ${person.yearsTeaching ? `<span class="person-tag" style="background:var(--surface-alt)">${person.yearsTeaching}y experience</span>` : ''}
         </div>
       </div>
 
       <!-- Quick Actions -->
       <div class="person-section" style="display:flex;gap:8px;flex-wrap:wrap;padding:16px 24px;">
-        <button class="btn btn-primary" style="flex:1;min-width:0;font-size:13px;padding:8px 12px;" onclick="document.getElementById('personOverlay').classList.remove('active');openModal('touchpointModal',${person.id})">✍️ Log Touchpoint</button>
-        <button class="btn btn-secondary" style="flex:1;min-width:0;font-size:13px;padding:8px 12px;" onclick="document.getElementById('personOverlay').classList.remove('active');openModal('flagModal',${person.id})">⚡ Flag</button>
-        <button class="btn btn-secondary" style="flex:1;min-width:0;font-size:13px;padding:8px 12px;" onclick="document.getElementById('personOverlay').classList.remove('active');openModal('moveModal',${person.id})">🔀 Move</button>
+        <button class="btn btn-primary" style="flex:1;min-width:0;font-size:13px;padding:8px 12px;" onclick="document.getElementById('personOverlay').classList.remove('active');openModal('touchpointModal',${person.id})">Log Connection</button>
+        <button class="btn btn-secondary" style="flex:1;min-width:0;font-size:13px;padding:8px 12px;" onclick="document.getElementById('personOverlay').classList.remove('active');openModal('moveModal',${person.id})">Move Position</button>
       </div>
 
-      <!-- Stream 1: Position / HRIS -->
+      <!-- At a Glance -->
       <div class="person-section">
-        <div class="person-section-title">Position (HRIS)</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;">
+          <div>
+            <div style="font-size:18px;font-weight:700;">${daysSinceTouch < 999 ? daysSinceTouch + 'd' : '—'}</div>
+            <div style="font-size:10px;color:var(--text-muted);">Since connected</div>
+          </div>
+          <div>
+            <div style="font-size:18px;font-weight:700;">${person.touchpointCount || 0}</div>
+            <div style="font-size:10px;color:var(--text-muted);">Connections</div>
+          </div>
+          <div>
+            <div style="font-size:18px;font-weight:700;">${engScore > 0 ? engScore : '—'}</div>
+            <div style="font-size:10px;color:var(--text-muted);">Engagement</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Position -->
+      <div class="person-section">
+        <div class="person-section-title">Position</div>
         <div class="person-detail-row">
           <span class="person-detail-label">Grade/Dept</span>
           <span class="person-detail-value">${person.department || person.gradeLevel || '—'}</span>
@@ -2486,62 +2481,51 @@ const app = {
         </div>
       </div>
 
-      <!-- Stream 3: Survey / Engagement -->
+      <!-- Engagement -->
+      ${engScore > 0 ? `
       <div class="person-section">
-        <div class="person-section-title">Engagement (Survey Data)</div>
+        <div class="person-section-title">Engagement</div>
         <div class="person-detail-row">
-          <span class="person-detail-label">Engagement Score</span>
-          <span class="person-detail-value" style="color:${engColor}">${engScore > 0 ? engScore + '/100' : 'No data'}</span>
+          <span class="person-detail-label">Score</span>
+          <span class="person-detail-value">${engScore}/100</span>
         </div>
-        ${engScore > 0 ? `<div style="height:6px;background:var(--surface-alt);border-radius:3px;margin:4px 0 8px;">
-          <div style="height:100%;width:${engScore}%;background:${engColor};border-radius:3px;transition:width 300ms;"></div>
-        </div>` : ''}
-        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Source: Attuned · Last updated Feb 2026</div>
+        <div style="height:6px;background:var(--surface-alt);border-radius:3px;margin:4px 0 8px;">
+          <div style="height:100%;width:${engScore}%;background:var(--accent);border-radius:3px;transition:width 300ms;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);">Source: Attuned · Feb 2026</div>
       </div>
+      ` : ''}
 
-      <!-- Stream 5: Retention Signals -->
+      <!-- Timeline -->
       <div class="person-section">
-        <div class="person-section-title">Retention Signals</div>
+        <div class="person-section-title">Connection Timeline</div>
         <div class="person-detail-row">
-          <span class="person-detail-label">Risk Level</span>
-          <span class="person-detail-value" style="color:${person.retentionRisk === 'high' ? 'var(--red)' : person.retentionRisk === 'moderate' ? 'var(--amber)' : 'var(--green)'}">${person.retentionRisk || 'Low'}</span>
+          <span class="person-detail-label">Last connection</span>
+          <span class="person-detail-value">${touchLabel}</span>
         </div>
         <div class="person-detail-row">
-          <span class="person-detail-label">Intent to Return</span>
-          <span class="person-detail-value">${person.intentToReturn === 'yes' ? '✓ Yes' : person.intentToReturn === 'no' ? '✗ No' : person.intentToReturn === 'undecided' ? '? Undecided' : '— Not asked'}</span>
-        </div>
-      </div>
-
-      <!-- Stream 6: Leadership Activity -->
-      <div class="person-section">
-        <div class="person-section-title">Leadership Activity (Lead Measures)</div>
-        <div class="person-detail-row">
-          <span class="person-detail-label">Touchpoints This Year</span>
-          <span class="person-detail-value">${person.touchpointCount || 0}</span>
-        </div>
-        <div class="person-detail-row">
-          <span class="person-detail-label">Last Touchpoint</span>
-          <span class="person-detail-value" style="color:${touchColor}">${touchLabel}</span>
-        </div>
-        <div class="person-detail-row">
-          <span class="person-detail-label">Last Observation</span>
+          <span class="person-detail-label">Last observation</span>
           <span class="person-detail-value">${obsLabel}</span>
+        </div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Intent to return</span>
+          <span class="person-detail-value">${person.intentToReturn === 'yes' ? 'Yes' : person.intentToReturn === 'no' ? 'No' : person.intentToReturn === 'undecided' ? 'Undecided' : 'Not yet asked'}</span>
         </div>
       </div>
 
       ${person.notes ? `
       <div class="person-section">
-        <div class="person-section-title">Recent Notes</div>
+        <div class="person-section-title">Notes</div>
         <div class="person-stream-item">${person.notes}</div>
       </div>
       ` : ''}
 
       ${person.status === 'open' ? `
       <div class="person-section">
-        <div class="person-section-title">Pipeline (ATS)</div>
+        <div class="person-section-title">Pipeline</div>
         <div class="person-detail-row">
           <span class="person-detail-label">Applicants</span>
-          <span class="person-detail-value" style="color:${(person.pipelineApplicants || 0) === 0 ? 'var(--red)' : (person.pipelineApplicants || 0) <= 2 ? 'var(--amber)' : 'var(--green)'}">${person.pipelineApplicants || 0}</span>
+          <span class="person-detail-value">${person.pipelineApplicants || 0}</span>
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Source: AppliTrack</div>
       </div>
@@ -2561,25 +2545,31 @@ const app = {
       ? DEMO_DATA.staff.filter(s => s.school === schoolFilter)
       : DEMO_DATA.staff;
 
-    const signals = staff
-      .filter(s => s.retentionRisk === 'high' || s.retentionRisk === 'moderate')
-      .sort((a, b) => (a.retentionRisk === 'high' ? 0 : 1) - (b.retentionRisk === 'high' ? 0 : 1));
+    // Sort by days since last touchpoint — longest first
+    const connected = staff
+      .filter(s => s.status === 'filled')
+      .map(s => {
+        const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+        return { ...s, daysSince: days };
+      })
+      .filter(s => s.daysSince > 14)
+      .sort((a, b) => b.daysSince - a.daysSince);
 
-    document.getElementById('retentionCount').textContent = signals.length;
-    document.getElementById('retentionList').innerHTML = signals.slice(0, 8).map(s => `
-      <div class="retention-item ${s.retentionRisk}" data-person-id="${s.id}" style="cursor:pointer">
-        <span class="signal-icon">${s.retentionRisk === 'high' ? '🔴' : '🟡'}</span>
-        <div>
-          <div class="signal-text"><strong>${s.name}</strong> — ${s.role}</div>
-          <div class="signal-meta">${s.school} · ${s.notes || 'No recent notes'}</div>
+    document.getElementById('retentionCount').textContent = connected.length;
+    document.getElementById('retentionList').innerHTML = connected.slice(0, 8).map(s => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);cursor:pointer;" data-person-id="${s.id}">
+        <div style="width:32px;text-align:center;font-size:13px;font-weight:600;color:${s.daysSince > 45 ? 'var(--text)' : 'var(--text-secondary)'};">${s.daysSince < 999 ? s.daysSince + 'd' : '—'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
+          <div style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.role} · ${s.school}</div>
         </div>
+        <button class="btn btn-primary" style="font-size:11px;padding:4px 10px;flex-shrink:0;" onclick="event.stopPropagation();openModal('touchpointModal',${s.id})">Log</button>
       </div>
-    `).join('');
+    `).join('') || '<div style="padding:12px;font-size:13px;color:var(--text-muted);text-align:center;">All connections current</div>';
   },
 
   // ---- Activity Feed (Stream 6) ----
   renderActivityFeed(schoolFilter) {
-    // Generate synthetic activity from touchpoint data
     const staff = schoolFilter
       ? DEMO_DATA.staff.filter(s => s.school === schoolFilter)
       : DEMO_DATA.staff;
@@ -2593,35 +2583,19 @@ const app = {
       .forEach(s => {
         activities.push({
           type: 'touchpoint',
-          text: `Check-in logged with <strong>${s.name}</strong>`,
+          text: `Connected with <strong>${s.name}</strong>`,
           sub: s.school,
           time: s.lastTouchpoint
         });
       });
 
-    // Resignations
+    // Resignations — matter of fact, not alarm
     staff.filter(s => s.status === 'resigned').forEach(s => {
       activities.push({
-        type: 'alert',
-        text: `<strong>${s.name}</strong> resigned — ${s.role}`,
-        sub: s.school,
+        type: 'info',
+        text: `<strong>${s.name}</strong> — position to fill`,
+        sub: `${s.role} · ${s.school}`,
         time: '2026-03-10'
-      });
-    });
-
-    // Nudges for untouched staff
-    const untouched = staff.filter(s =>
-      s.status === 'filled' &&
-      s.retentionRisk &&
-      (!s.lastTouchpoint || s.lastTouchpoint < '2026-02-15')
-    ).slice(0, 3);
-
-    untouched.forEach(s => {
-      activities.push({
-        type: 'nudge',
-        text: `Overdue: No check-in with <strong>${s.name}</strong> since ${s.lastTouchpoint || 'never'}`,
-        sub: `${s.school} · ${s.retentionRisk} risk`,
-        time: 'Nudge'
       });
     });
 
@@ -2629,34 +2603,24 @@ const app = {
     staff.filter(s => s.status === 'offer-out').forEach(s => {
       activities.push({
         type: 'info',
-        text: `Offer pending for <strong>${s.role}</strong>`,
+        text: `Offer out for <strong>${s.role}</strong>`,
         sub: s.school,
         time: '2026-03-12'
       });
     });
 
-    activities.sort((a, b) => {
-      if (a.type === 'nudge') return -1;
-      if (b.type === 'nudge') return 1;
-      return (b.time || '').localeCompare(a.time || '');
-    });
+    activities.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
 
     document.getElementById('activityCount').textContent = activities.length;
-    document.getElementById('activityFeed').innerHTML = activities.slice(0, 10).map(a => `
+    document.getElementById('activityFeed').innerHTML = activities.slice(0, 8).map(a => `
       <div class="activity-item">
-        <div class="activity-icon ${a.type}">${
-          a.type === 'touchpoint' ? '✓' :
-          a.type === 'warning' ? '⚠' :
-          a.type === 'alert' ? '!' :
-          a.type === 'nudge' ? '→' :
-          'ℹ'
-        }</div>
+        <div style="width:6px;height:6px;border-radius:50%;background:${a.type === 'touchpoint' ? 'var(--green)' : 'var(--accent)'};flex-shrink:0;margin-top:6px;"></div>
         <div class="activity-content">
           <div class="activity-text">${a.text}</div>
           <div class="activity-time">${a.sub} · ${a.time}</div>
         </div>
       </div>
-    `).join('');
+    `).join('') || '<div style="padding:12px;font-size:13px;color:var(--text-muted);text-align:center;">No recent activity</div>';
   },
 
   // ---- Pipeline (Stream 2) ----
@@ -2935,9 +2899,8 @@ const app = {
       );
     }
 
-    // Sort by risk (high first), then by name
-    const riskOrder = { high: 0, moderate: 1, low: 2, null: 3 };
-    staff.sort((a, b) => (riskOrder[a.retentionRisk] ?? 3) - (riskOrder[b.retentionRisk] ?? 3) || a.name.localeCompare(b.name));
+    // Sort by name
+    staff.sort((a, b) => a.name.localeCompare(b.name));
 
     const tbody = document.getElementById('peopleTableBody');
     tbody.innerHTML = staff.slice(0, 100).map(s => {
@@ -2973,7 +2936,7 @@ const app = {
     }).length;
     const itrCount = DEMO_DATA.staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided').length;
     const filterBtns = document.querySelectorAll('[data-people-filter]');
-    const labels = { all: `All (${allCount})`, 'at-risk': `At Risk (${riskCount})`, open: `Open (${openCount})`, 'low-touch': `Low Touch (${lowTouchCount})`, 'itr-pending': `ITR Pending (${itrCount})` };
+    const labels = { all: `All (${allCount})`, open: `Open Positions (${openCount})`, 'low-touch': `Needs Connection (${lowTouchCount})`, 'itr-pending': `ITR Pending (${itrCount})` };
     filterBtns.forEach(b => { if (labels[b.dataset.peopleFilter]) b.textContent = labels[b.dataset.peopleFilter]; });
   },
 
@@ -3036,7 +2999,7 @@ const app = {
     const map = {
       'filled': 'Filled',
       'open': 'Open',
-      'at-risk': 'At Risk',
+      'at-risk': 'Filled',
       'offer-out': 'Offer Out',
       'resigned': 'Resigned'
     };
@@ -3342,13 +3305,13 @@ const seasonConfig = {
   ],
 
   features: [
-    { id: 'onboarding', name: 'Onboarding Tracker', desc: 'New hire check-ins, 30/60/90 day touchpoints, early warning on bad fits', icon: '🟢', seasons: ['onboarding'], alwaysOn: false, active: false },
+    { id: 'onboarding', name: 'Onboarding Tracker', desc: 'New hire check-ins, 30/60/90 day touchpoints, getting to know new staff', icon: '🟢', seasons: ['onboarding'], alwaysOn: false, active: false },
     { id: 'observations', name: 'Observation Cycle', desc: 'Observation scheduling, walk-through logging, follow-up reminders', icon: '👁️', seasons: ['onboarding', 'invest', 'detect'], alwaysOn: false, active: true },
     { id: 'recognition', name: 'Recognition & Touchpoints', desc: 'Log positive touchpoints, recognition moments, coaching notes', icon: '✍️', seasons: [], alwaysOn: true, active: true },
     { id: 'pulse', name: 'Mid-Year Pulse', desc: 'Quick engagement check, connect to Attuned/survey data', icon: '📊', seasons: ['invest'], alwaysOn: false, active: false },
     { id: 'itr', name: 'Intent to Return', desc: 'ITR survey tracking, completion status, conversation prompts', icon: '📋', seasons: ['detect', 'plan'], alwaysOn: false, active: true },
     { id: 'stay', name: 'Stay Conversations', desc: 'Guided stay conversation workflows, outcome logging, follow-up nudges', icon: '💬', seasons: ['detect', 'plan'], alwaysOn: false, active: true },
-    { id: 'retention', name: 'Retention Signals', desc: 'Flight risk indicators, engagement trends, early warning dashboard', icon: '🔴', seasons: ['invest', 'detect', 'plan'], alwaysOn: false, active: true },
+    { id: 'retention', name: 'Connection Tracker', desc: 'See who you haven\'t connected with, engagement trends, conversation history', icon: '🤝', seasons: ['invest', 'detect', 'plan'], alwaysOn: false, active: true },
     { id: 'staffingplan', name: 'Staffing Plan Builder', desc: 'This year vs next year comparison, gap analysis, enrollment-driven projections', icon: '📐', seasons: ['plan', 'fill'], alwaysOn: false, active: true },
     { id: 'pipeline', name: 'Hiring Pipeline', desc: 'Open position tracking, applicant pipeline, offer management', icon: '📋', seasons: ['plan', 'fill'], alwaysOn: false, active: true },
     { id: 'postings', name: 'Job Postings', desc: 'Post positions, connect to job boards, track applicant flow', icon: '📢', seasons: ['plan', 'fill'], alwaysOn: false, active: false },
