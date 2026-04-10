@@ -1,0 +1,4143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalentPoint — Horizon Public Schools</title>
+<style>
+/* ============================================================
+   TalentPoint v3 — The Confluence Model
+   Responsive: Desktop command center → Phone action tool
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface-alt: #f5f6f8;
+  --border: #e0e3e8;
+  --border-light: #eceff3;
+  --text: #1b2332;
+  --text-secondary: #556070;
+  --text-muted: #8892a4;
+  --accent: #0d9488;
+  --accent-light: #e6f7f5;
+  --accent-hover: #0a7c72;
+  --green: #10b981;
+  --green-bg: #ecfdf5;
+  --green-border: #a7f3d0;
+  --amber: #f59e0b;
+  --amber-bg: #fffbeb;
+  --amber-border: #fde68a;
+  --red: #ef4444;
+  --red-bg: #fef2f2;
+  --red-border: #fecaca;
+  --blue: #3b82f6;
+  --blue-bg: #eff6ff;
+  --blue-border: #bfdbfe;
+  --purple: #8b5cf6;
+  --purple-bg: #f5f3ff;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 2px 6px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+  --transition: 150ms ease;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ---- Top Bar ---- */
+.topbar {
+  background: linear-gradient(135deg, #1b2332 0%, #243044 100%);
+  color: white;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.topbar-brand .logo {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.topbar-network {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  margin-left: 4px;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.topbar-season {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.8);
+}
+.topbar-user {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---- Breadcrumb / Nav ---- */
+.breadcrumb-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+.breadcrumb-item {
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.breadcrumb-item:hover { color: var(--accent); }
+.breadcrumb-item.active {
+  color: var(--text);
+  font-weight: 600;
+  cursor: default;
+}
+.breadcrumb-sep { color: var(--text-muted); font-size: 12px; }
+.view-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-alt);
+  border-radius: 8px;
+  padding: 3px;
+}
+.view-tab {
+  padding: 5px 14px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  border: none;
+  background: none;
+}
+.view-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+.view-tab:hover:not(.active) { color: var(--text); }
+
+/* ---- Quick Actions (phone-first but visible on desktop too) ---- */
+.quick-actions {
+  display: none;
+  padding: 12px 16px;
+  gap: 8px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+.quick-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.quick-action-btn .icon { font-size: 15px; }
+
+/* ---- Main Layout ---- */
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  min-height: calc(100vh - 56px);
+}
+
+/* ---- Network Overview (CMO View) ---- */
+.network-view {
+  padding: 24px;
+}
+.network-header {
+  margin-bottom: 24px;
+}
+.network-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.network-header .subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ---- Network Stats Bar ---- */
+.network-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  flex: 1;
+  min-width: 120px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.stat-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+.stat-card.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+.stat-value.green { color: var(--green); }
+.stat-value.amber { color: var(--amber); }
+.stat-value.red { color: var(--red); }
+.stat-value.blue { color: var(--blue); }
+
+/* ---- School Cards ---- */
+.school-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.school-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.school-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.school-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.school-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+.school-grades {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.health-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.health-A { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+.health-B { background: var(--green-bg); color: #059669; border: 1px solid var(--green-border); }
+.health-C { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.health-D { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+/* School card progress bar */
+.staffing-bar-container {
+  margin-bottom: 12px;
+}
+.staffing-bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.staffing-bar {
+  height: 8px;
+  background: var(--surface-alt);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+.staffing-bar .filled { background: var(--green); }
+.staffing-bar .offer { background: var(--blue); }
+.staffing-bar .at-risk { background: var(--amber); }
+.staffing-bar .open { background: var(--red); }
+.staffing-bar .resigned { background: #d1d5db; }
+
+/* School card mini stats */
+.school-mini-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.mini-stat {
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 6px;
+  background: var(--surface-alt);
+}
+.mini-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.mini-stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* School card alerts */
+.school-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.school-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.school-alert.warning,
+.school-alert.danger,
+.school-alert.info {
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+  border: none;
+}
+.school-alert .alert-arrow {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* School card footer */
+.school-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid var(--border-light);
+  font-size: 13px;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+.school-card:hover .school-card-footer {
+  color: var(--accent);
+}
+.school-card-footer .arrow {
+  font-size: 14px;
+  transition: transform var(--transition);
+}
+.school-card:hover .school-card-footer .arrow {
+  transform: translateX(3px);
+}
+
+/* ---- School Detail View ---- */
+.school-detail-view {
+  display: none;
+  padding: 24px;
+}
+.school-detail-view.active { display: block; }
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 4px 0;
+}
+.back-btn:hover { color: var(--accent); }
+.school-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.school-detail-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* Grade/Department cards */
+.grade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.grade-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.grade-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+.grade-card.has-issues {
+  border-left: 3px solid var(--red);
+}
+.grade-card.has-risk {
+  border-left: 3px solid var(--amber);
+}
+.grade-card.healthy {
+  border-left: 3px solid var(--green);
+}
+.grade-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.grade-card-title .chevron {
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: transform 200ms ease;
+  display: inline-block;
+}
+.grade-card.expanded .grade-card-title .chevron {
+  transform: rotate(180deg);
+}
+.grade-card-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.grade-card-stats span.issue { color: var(--red); font-weight: 600; }
+.grade-card-stats span.risk { color: var(--amber); font-weight: 600; }
+
+/* Expanded grade — staff list */
+.grade-expanded {
+  border-top: 1px solid var(--border-light);
+}
+.staff-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+.staff-row:last-child { border-bottom: none; }
+.staff-name {
+  font-weight: 500;
+}
+.staff-role {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.staff-status {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.status-filled { background: var(--green-bg); color: var(--green); }
+.status-at-risk { background: var(--amber-bg); color: var(--amber); }
+.status-open { background: var(--red-bg); color: var(--red); }
+.status-offer-out { background: var(--blue-bg); color: var(--blue); }
+.status-resigned { background: var(--surface-alt); color: var(--text-muted); }
+
+/* ---- Right Panel (Activity + Streams) ---- */
+.right-panel {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  max-height: calc(100vh - 56px);
+  position: sticky;
+  top: 56px;
+}
+.panel-section {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-section-title .count {
+  font-size: 11px;
+  background: var(--surface-alt);
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+}
+
+/* Season widget */
+.season-widget {
+  padding: 16px;
+  background: linear-gradient(135deg, #1b2332 0%, #1a3a4a 100%);
+  border-radius: var(--radius);
+  color: white;
+  margin-bottom: 6px;
+}
+.season-phase {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+}
+.season-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.season-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.season-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  width: 62%;
+}
+.season-bar-marker {
+  position: absolute;
+  top: -3px;
+  left: 62%;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  transform: translateX(-50%);
+}
+.season-milestones {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* Activity feed */
+.activity-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.activity-icon.touchpoint { background: var(--green-bg); color: var(--green); }
+.activity-icon.warning { background: var(--amber-bg); color: var(--amber); }
+.activity-icon.alert { background: var(--red-bg); color: var(--red); }
+.activity-icon.info { background: var(--blue-bg); color: var(--blue); }
+.activity-icon.nudge { background: var(--purple-bg); color: var(--purple); }
+.activity-content { flex: 1; }
+.activity-text { line-height: 1.4; }
+.activity-text strong { font-weight: 600; }
+.activity-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Retention signals */
+.retention-item {
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.retention-item.high {
+  background: var(--red-bg);
+  border: 1px solid var(--red-border);
+}
+.retention-item.moderate {
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+}
+.retention-item .signal-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.retention-item .signal-text { line-height: 1.4; }
+.retention-item .signal-text strong { font-weight: 600; }
+.retention-item .signal-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* Pipeline mini */
+.pipeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+.pipeline-item:last-child { border-bottom: none; }
+.pipeline-role { font-weight: 500; }
+.pipeline-school { font-size: 11px; color: var(--text-muted); }
+.pipeline-count {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.pipeline-count.zero { background: var(--red-bg); color: var(--red); }
+.pipeline-count.low { background: var(--amber-bg); color: var(--amber); }
+.pipeline-count.ok { background: var(--green-bg); color: var(--green); }
+
+/* ---- Person Slide-Over ---- */
+.person-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  top: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 200;
+}
+.person-overlay.active { display: block; }
+.person-panel {
+  position: fixed;
+  top: 100px; /* device bar (44) + topbar (56) */
+  right: 0;
+  width: 420px;
+  height: calc(100vh - 100px);
+  background: var(--surface);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+  z-index: 201;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-top-left-radius: var(--radius-lg);
+}
+.person-overlay.active .person-panel { transform: translateX(0); }
+.person-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.person-close {
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  float: right;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.person-close:hover { background: var(--border); color: var(--text); }
+.person-name {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.person-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.person-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.person-tag {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.person-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.person-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.person-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.person-detail-label { color: var(--text-secondary); }
+.person-detail-value { font-weight: 500; }
+.person-stream-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--surface-alt);
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.person-stream-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ---- Mobile Bottom Nav ---- */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.mobile-nav-items {
+  display: flex;
+  justify-content: space-around;
+}
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 12px;
+  transition: color var(--transition);
+}
+.mobile-nav-item.active { color: var(--accent); }
+.mobile-nav-item .nav-icon { font-size: 20px; }
+
+/* ---- Year Toggle ---- */
+.year-toggle {
+  display: inline-flex;
+  background: var(--surface-alt);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+.year-btn {
+  padding: 5px 14px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  border: none;
+  background: none;
+  font-weight: 500;
+}
+.year-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Search / Command Bar ---- */
+.search-bar {
+  position: relative;
+  margin-bottom: 20px;
+}
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color var(--transition);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.search-shortcut {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .topbar { padding: 0 16px; height: 50px; }
+  .topbar-network { display: none; }
+  .topbar-season { display: none; }
+  .breadcrumb-bar { padding: 10px 16px; }
+  .view-tabs { display: none; }
+  .quick-actions { display: flex; }
+  .main-container {
+    grid-template-columns: 1fr;
+  }
+  .right-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    top: 50px;
+    z-index: 90;
+    max-height: none;
+    border-left: none;
+  }
+  .right-panel.mobile-visible {
+    display: block;
+  }
+  .network-view { padding: 16px; }
+  .school-grid {
+    grid-template-columns: 1fr;
+  }
+  .network-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .stat-card { padding: 10px 12px; }
+  .stat-value { font-size: 22px; }
+  .mobile-nav { display: block; }
+  .network-view { padding-bottom: 80px; }
+  .school-detail-view { padding: 16px; padding-bottom: 80px; }
+  .person-panel { width: 100%; top: 50px; height: calc(100vh - 50px); border-radius: 0; }
+  .grade-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .search-shortcut { display: none; }
+}
+
+@media (max-width: 480px) {
+  .network-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .school-mini-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grade-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Device Toggle Bar ---- */
+.device-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 9999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+.device-bar-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-right: 4px;
+}
+.device-btn {
+  padding: 5px 16px;
+  font-size: 13px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  background: white;
+  color: #495057;
+  font-weight: 500;
+  transition: all 150ms;
+}
+.device-btn.active {
+  background: #1a1d23;
+  color: white;
+  border-color: #1a1d23;
+}
+.device-btn:hover:not(.active) {
+  border-color: #adb5bd;
+}
+
+/* App wrapper */
+.app-wrapper {
+  margin-top: 44px;
+}
+
+/* Phone simulator mode */
+body.phone-mode .app-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px;
+  background: #e9ecef;
+  min-height: calc(100vh - 44px);
+}
+body.phone-mode .phone-frame {
+  width: 390px;
+  height: 844px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.2), 0 0 0 8px #1a1d23, 0 0 0 10px #333;
+  position: relative;
+  background: var(--bg);
+}
+body.phone-mode .phone-frame .phone-notch {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 22px;
+  background: #1a1d23;
+  border-radius: 0 0 14px 14px;
+  z-index: 9998;
+}
+body.phone-mode .phone-frame .phone-inner {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+body.phone-mode .main-container {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+body.phone-mode .network-view {
+  width: 100%;
+  overflow: hidden;
+}
+body.phone-mode .right-panel:not(.mobile-visible) {
+  display: none !important;
+}
+body.phone-mode .search-bar,
+body.phone-mode .school-alerts,
+body.phone-mode .quick-actions,
+body.phone-mode .network-stats {
+  overflow: hidden;
+}
+/* Force mobile styles in phone mode regardless of actual viewport width */
+body.phone-mode .topbar { padding: 0 12px; padding-top: 24px; height: 64px; }
+body.phone-mode .topbar-network { display: none; }
+body.phone-mode .topbar-season { display: none; }
+body.phone-mode .breadcrumb-bar { padding: 6px 12px; }
+body.phone-mode .view-tabs { display: none; }
+body.phone-mode .quick-actions { display: flex; }
+/* main-container override moved to phone-inner block above */
+body.phone-mode .right-panel {
+  display: none;
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  top: 64px;
+  z-index: 90;
+  max-height: none;
+  border-left: none;
+}
+body.phone-mode .right-panel.mobile-visible { display: block; }
+body.phone-mode .network-view { padding: 12px; padding-bottom: 80px; }
+body.phone-mode .school-grid { grid-template-columns: 1fr; overflow: hidden; }
+body.phone-mode .network-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+body.phone-mode .stat-card { padding: 10px 12px; }
+body.phone-mode .stat-value { font-size: 22px; }
+body.phone-mode .mobile-nav {
+  display: block;
+  position: sticky;
+  bottom: 0;
+}
+body.phone-mode .school-detail-view { padding: 16px; padding-bottom: 80px; }
+body.phone-mode .person-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200;
+}
+body.phone-mode .person-panel {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  right: 0;
+  height: 100%;
+  border-radius: 0;
+}
+body.phone-mode .grade-grid { grid-template-columns: 1fr; }
+body.phone-mode .search-shortcut { display: none; }
+body.phone-mode .school-card-footer { display: none; }
+body.phone-mode .school-card { margin: 0; max-width: 100%; }
+body.phone-mode .school-card:hover { transform: none; }
+body.phone-mode .school-mini-stats { grid-template-columns: repeat(2, 1fr); }
+body.phone-mode .network-header h1 { font-size: 18px; }
+body.phone-mode .network-header .subtitle { font-size: 13px; }
+body.phone-mode .desktop-actions { display: none; }
+
+/* Desktop mode — hide phone frame stuff */
+body:not(.phone-mode) .phone-frame { display: contents; }
+body:not(.phone-mode) .phone-notch { display: none !important; }
+body:not(.phone-mode) .phone-inner { display: contents; }
+body:not(.phone-mode) .mobile-nav { display: none; }
+body:not(.phone-mode) .quick-actions { display: none; }
+
+/* ---- Modal ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 460px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: modalIn 200ms ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.modal-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  transition: all var(--transition);
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Form elements */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color var(--transition);
+  font-family: inherit;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-select { appearance: auto; }
+.form-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.form-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+.form-chip:hover { border-color: var(--accent); color: var(--accent); }
+.form-chip.selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 20px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+  font-family: inherit;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+}
+.btn-secondary:hover { background: var(--surface-alt); }
+.btn-danger {
+  background: var(--red);
+  color: white;
+  border-color: var(--red);
+}
+
+/* Toast notifications */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.toast {
+  padding: 12px 20px;
+  background: var(--text);
+  color: white;
+  border-radius: var(--radius);
+  font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: toastIn 300ms ease, toastOut 300ms ease 2700ms forwards;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast.success { background: #065f46; }
+.toast.warning { background: #92400e; }
+.toast.error { background: #991b1b; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+/* Staff row hover */
+.staff-row { transition: background 100ms; }
+.staff-row:hover { background: var(--surface-alt); }
+
+/* Smooth transitions for grade expand */
+.grade-expanded {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 300ms ease, opacity 200ms ease, margin 200ms ease, padding 200ms ease;
+  margin-top: 0;
+  padding-top: 0;
+}
+.grade-card.expanded .grade-expanded {
+  max-height: 2000px;
+  opacity: 1;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+/* School card enter animation */
+.school-card {
+  animation: cardIn 300ms ease backwards;
+}
+.school-card:nth-child(1) { animation-delay: 0ms; }
+.school-card:nth-child(2) { animation-delay: 50ms; }
+.school-card:nth-child(3) { animation-delay: 100ms; }
+.school-card:nth-child(4) { animation-delay: 150ms; }
+.school-card:nth-child(5) { animation-delay: 200ms; }
+.school-card:nth-child(6) { animation-delay: 250ms; }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Retention item hover */
+.retention-item { transition: transform 100ms; cursor: pointer; }
+.retention-item:hover { transform: translateX(2px); }
+
+/* Pipeline item hover */
+.pipeline-item { transition: background 100ms; cursor: pointer; }
+.pipeline-item:hover { background: var(--surface-alt); }
+</style>
+</head>
+<body>
+
+<!-- ---- Device Toggle ---- -->
+<div class="device-bar">
+  <span class="device-bar-label">View:</span>
+  <button class="device-btn active" data-device="desktop">Desktop</button>
+  <button class="device-btn" data-device="phone">Phone</button>
+  <span style="width:1px;height:20px;background:#dee2e6;margin:0 8px;"></span>
+  <button class="device-btn" onclick="document.getElementById('importModal').classList.add('active')">Import CSV</button>
+  <button class="device-btn" onclick="useDemoData()">Use Demo Data</button>
+</div>
+
+<!-- ---- App Wrapper ---- -->
+<div class="app-wrapper">
+<div class="phone-frame">
+<div class="phone-notch" style="display:none;"></div>
+<div class="phone-inner">
+
+<!-- ---- Top Bar ---- -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <img src="cpc-logo.png" alt="CPC" style="width:30px;height:30px;border-radius:6px;">
+    <span>TalentPoint</span>
+    <span class="topbar-network">Horizon Public Schools</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-season">Spring Planning — March 2026</span>
+    <div style="position:relative;cursor:pointer;" title="Notifications">
+      <span style="font-size:18px;">🔔</span>
+      <span style="position:absolute;top:-4px;right:-6px;background:var(--red);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;" id="notifBadge">0</span>
+    </div>
+    <div style="cursor:pointer;font-size:18px;opacity:0.7;transition:opacity 150ms;" onclick="document.getElementById('seasonModal').classList.add('active')" title="Season & Features">⚙️</div>
+    <div class="topbar-user">DR</div>
+  </div>
+</header>
+
+<!-- ---- Breadcrumb ---- -->
+<nav class="breadcrumb-bar" id="breadcrumbBar">
+  <div class="breadcrumb" id="breadcrumb">
+    <span class="breadcrumb-item active" data-view="network">Network</span>
+  </div>
+  <div class="view-tabs">
+    <button class="view-tab active" data-tab="overview">Overview</button>
+    <button class="view-tab" data-tab="people">People</button>
+    <button class="view-tab" data-tab="pipeline">Pipeline</button>
+  </div>
+</nav>
+
+<!-- ---- Quick Actions (mobile) ---- -->
+<div class="quick-actions">
+  <button class="quick-action-btn" onclick="openModal('touchpointModal')"><span class="icon">✍️</span> Log Touchpoint</button>
+  <button class="quick-action-btn" onclick="openModal('flagModal')"><span class="icon">⚡</span> Flag Concern</button>
+  <button class="quick-action-btn" onclick="openModal('moveModal')"><span class="icon">🔀</span> Move Position</button>
+  <button class="quick-action-btn" onclick="document.getElementById('searchInput').focus()"><span class="icon">🔍</span> Find Person</button>
+</div>
+
+<!-- ---- Main Container ---- -->
+<div class="main-container">
+
+  <!-- ---- Left: Network / School View ---- -->
+  <div class="network-view" id="networkView">
+    <div class="network-header">
+      <h1 id="viewTitle">Network Overview</h1>
+      <p class="subtitle" id="viewSubtitle">6 schools · 530 staff · March 2026</p>
+    </div>
+
+    <!-- Action Bar (desktop) -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;" class="desktop-actions">
+      <button class="btn btn-primary" onclick="openModal('touchpointModal')" style="font-size:13px;">✍️ Log Touchpoint</button>
+      <button class="btn btn-secondary" onclick="openModal('flagModal')" style="font-size:13px;">⚡ Flag Concern</button>
+      <button class="btn btn-secondary" onclick="openModal('moveModal')" style="font-size:13px;">🔀 Move Position</button>
+      <div style="flex:1;"></div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search people, positions, schools..." id="searchInput">
+      <span class="search-shortcut">⌘K</span>
+    </div>
+
+    <!-- Network Stats -->
+    <div class="network-stats" id="networkStats">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- School Cards -->
+    <div class="school-grid" id="schoolGrid">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- School Detail (hidden by default) -->
+    <div class="school-detail-view" id="schoolDetail">
+      <!-- Populated when a school is clicked -->
+    </div>
+
+    <!-- People List View -->
+    <div id="peopleView" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="peopleFilters">
+          <button class="view-tab active" data-people-filter="all">All (530)</button>
+          <button class="view-tab" data-people-filter="open">Open Positions</button>
+          <button class="view-tab" data-people-filter="low-touch">Needs Connection</button>
+          <button class="view-tab" data-people-filter="itr-pending">ITR Pending</button>
+        </div>
+        <input type="text" class="search-input" placeholder="Filter by name, role, school..." id="peopleSearch" style="max-width:300px;padding:8px 12px;">
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;" id="peopleTable">
+          <thead>
+            <tr style="background:var(--surface-alt);border-bottom:1px solid var(--border);">
+              <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="name">Name ↕</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="role">Role ↕</th>
+              <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="school">School ↕</th>
+              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="status">Status ↕</th>
+              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="risk">Risk ↕</th>
+              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="engagement">Eng ↕</th>
+              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="touch">Touch ↕</th>
+              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">ITR</th>
+            </tr>
+          </thead>
+          <tbody id="peopleTableBody">
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:12px;text-align:center;font-size:12px;color:var(--text-muted);" id="peopleCount"></div>
+    </div>
+
+    <!-- Pipeline View -->
+    <div id="pipelineView" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;" id="pipelineGrid">
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Right Panel: Streams ---- -->
+  <div class="right-panel" id="rightPanel">
+
+    <!-- Season Widget -->
+    <div class="panel-section">
+      <div class="season-widget">
+        <div class="season-phase">School Year 2025–26</div>
+        <div class="season-title">Spring Planning</div>
+        <div class="season-bar">
+          <div class="season-bar-fill"></div>
+          <div class="season-bar-marker"></div>
+        </div>
+        <div class="season-milestones">
+          <span>Aug</span><span>Nov</span><span>Feb</span><span>May</span><span>Jul</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retention Health Trend -->
+    <div class="panel-section">
+      <div class="panel-section-title">Staffing Trend</div>
+      <div style="display:flex;align-items:flex-end;gap:4px;height:60px;margin-bottom:8px;" id="healthBars">
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);">
+        <span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span>
+      </div>
+    </div>
+
+    <!-- Today's Nudges -->
+    <div class="panel-section" id="nudgesPanel">
+      <div class="panel-section-title">
+        Next Steps
+        <span class="count" id="nudgeCount">0</span>
+      </div>
+      <div id="nudgeList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Retention Signals (Stream 5) -->
+    <div class="panel-section" id="retentionPanel">
+      <div class="panel-section-title">
+        Longest Since Connected
+        <span class="count" id="retentionCount">0</span>
+      </div>
+      <div id="retentionList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Activity Feed (Stream 6) -->
+    <div class="panel-section" id="activityPanel">
+      <div class="panel-section-title">
+        Recent Activity
+        <span class="count" id="activityCount">0</span>
+      </div>
+      <div id="activityFeed">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Pipeline (Stream 2) -->
+    <div class="panel-section" id="pipelinePanel">
+      <div class="panel-section-title">
+        Open Positions
+        <span class="count" id="pipelineCount">0</span>
+      </div>
+      <div id="pipelineList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ---- Person Slide-Over ---- -->
+<div class="person-overlay" id="personOverlay">
+  <div class="person-panel" id="personPanel">
+    <!-- Populated when a person is clicked -->
+  </div>
+</div>
+
+<!-- ---- Mobile Today View ---- -->
+<div id="mobileTodayView" style="display:none;padding:10px 12px;padding-bottom:80px;">
+  <div style="margin-bottom:10px;">
+    <div style="font-size:17px;font-weight:700;">Good morning</div>
+    <div style="font-size:12px;color:var(--text-secondary);">March 15, 2026 · Spring Planning</div>
+  </div>
+
+  <!-- Urgent banner -->
+  <div id="todayUrgent" style="margin-bottom:16px;"></div>
+
+  <!-- Next step -->
+  <div id="todayNudges" style="margin-bottom:20px;"></div>
+
+  <!-- Schools -->
+  <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Your Schools</div>
+  <div id="todaySnapshot" style="margin-bottom:20px;"></div>
+
+  <!-- Recent -->
+  <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Recent Connections</div>
+  <div id="todayActivity" style="margin-bottom:20px;"></div>
+</div>
+
+<!-- ---- Mobile People View ---- -->
+<div id="mobilePeopleView" style="display:none;padding:12px;padding-bottom:80px;">
+  <input type="text" class="search-input" placeholder="Search people..." id="mobilePeopleSearch" style="margin-bottom:12px;padding:10px 12px;">
+  <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px;" id="mobilePeopleChips">
+    <span class="form-chip selected" data-mfilter="all">All</span>
+    <span class="form-chip" data-mfilter="open">Open Positions</span>
+    <span class="form-chip" data-mfilter="low-touch">Needs Connection</span>
+    <span class="form-chip" data-mfilter="itr-pending">ITR Pending</span>
+  </div>
+  <div id="mobilePeopleList"></div>
+</div>
+
+<!-- ---- Mobile Bottom Nav ---- -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-items">
+    <div class="mobile-nav-item active" data-nav="today">
+      <span class="nav-icon">☀️</span>
+      <span>Today</span>
+    </div>
+    <div class="mobile-nav-item" data-nav="building">
+      <span class="nav-icon">🏫</span>
+      <span>Schools</span>
+    </div>
+    <div class="mobile-nav-item" data-nav="people">
+      <span class="nav-icon">👥</span>
+      <span>People</span>
+    </div>
+    <div class="mobile-nav-item" data-nav="activity">
+      <span class="nav-icon">⚡</span>
+      <span>Streams</span>
+    </div>
+    <div class="mobile-nav-item" data-nav="actions">
+      <span class="nav-icon">✍️</span>
+      <span>Actions</span>
+    </div>
+  </div>
+</nav>
+
+<!-- Close phone frame wrappers -->
+</div><!-- /phone-inner -->
+</div><!-- /phone-frame -->
+</div><!-- /app-wrapper -->
+
+<!-- ---- Modals ---- -->
+
+<!-- Log Touchpoint Modal -->
+<div class="modal-overlay" id="touchpointModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Log Touchpoint</h3>
+      <span class="modal-close" onclick="closeModal('touchpointModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Person</label>
+        <select class="form-select" id="touchpointPerson">
+          <option value="">Select a person...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <div class="form-chips" id="touchpointType">
+          <span class="form-chip selected" data-value="check-in">Check-in</span>
+          <span class="form-chip" data-value="observation">Observation</span>
+          <span class="form-chip" data-value="coaching">Coaching</span>
+          <span class="form-chip" data-value="recognition">Recognition</span>
+          <span class="form-chip" data-value="stay-convo">Stay Conversation</span>
+          <span class="form-chip" data-value="other">Other</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sentiment</label>
+        <div class="form-chips" id="touchpointSentiment">
+          <span class="form-chip" data-value="positive">Positive</span>
+          <span class="form-chip selected" data-value="neutral">Neutral</span>
+          <span class="form-chip" data-value="concern">Concern</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-textarea" id="touchpointNotes" placeholder="What happened? Quick notes for yourself..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('touchpointModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTouchpoint()">Save Touchpoint</button>
+    </div>
+  </div>
+</div>
+
+<!-- Flag Concern Modal -->
+<div class="modal-overlay" id="flagModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Flag a Concern</h3>
+      <span class="modal-close" onclick="closeModal('flagModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Person</label>
+        <select class="form-select" id="flagPerson">
+          <option value="">Select a person...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Concern Level</label>
+        <div class="form-chips" id="flagLevel">
+          <span class="form-chip selected" data-value="monitor">Monitor</span>
+          <span class="form-chip" data-value="at-risk">Needs Attention</span>
+          <span class="form-chip" data-value="urgent">Likely Leaving</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <div class="form-chips" id="flagReason" style="flex-wrap:wrap;">
+          <span class="form-chip" data-value="compensation">Compensation</span>
+          <span class="form-chip" data-value="workload">Workload</span>
+          <span class="form-chip" data-value="culture">Culture/Climate</span>
+          <span class="form-chip" data-value="leadership">Leadership</span>
+          <span class="form-chip" data-value="personal">Personal/Family</span>
+          <span class="form-chip" data-value="career">Career Growth</span>
+          <span class="form-chip" data-value="relocation">Relocation</span>
+          <span class="form-chip" data-value="other">Other</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="flagNotes" placeholder="What's happening? What triggered this flag?"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('flagModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="saveFlag()">Flag Concern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Move Position Modal -->
+<div class="modal-overlay" id="moveModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Move Position</h3>
+      <span class="modal-close" onclick="closeModal('moveModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Action</label>
+        <div class="form-chips" id="moveAction">
+          <span class="form-chip selected" data-value="resignation">Log Resignation</span>
+          <span class="form-chip" data-value="transfer">Transfer</span>
+          <span class="form-chip" data-value="role-change">Role Change</span>
+          <span class="form-chip" data-value="new-position">Create Position</span>
+          <span class="form-chip" data-value="remove-position">Remove Position</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Person / Position</label>
+        <select class="form-select" id="movePerson">
+          <option value="">Select a person or position...</option>
+        </select>
+      </div>
+      <div class="form-group" id="moveDestGroup" style="display:none;">
+        <label class="form-label">Transfer To</label>
+        <select class="form-select" id="moveDest">
+          <option value="">Select destination school...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Effective Date</label>
+        <input type="date" class="form-input" id="moveDate" value="2026-03-15">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="moveNotes" placeholder="Any context for this move..."></textarea>
+      </div>
+      <div style="padding:12px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius);font-size:13px;color:#92400e;" id="moveChainPreview">
+        This action will trigger: <strong>Position posted</strong> → <strong>AP notified</strong> → <strong>Talent team alerted</strong> → <strong>Next year plan updated</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('moveModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMove()">Confirm Move</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal" style="width:640px;">
+    <div class="modal-header">
+      <h3>Import Staffing Data</h3>
+      <span class="modal-close" onclick="closeModal('importModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <!-- Step 1: Upload -->
+      <div id="importStep1">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+          Drop a CSV export from your HRIS (UKG, Frontline, PowerSchool, or any spreadsheet). TalentPoint will map your columns automatically.
+        </div>
+        <div id="dropZone" style="border:2px dashed var(--border);border-radius:var(--radius-lg);padding:40px;text-align:center;cursor:pointer;transition:all 150ms;">
+          <div style="font-size:32px;margin-bottom:8px;">📄</div>
+          <div style="font-weight:600;font-size:14px;margin-bottom:4px;">Drop your CSV here</div>
+          <div style="font-size:12px;color:var(--text-muted);">or click to browse</div>
+          <input type="file" id="csvFile" accept=".csv,.tsv,.txt" style="display:none;">
+        </div>
+        <div style="margin-top:16px;padding:12px;background:var(--surface-alt);border-radius:var(--radius);font-size:12px;color:var(--text-secondary);">
+          <strong>Option 1:</strong> Drop your HRIS export (UKG, Namely, Frontline, any CSV). We'll map your columns.<br>
+          <strong>Option 2:</strong> <a href="talentpoint-import-template.csv" download style="color:var(--accent);font-weight:600;">Download our template</a> and fill it in. <a href="talentpoint-template-guide.html" target="_blank" style="color:var(--accent);">See field guide →</a><br>
+          <strong>Only 3 columns required:</strong> Name, School, Position. Everything else enriches the picture.
+        </div>
+      </div>
+
+      <!-- Step 2: Column Mapping -->
+      <div id="importStep2" style="display:none;">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">
+          We found <strong id="importRowCount">0</strong> rows and <strong id="importColCount">0</strong> columns. Map your columns below:
+        </div>
+        <div style="max-height:400px;overflow-y:auto;" id="columnMapping">
+        </div>
+      </div>
+
+      <!-- Step 3: Preview -->
+      <div id="importStep3" style="display:none;">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;" id="importPreviewSummary">
+        </div>
+        <div style="max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:var(--radius);" id="importPreviewTable">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('importModal')">Cancel</button>
+      <button class="btn btn-secondary" id="importBackBtn" style="display:none;" onclick="importBack()">Back</button>
+      <button class="btn btn-primary" id="importNextBtn" style="display:none;" onclick="importNext()">Next: Map Columns</button>
+      <button class="btn btn-primary" id="importFinishBtn" style="display:none;" onclick="importFinish()">Import Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- Season & Features Modal -->
+<div class="modal-overlay" id="seasonModal">
+  <div class="modal" style="width:780px;max-height:90vh;">
+    <div class="modal-header">
+      <h3>Season & Features</h3>
+      <span class="modal-close" onclick="closeModal('seasonModal')">✕</span>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;max-height:calc(90vh - 130px);">
+
+      <!-- View Toggle -->
+      <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--surface-alt);border-radius:8px;padding:3px;width:fit-content;">
+        <button class="view-tab active" id="seasonViewActive" onclick="showSeasonView('active')">Active Season</button>
+        <button class="view-tab" id="seasonViewConfig" onclick="showSeasonView('config')">Configure Calendar</button>
+      </div>
+
+      <!-- Active Season View -->
+      <div id="seasonActiveView">
+        <div style="margin-bottom:20px;">
+          <div class="form-label">Current Season</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;" id="seasonSelector">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <div class="form-label">Active Features</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Features recommended for this season are highlighted. Toggle anything on or off — your network, your rules.</div>
+        <div id="featureToggles"></div>
+      </div>
+
+      <!-- Configure Calendar View -->
+      <div id="seasonConfigView" style="display:none;">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+          Define your network's seasons and assign features to each one. Drag features between seasons or mark them always-on.
+        </div>
+
+        <!-- Season Timeline -->
+        <div id="seasonTimeline" style="margin-bottom:24px;">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Feature Assignment -->
+        <div id="featureAssignment">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="btn btn-secondary" onclick="addCustomSeason()" style="font-size:13px;">+ Add Season</button>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;padding:14px;background:var(--accent-light);border:1px solid #a7f3d0;border-radius:var(--radius);font-size:13px;color:#065f46;">
+        <strong>Bespoke by design:</strong> Every network runs differently. Customize seasons, features, and timing to match how your schools actually work. Changes apply across the network — or override per school.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('seasonModal')">Close</button>
+      <button class="btn btn-primary" onclick="applySeasonConfig()">Apply Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ---- Demo Data ---- -->
+<script src="demo-data.js"></script>
+
+<script>
+// ============================================================
+// TalentPoint v3 — App Logic
+// ============================================================
+
+const app = {
+  currentView: 'network', // 'network' | 'school'
+  selectedSchool: null,
+  selectedPerson: null,
+  filterStatus: null,
+
+  init() {
+    this.renderNetworkStats();
+    this.renderSchoolCards();
+    this.renderNudges();
+    this.renderRetentionSignals();
+    this.renderActivityFeed();
+    this.renderPipeline();
+    this.updateNotifBadge();
+    this.renderHealthBars();
+    this.bindEvents();
+  },
+
+  // ---- Health Bars ----
+  renderHealthBars() {
+    // Simulated monthly health scores (would come from real data)
+    const months = [
+      { label: 'Aug', score: 95, filled: 520 },
+      { label: 'Sep', score: 94, filled: 518 },
+      { label: 'Oct', score: 92, filled: 515 },
+      { label: 'Nov', score: 88, filled: 510 },
+      { label: 'Dec', score: 85, filled: 508 },
+      { label: 'Jan', score: 82, filled: 507 },
+      { label: 'Feb', score: 78, filled: 504 },
+      { label: 'Mar', score: 74, filled: 504 },
+    ];
+    const container = document.getElementById('healthBars');
+    if (!container) return;
+    container.innerHTML = months.map((m, i) => {
+      const height = m.score * 0.6;
+      const color = m.score >= 85 ? 'var(--green)' : m.score >= 70 ? 'var(--amber)' : 'var(--red)';
+      const isCurrent = i === months.length - 1;
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
+        <span style="font-size:10px;font-weight:${isCurrent ? '700' : '400'};color:${isCurrent ? color : 'var(--text-muted)'}">${m.score}</span>
+        <div style="width:100%;height:${height}px;background:${color};border-radius:3px;opacity:${isCurrent ? 1 : 0.5};transition:height 500ms ease ${i * 50}ms;"></div>
+      </div>`;
+    }).join('');
+  },
+
+  // ---- Nudges ----
+  renderNudges(schoolFilter) {
+    const staff = schoolFilter
+      ? DEMO_DATA.staff.filter(s => s.school === schoolFilter)
+      : DEMO_DATA.staff;
+
+    const nudges = [];
+    const isFeatureActive = (id) => seasonConfig.features.find(f => f.id === id)?.active ?? true;
+
+    // Overdue touchpoints on at-risk staff (requires recognition or retention feature)
+    if (isFeatureActive('recognition') || isFeatureActive('retention')) {
+      staff.filter(s => s.status === 'filled' && s.retentionRisk).forEach(s => {
+        const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+        if (days > 21) {
+          nudges.push({
+            priority: s.retentionRisk === 'high' ? 0 : 1,
+            icon: '→',
+            type: 'nudge',
+            text: `<strong>Check in with ${s.name}</strong> — ${days < 999 ? days + ' days since last touchpoint' : 'no touchpoints logged'}`,
+            meta: `${s.school} · ${s.role} · ${s.retentionRisk} risk`,
+            personId: s.id
+          });
+        }
+      });
+    }
+
+    // ITR not asked (requires ITR feature)
+    if (isFeatureActive('itr')) {
+      staff.filter(s => s.intentToReturn === 'not-asked' && s.status === 'filled').forEach(s => {
+        nudges.push({
+          priority: 2,
+          icon: '📋',
+          type: 'warning',
+          text: `<strong>Ask ${s.name} about intent to return</strong> — ITR deadline approaching`,
+          meta: `${s.school} · ${s.role}`,
+          personId: s.id
+        });
+      });
+    }
+
+    // Stay conversation reminders for undecided (requires stay feature)
+    if (isFeatureActive('stay')) {
+      staff.filter(s => s.intentToReturn === 'undecided' && s.status === 'filled').forEach(s => {
+        nudges.push({
+          priority: 1,
+          icon: '💬',
+          type: 'info',
+          text: `<strong>Schedule stay conversation with ${s.name}</strong> — undecided on return`,
+          meta: `${s.school} · ${s.role}`,
+          personId: s.id
+        });
+      });
+    }
+
+    // Onboarding nudges (requires onboarding feature)
+    if (isFeatureActive('onboarding')) {
+      staff.filter(s => s.status === 'filled' && s.yearsAtSchool !== null && s.yearsAtSchool <= 1).forEach(s => {
+        const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+        if (days > 14) {
+          nudges.push({
+            priority: 2,
+            icon: '🟢',
+            type: 'info',
+            text: `<strong>New hire check-in: ${s.name}</strong> — first-year teacher needs support`,
+            meta: `${s.school} · ${s.role}`,
+            personId: s.id
+          });
+        }
+      });
+    }
+
+    // Observation nudges (requires observations feature)
+    if (isFeatureActive('observations')) {
+      staff.filter(s => s.status === 'filled' && s.role && s.role.toLowerCase().includes('teacher')).forEach(s => {
+        const days = s.lastObservation ? Math.floor((new Date('2026-03-15') - new Date(s.lastObservation)) / 86400000) : 999;
+        if (days > 45) {
+          nudges.push({
+            priority: 3,
+            icon: '👁️',
+            type: 'info',
+            text: `<strong>${s.name}</strong> — ${days < 999 ? days + ' days since last observation' : 'no observation logged yet'}`,
+            meta: `${s.school} · ${s.role}`,
+            personId: s.id
+          });
+        }
+      });
+    }
+
+    nudges.sort((a, b) => a.priority - b.priority);
+
+    document.getElementById('nudgeCount').textContent = nudges.length;
+    document.getElementById('nudgeList').innerHTML = nudges.slice(0, 6).map(n => `
+      <div class="activity-item" data-person-id="${n.personId}" style="cursor:pointer;">
+        <div class="activity-icon ${n.type}">${n.icon}</div>
+        <div class="activity-content">
+          <div class="activity-text">${n.text}</div>
+          <div class="activity-time">${n.meta}</div>
+        </div>
+      </div>
+    `).join('');
+
+    return nudges.length;
+  },
+
+  updateNotifBadge() {
+    const staff = DEMO_DATA.staff;
+    const highRisk = staff.filter(s => s.retentionRisk === 'high').length;
+    const openZero = staff.filter(s => s.status === 'open' && (s.pipelineApplicants || 0) === 0).length;
+    const itrOverdue = staff.filter(s => s.intentToReturn === 'not-asked' && s.status === 'filled').length;
+    const total = highRisk + openZero + Math.min(itrOverdue, 5); // cap itr
+    const badge = document.getElementById('notifBadge');
+    if (badge) {
+      badge.textContent = total;
+      badge.style.display = total > 0 ? '' : 'none';
+    }
+  },
+
+  // ---- Network Stats ----
+  renderNetworkStats() {
+    const staff = DEMO_DATA.staff;
+    const filled = staff.filter(s => s.status === 'filled').length;
+    const open = staff.filter(s => s.status === 'open').length;
+    const atRisk = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
+    const offers = staff.filter(s => s.status === 'offer-out').length;
+    const notAskedITR = staff.filter(s => s.intentToReturn === 'not-asked').length;
+    const undecided = staff.filter(s => s.intentToReturn === 'undecided').length;
+
+    // Network donut
+    const nTotal = staff.length;
+    const nR = 32;
+    const nC = 2 * Math.PI * nR;
+    let nOff = 0;
+    const nSegs = [
+      { count: filled, color: '#10b981' },
+      { count: offers, color: '#3b82f6' },
+      { count: atRisk, color: '#f59e0b' },
+      { count: open, color: '#ef4444' },
+      { count: staff.filter(s => s.status === 'resigned').length, color: '#d1d5db' },
+    ].filter(s => s.count > 0).map(s => {
+      const dash = (s.count / nTotal) * nC;
+      const svg = `<circle cx="40" cy="40" r="${nR}" fill="none" stroke="${s.color}" stroke-width="10" stroke-dasharray="${dash} ${nC - dash}" stroke-dashoffset="${-nOff}"/>`;
+      nOff += dash;
+      return svg;
+    }).join('');
+    const fillPct = Math.round(filled / nTotal * 100);
+
+    document.getElementById('networkStats').innerHTML = `
+      <div class="stat-card" data-filter="all" style="display:flex;align-items:center;gap:14px;min-width:180px;">
+        <svg width="80" height="80" viewBox="0 0 80 80" style="transform:rotate(-90deg);flex-shrink:0;">
+          <circle cx="40" cy="40" r="${nR}" fill="none" stroke="var(--border)" stroke-width="10"/>
+          ${nSegs}
+          <text x="40" y="40" text-anchor="middle" dominant-baseline="central" fill="var(--text)" font-weight="700" font-size="16" style="transform:rotate(90deg);transform-origin:40px 40px;">${fillPct}%</text>
+        </svg>
+        <div>
+          <div style="font-size:13px;font-weight:600;">${staff.length} staff</div>
+          <div style="font-size:11px;color:var(--text-muted);">6 schools</div>
+        </div>
+      </div>
+      <div class="stat-card" data-filter="filled">
+        <div class="stat-value green">${filled}</div>
+        <div class="stat-label">Filled</div>
+      </div>
+      <div class="stat-card" data-filter="open">
+        <div class="stat-value red">${open}</div>
+        <div class="stat-label">Open</div>
+      </div>
+      ${seasonConfig.features.find(f => f.id === 'itr')?.active ? `
+      <div class="stat-card" data-filter="not-asked">
+        <div class="stat-value">${notAskedITR + undecided}</div>
+        <div class="stat-label">ITR Pending</div>
+      </div>` : ''}
+    `;
+  },
+
+  // ---- School Cards ----
+  renderSchoolCards() {
+    const grid = document.getElementById('schoolGrid');
+    grid.innerHTML = DEMO_DATA.schools.map(school => {
+      const staff = DEMO_DATA.staff.filter(s => s.school === school.name);
+      const filled = staff.filter(s => s.status === 'filled').length;
+      const open = staff.filter(s => s.status === 'open').length;
+      const atRisk = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
+      const offers = staff.filter(s => s.status === 'offer-out').length;
+      const resigned = staff.filter(s => s.status === 'resigned').length;
+      const total = staff.length;
+
+      // Alerts
+      const alerts = this.getSchoolAlerts(school, staff);
+
+      // Key metrics
+      const pctStaffed = Math.round(filled / total * 100);
+      const staffedColor = pctStaffed >= 95 ? 'var(--green)' : pctStaffed >= 85 ? 'var(--amber)' : 'var(--red)';
+      const itrYes = staff.filter(s => s.intentToReturn === 'yes').length;
+      const itrTotal = staff.filter(s => s.status === 'filled').length;
+      const pctITR = itrTotal > 0 ? Math.round(itrYes / itrTotal * 100) : 0;
+      const itrColor = pctITR >= 85 ? 'var(--green)' : pctITR >= 65 ? 'var(--amber)' : 'var(--red)';
+      const avgEng = staff.filter(s => s.surveyEngagement).length > 0
+        ? Math.round(staff.filter(s => s.surveyEngagement).reduce((a,s) => a + s.surveyEngagement, 0) / staff.filter(s => s.surveyEngagement).length)
+        : null;
+
+      // Bar widths — simple: filled, offer, open (resigned counts as open)
+      const totalOpen = open + resigned;
+      const pctFilled = (filled / total * 100).toFixed(1);
+      const pctOffer = (offers / total * 100).toFixed(1);
+      const pctOpen = (totalOpen / total * 100).toFixed(1);
+
+      // Mini donut for card — shows % staffed
+      const cardR = 20;
+      const cardC = 2 * Math.PI * cardR;
+      const filledDash = (filled / total) * cardC;
+
+      return `
+        <div class="school-card" data-school-id="${school.id}">
+          <div class="school-card-header">
+            <div style="flex:1;">
+              <div class="school-name">${school.name}</div>
+              <div class="school-grades">${school.gradeSpan} · ${total} staff</div>
+            </div>
+            <svg width="56" height="56" viewBox="0 0 56 56" style="transform:rotate(-90deg);flex-shrink:0;">
+              <circle cx="28" cy="28" r="${cardR}" fill="none" stroke="var(--border)" stroke-width="6"/>
+              <circle cx="28" cy="28" r="${cardR}" fill="none" stroke="${staffedColor}" stroke-width="6" stroke-dasharray="${filledDash} ${cardC - filledDash}" stroke-linecap="round"/>
+              <text x="28" y="28" text-anchor="middle" dominant-baseline="central" fill="${staffedColor}" font-weight="700" font-size="12" style="transform:rotate(90deg);transform-origin:28px 28px;">${pctStaffed}%</text>
+            </svg>
+          </div>
+          <div class="staffing-bar-container">
+            <div class="staffing-bar">
+              <div class="filled" style="width:${pctFilled}%"></div>
+              <div class="offer" style="width:${pctOffer}%"></div>
+              <div class="open" style="width:${pctOpen}%"></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(${seasonConfig.features.find(f => f.id === 'itr')?.active ? 3 : 2},1fr);gap:8px;margin:12px 0;text-align:center;">
+            <div style="padding:6px;background:var(--surface-alt);border-radius:6px;">
+              <div style="font-size:16px;font-weight:700;color:${staffedColor};">${pctStaffed}%</div>
+              <div style="font-size:10px;color:var(--text-muted);">Staffed</div>
+            </div>
+            ${seasonConfig.features.find(f => f.id === 'itr')?.active ? `
+            <div style="padding:6px;background:var(--surface-alt);border-radius:6px;">
+              <div style="font-size:16px;font-weight:700;color:${itrColor};">${pctITR}%</div>
+              <div style="font-size:10px;color:var(--text-muted);">ITR Yes</div>
+            </div>` : ''}
+            <div style="padding:6px;background:var(--surface-alt);border-radius:6px;">
+              <div style="font-size:16px;font-weight:700;">${open}</div>
+              <div style="font-size:10px;color:var(--text-muted);">To Fill</div>
+            </div>
+          </div>
+          <div class="school-card-footer">
+            <span>View school</span>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  calcHealthScore(staff) {
+    const total = staff.length;
+    if (!total) return 100;
+    const filled = staff.filter(s => s.status === 'filled').length;
+    const open = staff.filter(s => s.status === 'open').length;
+    const resigned = staff.filter(s => s.status === 'resigned').length;
+    const highRisk = staff.filter(s => s.retentionRisk === 'high').length;
+    const modRisk = staff.filter(s => s.retentionRisk === 'moderate').length;
+    const notAsked = staff.filter(s => s.intentToReturn === 'not-asked').length;
+    const undecided = staff.filter(s => s.intentToReturn === 'undecided').length;
+    const intentNo = staff.filter(s => s.intentToReturn === 'no').length;
+    const lowTouch = staff.filter(s => {
+      if (s.status === 'open') return false;
+      const d = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+      return d > 30;
+    }).length;
+    const thinPipeline = staff.filter(s => s.status === 'open' && (s.pipelineApplicants || 0) <= 1).length;
+
+    let score = 100;
+    // Each open position is a real problem
+    score -= open * 4;
+    // Each resignation is a hit
+    score -= resigned * 5;
+    // High risk staff are serious — each one matters
+    score -= highRisk * 6;
+    // Moderate risk adds up
+    score -= modRisk * 2;
+    // Confirmed departures
+    score -= intentNo * 4;
+    // Undecided is a yellow flag
+    score -= undecided * 1.5;
+    // Not asking ITR in spring is negligent — scaled by percentage
+    score -= Math.min(notAsked / total, 0.5) * 20;
+    // Low touchpoint activity means the leader isn't doing the work
+    score -= Math.min(lowTouch / total, 0.5) * 15;
+    // Open positions with thin pipeline are critical
+    score -= thinPipeline * 3;
+
+    return Math.max(0, Math.min(100, Math.round(score)));
+  },
+
+  getSchoolAlerts(school, staff) {
+    const alerts = [];
+    const open = staff.filter(s => s.status === 'open');
+    const thinPipeline = open.filter(o => (o.pipelineApplicants || 0) <= 1);
+    const notAsked = staff.filter(s => s.intentToReturn === 'not-asked' && s.status === 'filled');
+    const resigned = staff.filter(s => s.status === 'resigned');
+
+    if (thinPipeline.length > 0) {
+      alerts.push({ type: 'info', icon: '→', text: `${thinPipeline.length} position${thinPipeline.length > 1 ? 's' : ''} need${thinPipeline.length === 1 ? 's' : ''} pipeline attention` });
+    }
+    if (notAsked.length > 3) {
+      alerts.push({ type: 'info', icon: '→', text: `${notAsked.length} ITR conversations to schedule` });
+    }
+    if (resigned.length > 0) {
+      alerts.push({ type: 'info', icon: '→', text: `${resigned.length} position${resigned.length > 1 ? 's' : ''} to fill from resignation${resigned.length > 1 ? 's' : ''}` });
+    }
+    return alerts.slice(0, 2); // max 2 — keep it quiet
+  },
+
+  // ---- School Detail View ----
+  showSchoolDetail(schoolId) {
+    const school = DEMO_DATA.schools.find(s => s.id === schoolId);
+    if (!school) return;
+
+    this.currentView = 'school';
+    this.selectedSchool = school;
+
+    // Update breadcrumb
+    document.getElementById('breadcrumb').innerHTML = `
+      <span class="breadcrumb-item" data-view="network">Network</span>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-item active">${school.name}</span>
+    `;
+
+    // Hide network grid, show detail
+    document.getElementById('schoolGrid').style.display = 'none';
+    document.getElementById('networkStats').style.display = 'none';
+    document.querySelector('.search-bar').style.display = 'none';
+
+    document.getElementById('viewTitle').textContent = school.name;
+    const staff = DEMO_DATA.staff.filter(s => s.school === school.name);
+    document.getElementById('viewSubtitle').textContent = `${school.gradeSpan} · ${staff.length} staff · ${school.enrollment} students`;
+
+    const detail = document.getElementById('schoolDetail');
+    detail.style.display = 'block';
+
+    // Group staff by grade level or department
+    const groups = {};
+    staff.forEach(p => {
+      let group = p.department || p.gradeLevel || 'Other';
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(p);
+    });
+
+    // Sort groups
+    const gradeOrder = ['PK', 'K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'All',
+      'English', 'Math', 'Science', 'Social Studies', 'World Languages', 'PE/Health', 'Arts', 'CTE/Electives',
+      'SPED', 'Administration', 'Support', 'Operations', 'Other'];
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      const ai = gradeOrder.indexOf(a);
+      const bi = gradeOrder.indexOf(b);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+
+    // School-level stats
+    const filled = staff.filter(s => s.status === 'filled').length;
+    const open = staff.filter(s => s.status === 'open').length;
+    const atRisk = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
+    const offers = staff.filter(s => s.status === 'offer-out').length;
+    const itrYes = staff.filter(s => s.intentToReturn === 'yes').length;
+    const itrNotAsked = staff.filter(s => s.intentToReturn === 'not-asked').length;
+    const itrUndecided = staff.filter(s => s.intentToReturn === 'undecided').length;
+    const avgEngagement = Math.round(staff.filter(s => s.surveyEngagement).reduce((a,s) => a + s.surveyEngagement, 0) / (staff.filter(s => s.surveyEngagement).length || 1));
+    const healthScore = this.calcHealthScore(staff);
+
+    // Donut chart SVG
+    const total = staff.length;
+    const totalOpen = open + staff.filter(s => s.status === 'resigned').length;
+    const segments = [
+      { count: filled, color: '#10b981', label: 'Filled' },
+      { count: offers, color: '#3b82f6', label: 'Offers' },
+      { count: totalOpen, color: '#ef4444', label: 'Open' },
+    ];
+    let donutOffset = 0;
+    const donutCircumference = 2 * Math.PI * 40;
+    const donutSegments = segments.filter(s => s.count > 0).map(s => {
+      const pct = s.count / total;
+      const dashLength = pct * donutCircumference;
+      const svg = `<circle cx="50" cy="50" r="40" fill="none" stroke="${s.color}" stroke-width="12" stroke-dasharray="${dashLength} ${donutCircumference - dashLength}" stroke-dashoffset="${-donutOffset}" stroke-linecap="round"/>`;
+      donutOffset += dashLength;
+      return svg;
+    }).join('');
+
+    detail.innerHTML = `
+      <div class="school-detail-header" style="flex-wrap:wrap;gap:16px;align-items:flex-start;">
+        <div style="display:flex;gap:20px;align-items:center;flex:1;flex-wrap:wrap;">
+          <svg width="100" height="100" viewBox="0 0 100 100" style="transform:rotate(-90deg);flex-shrink:0;">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="12"/>
+            ${donutSegments}
+          </svg>
+          <div>
+            <div style="display:flex;gap:16px;font-size:13px;color:var(--text-secondary);flex-wrap:wrap;margin-bottom:8px;">
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;"></span><strong>${filled}</strong> filled</span>
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:4px;"></span><strong>${totalOpen}</strong> open</span>
+              ${offers > 0 ? `<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:4px;"></span><strong>${offers}</strong> offers</span>` : ''}
+            </div>
+            <div style="display:flex;gap:16px;font-size:13px;color:var(--text-secondary);flex-wrap:wrap;">
+              ${seasonConfig.features.find(f => f.id === 'itr')?.active ? `<span>ITR: <strong>${itrYes}</strong> yes · <strong>${itrUndecided + itrNotAsked}</strong> pending</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="year-toggle">
+          <button class="year-btn active" data-year="current">2025-26</button>
+          <button class="year-btn" data-year="next">2026-27</button>
+        </div>
+      </div>
+      <div class="grade-grid">
+        ${sortedKeys.map(key => {
+          const members = groups[key];
+          const openCount = members.filter(m => m.status === 'open' || m.status === 'resigned').length;
+          const borderClass = openCount > 0 ? 'has-issues' : 'healthy';
+
+          return `
+            <div class="grade-card ${borderClass}" data-grade="${key}">
+              <div class="grade-card-title"><span>${this.formatGradeLabel(key)}</span><span class="chevron">▼</span></div>
+              <div class="grade-card-stats">
+                <span>${members.length} staff</span>
+                ${openCount ? `<span class="issue">${openCount} to fill</span>` : ''}
+              </div>
+              <div class="grade-expanded">
+                ${members.map(m => {
+                  const touchDays = m.lastTouchpoint
+                    ? Math.floor((new Date('2026-03-15') - new Date(m.lastTouchpoint)) / 86400000)
+                    : 999;
+                  const touchDot = m.status === 'open' ? '' :
+                    touchDays <= 14 ? '<span style="color:var(--green);font-size:8px;" title="Touchpoint recent">●</span>' :
+                    touchDays <= 30 ? '<span style="color:var(--amber);font-size:8px;" title="Touchpoint aging">●</span>' :
+                    '<span style="color:var(--red);font-size:8px;" title="30+ days since connection">●</span>';
+                  const riskDot = m.retentionRisk === 'high' ? '<span style="color:var(--red);font-size:10px;" title="High risk">▲</span>' :
+                    m.retentionRisk === 'moderate' ? '<span style="color:var(--amber);font-size:10px;" title="Moderate risk">▲</span>' : '';
+                  return `
+                  <div class="staff-row" data-person-id="${m.id}">
+                    <div>
+                      <div class="staff-name">${m.name} ${riskDot}</div>
+                      <div class="staff-role">${m.role}${m.yearsAtSchool ? ' · ' + m.yearsAtSchool + 'y' : ''} ${touchDot}</div>
+                    </div>
+                    <span class="staff-status status-${m.status}">${this.formatStatus(m.status)}</span>
+                  </div>
+                `}).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    // Update right panel for this school
+    this.renderNudges(school.name);
+    this.renderRetentionSignals(school.name);
+    this.renderActivityFeed(school.name);
+    this.renderPipeline(school.name);
+  },
+
+  showNetworkView() {
+    this.currentView = 'network';
+    this.selectedSchool = null;
+
+    document.getElementById('breadcrumb').innerHTML = `
+      <span class="breadcrumb-item active" data-view="network">Network</span>
+    `;
+    document.getElementById('viewTitle').textContent = 'Network Overview';
+    document.getElementById('viewSubtitle').textContent = `6 schools · ${DEMO_DATA.staff.length} staff · March 2026`;
+    document.getElementById('schoolGrid').style.display = '';
+    document.getElementById('networkStats').style.display = '';
+    document.querySelector('.search-bar').style.display = '';
+    document.getElementById('schoolDetail').style.display = 'none';
+
+    this.renderNudges();
+    this.renderRetentionSignals();
+    this.renderActivityFeed();
+    this.renderPipeline();
+  },
+
+  // ---- Person Panel ----
+  showPerson(personId) {
+    const person = DEMO_DATA.staff.find(p => p.id === personId);
+    if (!person) return;
+
+    this.selectedPerson = person;
+    const panel = document.getElementById('personPanel');
+
+    const statusClass = `status-${person.status}`;
+
+    // Engagement
+    const engScore = person.surveyEngagement || 0;
+    const engColor = engScore > 0 ? 'var(--accent)' : 'var(--border)';
+
+    // Connection timeline
+    const daysSinceTouch = person.lastTouchpoint
+      ? Math.floor((new Date('2026-03-15') - new Date(person.lastTouchpoint)) / 86400000)
+      : 999;
+    const touchLabel = daysSinceTouch <= 14 ? 'Recent' : daysSinceTouch < 999 ? `${daysSinceTouch} days ago` : 'Not yet';
+
+    const daysSinceObs = person.lastObservation
+      ? Math.floor((new Date('2026-03-15') - new Date(person.lastObservation)) / 86400000)
+      : 999;
+    const obsLabel = daysSinceObs < 999 ? `${daysSinceObs} days ago` : 'Not yet';
+
+    panel.innerHTML = `
+      <div class="person-header">
+        <span class="person-close" id="closePerson">✕</span>
+        <div class="person-name">${person.name}</div>
+        <div class="person-title">${person.role} · ${person.school}</div>
+        <div class="person-tags">
+          <span class="person-tag ${statusClass}">${this.formatStatus(person.status)}</span>
+          ${person.intentToReturn && person.intentToReturn !== 'not-asked' ? `<span class="person-tag" style="background:var(--surface-alt)">ITR: ${person.intentToReturn}</span>` : ''}
+          ${person.yearsTeaching ? `<span class="person-tag" style="background:var(--surface-alt)">${person.yearsTeaching}y experience</span>` : ''}
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="person-section" style="display:flex;gap:8px;flex-wrap:wrap;padding:16px 24px;">
+        <button class="btn btn-primary" style="flex:1;min-width:0;font-size:13px;padding:8px 12px;" onclick="document.getElementById('personOverlay').classList.remove('active');openModal('touchpointModal',${person.id})">Log Connection</button>
+        <button class="btn btn-secondary" style="flex:1;min-width:0;font-size:13px;padding:8px 12px;" onclick="document.getElementById('personOverlay').classList.remove('active');openModal('moveModal',${person.id})">Move Position</button>
+      </div>
+
+      <!-- At a Glance -->
+      <div class="person-section">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;">
+          <div>
+            <div style="font-size:18px;font-weight:700;">${daysSinceTouch < 999 ? daysSinceTouch + 'd' : '—'}</div>
+            <div style="font-size:10px;color:var(--text-muted);">Since connected</div>
+          </div>
+          <div>
+            <div style="font-size:18px;font-weight:700;">${person.touchpointCount || 0}</div>
+            <div style="font-size:10px;color:var(--text-muted);">Connections</div>
+          </div>
+          <div>
+            <div style="font-size:18px;font-weight:700;">${engScore > 0 ? engScore : '—'}</div>
+            <div style="font-size:10px;color:var(--text-muted);">Engagement</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Position -->
+      <div class="person-section">
+        <div class="person-section-title">Position</div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Grade/Dept</span>
+          <span class="person-detail-value">${person.department || person.gradeLevel || '—'}</span>
+        </div>
+        ${person.section ? `<div class="person-detail-row">
+          <span class="person-detail-label">Section</span>
+          <span class="person-detail-value">${person.section}</span>
+        </div>` : ''}
+        <div class="person-detail-row">
+          <span class="person-detail-label">Certifications</span>
+          <span class="person-detail-value" style="text-align:right;max-width:60%;">${(person.certifications || []).join(', ') || '—'}</span>
+        </div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Hire Date</span>
+          <span class="person-detail-value">${person.hireDate || '—'}</span>
+        </div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Tenure</span>
+          <span class="person-detail-value">${person.yearsAtSchool || 0}y at school · ${person.yearsTeaching || 0}y teaching</span>
+        </div>
+      </div>
+
+      <!-- Engagement -->
+      ${engScore > 0 ? `
+      <div class="person-section">
+        <div class="person-section-title">Engagement</div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Score</span>
+          <span class="person-detail-value">${engScore}/100</span>
+        </div>
+        <div style="height:6px;background:var(--surface-alt);border-radius:3px;margin:4px 0 8px;">
+          <div style="height:100%;width:${engScore}%;background:var(--accent);border-radius:3px;transition:width 300ms;"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);">Source: Attuned · Feb 2026</div>
+      </div>
+      ` : ''}
+
+      <!-- Timeline -->
+      <div class="person-section">
+        <div class="person-section-title">Connection Timeline</div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Last connection</span>
+          <span class="person-detail-value">${touchLabel}</span>
+        </div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Last observation</span>
+          <span class="person-detail-value">${obsLabel}</span>
+        </div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Intent to return</span>
+          <span class="person-detail-value">${person.intentToReturn === 'yes' ? 'Yes' : person.intentToReturn === 'no' ? 'No' : person.intentToReturn === 'undecided' ? 'Undecided' : 'Not yet asked'}</span>
+        </div>
+      </div>
+
+      ${person.notes ? `
+      <div class="person-section">
+        <div class="person-section-title">Notes</div>
+        <div class="person-stream-item">${person.notes}</div>
+      </div>
+      ` : ''}
+
+      ${person.status === 'open' ? `
+      <div class="person-section">
+        <div class="person-section-title">Pipeline</div>
+        <div class="person-detail-row">
+          <span class="person-detail-label">Applicants</span>
+          <span class="person-detail-value">${person.pipelineApplicants || 0}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Source: AppliTrack</div>
+      </div>
+      ` : ''}
+    `;
+
+    document.getElementById('personOverlay').classList.add('active');
+
+    document.getElementById('closePerson').onclick = () => {
+      document.getElementById('personOverlay').classList.remove('active');
+    };
+  },
+
+  // ---- Retention Signals (Stream 5) ----
+  renderRetentionSignals(schoolFilter) {
+    const staff = schoolFilter
+      ? DEMO_DATA.staff.filter(s => s.school === schoolFilter)
+      : DEMO_DATA.staff;
+
+    // Sort by days since last touchpoint — longest first
+    const connected = staff
+      .filter(s => s.status === 'filled')
+      .map(s => {
+        const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+        return { ...s, daysSince: days };
+      })
+      .filter(s => s.daysSince > 14)
+      .sort((a, b) => b.daysSince - a.daysSince);
+
+    document.getElementById('retentionCount').textContent = connected.length;
+    document.getElementById('retentionList').innerHTML = connected.slice(0, 8).map(s => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);cursor:pointer;" data-person-id="${s.id}">
+        <div style="width:32px;text-align:center;font-size:13px;font-weight:600;color:${s.daysSince > 45 ? 'var(--text)' : 'var(--text-secondary)'};">${s.daysSince < 999 ? s.daysSince + 'd' : '—'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
+          <div style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.role} · ${s.school}</div>
+        </div>
+        <button class="btn btn-primary" style="font-size:11px;padding:4px 10px;flex-shrink:0;" onclick="event.stopPropagation();openModal('touchpointModal',${s.id})">Log</button>
+      </div>
+    `).join('') || '<div style="padding:12px;font-size:13px;color:var(--text-muted);text-align:center;">All connections current</div>';
+  },
+
+  // ---- Activity Feed (Stream 6) ----
+  renderActivityFeed(schoolFilter) {
+    const staff = schoolFilter
+      ? DEMO_DATA.staff.filter(s => s.school === schoolFilter)
+      : DEMO_DATA.staff;
+
+    const activities = [];
+
+    // Recent touchpoints
+    staff.filter(s => s.lastTouchpoint && s.lastTouchpoint >= '2026-03-01')
+      .sort((a, b) => b.lastTouchpoint.localeCompare(a.lastTouchpoint))
+      .slice(0, 6)
+      .forEach(s => {
+        activities.push({
+          type: 'touchpoint',
+          text: `Connected with <strong>${s.name}</strong>`,
+          sub: s.school,
+          time: s.lastTouchpoint
+        });
+      });
+
+    // Resignations — matter of fact, not alarm
+    staff.filter(s => s.status === 'resigned').forEach(s => {
+      activities.push({
+        type: 'info',
+        text: `<strong>${s.name}</strong> — position to fill`,
+        sub: `${s.role} · ${s.school}`,
+        time: '2026-03-10'
+      });
+    });
+
+    // Offers
+    staff.filter(s => s.status === 'offer-out').forEach(s => {
+      activities.push({
+        type: 'info',
+        text: `Offer out for <strong>${s.role}</strong>`,
+        sub: s.school,
+        time: '2026-03-12'
+      });
+    });
+
+    activities.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+
+    document.getElementById('activityCount').textContent = activities.length;
+    document.getElementById('activityFeed').innerHTML = activities.slice(0, 8).map(a => `
+      <div class="activity-item">
+        <div style="width:6px;height:6px;border-radius:50%;background:${a.type === 'touchpoint' ? 'var(--green)' : 'var(--accent)'};flex-shrink:0;margin-top:6px;"></div>
+        <div class="activity-content">
+          <div class="activity-text">${a.text}</div>
+          <div class="activity-time">${a.sub} · ${a.time}</div>
+        </div>
+      </div>
+    `).join('') || '<div style="padding:12px;font-size:13px;color:var(--text-muted);text-align:center;">No recent activity</div>';
+  },
+
+  // ---- Pipeline (Stream 2) ----
+  renderPipeline(schoolFilter) {
+    const staff = schoolFilter
+      ? DEMO_DATA.staff.filter(s => s.school === schoolFilter)
+      : DEMO_DATA.staff;
+
+    const openPositions = staff.filter(s => s.status === 'open');
+    openPositions.sort((a, b) => (a.pipelineApplicants || 0) - (b.pipelineApplicants || 0));
+
+    document.getElementById('pipelineCount').textContent = openPositions.length;
+    document.getElementById('pipelineList').innerHTML = openPositions.map(p => {
+      const count = p.pipelineApplicants || 0;
+      const countClass = count === 0 ? 'zero' : count <= 2 ? 'low' : 'ok';
+      return `
+        <div class="pipeline-item" data-person-id="${p.id}" style="cursor:pointer">
+          <div>
+            <div class="pipeline-role">${p.role}</div>
+            <div class="pipeline-school">${p.school} · ${p.department || p.gradeLevel || ''}</div>
+          </div>
+          <span class="pipeline-count ${countClass}">${count} applicant${count !== 1 ? 's' : ''}</span>
+        </div>
+      `;
+    }).join('');
+  },
+
+  // ---- Next Year Staffing Plan ----
+  showNextYearPlan(school) {
+    const plan = DEMO_DATA.staffingPlans ? DEMO_DATA.staffingPlans.find(p => p.schoolId === school.id) : null;
+    const gradeGrid = document.querySelector('.grade-grid');
+    if (!gradeGrid) return;
+
+    // Get current year stats
+    const currStaff = DEMO_DATA.staff.filter(s => s.school === school.name);
+    const currFilled = currStaff.filter(s => s.status === 'filled').length;
+    const currOpen = currStaff.filter(s => s.status === 'open').length;
+    const currTotal = currStaff.length;
+    const itrYes = currStaff.filter(s => s.intentToReturn === 'yes').length;
+    const itrNo = currStaff.filter(s => s.intentToReturn === 'no' || s.status === 'resigned').length;
+    const itrUnknown = currTotal - itrYes - itrNo;
+
+    if (plan) {
+      const nextTotal = (plan.confirmedPositions || 0) + (plan.tbdPositions || 0) + (plan.newPositions || 0);
+      const projectedGaps = nextTotal - itrYes;
+
+      gradeGrid.innerHTML = `
+        <div style="grid-column:1/-1;">
+          <!-- Side by side comparison -->
+          <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:0;margin-bottom:20px;">
+            <!-- This Year -->
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;">
+              <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:12px;">2025-26 Current</div>
+              <div style="font-size:32px;font-weight:700;margin-bottom:4px;">${currTotal}</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">total positions</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">Filled</span><strong style="color:var(--green)">${currFilled}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">Open</span><strong style="color:var(--red)">${currOpen}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">Resigned</span><strong>${currStaff.filter(s => s.status === 'resigned').length}</strong></div>
+                <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">ITR: Yes</span><strong style="color:var(--green)">${itrYes}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">ITR: No/Resigned</span><strong style="color:var(--red)">${itrNo}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">ITR: Unknown</span><strong style="color:var(--amber)">${itrUnknown}</strong></div>
+              </div>
+            </div>
+            <!-- Arrow -->
+            <div style="display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text-muted);">→</div>
+            <!-- Next Year -->
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;">
+              <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:12px;">2026-27 Plan</div>
+              <div style="font-size:32px;font-weight:700;margin-bottom:4px;">${nextTotal}</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">projected positions</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">Confirmed</span><strong style="color:var(--green)">${plan.confirmedPositions || 0}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">TBD (enrollment)</span><strong style="color:var(--amber)">${plan.tbdPositions || 0}</strong></div>
+                ${plan.newPositions ? `<div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">New positions</span><strong style="color:var(--blue)">${plan.newPositions}</strong></div>` : ''}
+                ${plan.cutPositions ? `<div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">Positions cut</span><strong style="color:var(--red)">-${plan.cutPositions}</strong></div>` : ''}
+                <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-secondary);">Returning (ITR yes)</span><strong style="color:var(--green)">${itrYes}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;"><span style="color:var(--red);">Projected gaps</span><strong style="color:var(--red)">${projectedGaps > 0 ? projectedGaps : 0}</strong></div>
+              </div>
+            </div>
+          </div>
+          <!-- Gap analysis callout -->
+          ${projectedGaps > 0 ? `
+          <div style="padding:14px 16px;background:${projectedGaps > 5 ? 'var(--red-bg)' : 'var(--amber-bg)'};border:1px solid ${projectedGaps > 5 ? 'var(--red-border)' : 'var(--amber-border)'};border-radius:var(--radius);display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <span style="font-size:20px;">${projectedGaps > 5 ? '🚨' : '⚠️'}</span>
+            <div>
+              <div style="font-weight:600;font-size:14px;color:${projectedGaps > 5 ? '#991b1b' : '#92400e'};">${projectedGaps} positions to fill for next year</div>
+              <div style="font-size:12px;color:${projectedGaps > 5 ? '#991b1b' : '#92400e'};opacity:0.8;">Based on ${itrNo} confirmed departures + ${itrUnknown} undecided/not asked + ${currOpen} currently open</div>
+            </div>
+          </div>` : ''}
+          ${plan.notes ? `<div style="padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-secondary);">${plan.notes}</div>` : ''}
+        </div>
+      `;
+    } else {
+      gradeGrid.innerHTML = `
+        <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text-muted);">
+          <div style="font-size:16px;margin-bottom:4px;">No staffing plan entered yet for 2026-27</div>
+          <div style="font-size:13px;">Staffing plans will appear here once enrollment projections are loaded.</div>
+        </div>
+      `;
+    }
+  },
+
+  // ---- Mobile Today View ----
+  renderMobileToday() {
+    const staff = DEMO_DATA.staff;
+    const open = staff.filter(s => s.status === 'open');
+    const resigned = staff.filter(s => s.status === 'resigned');
+    const filled = staff.filter(s => s.status === 'filled');
+    const itrNotAsked = filled.filter(s => s.intentToReturn === 'not-asked');
+    const undecided = filled.filter(s => s.intentToReturn === 'undecided');
+    const pctStaffed = Math.round(filled.length / staff.length * 100);
+    const itrYes = filled.filter(s => s.intentToReturn === 'yes').length;
+    const pctITR = filled.length > 0 ? Math.round(itrYes / filled.length * 100) : 0;
+
+    // Summary banner — just the numbers, no alarm
+    document.getElementById('todayUrgent').innerHTML = `
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:${pctStaffed >= 95 ? 'var(--green)' : pctStaffed >= 85 ? 'var(--amber)' : 'var(--text)'};">${pctStaffed}%</div>
+          <div style="font-size:11px;color:var(--text-muted);">Staffed</div>
+        </div>
+        <div style="flex:1;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:${pctITR >= 85 ? 'var(--green)' : pctITR >= 65 ? 'var(--amber)' : 'var(--text)'};">${pctITR}%</div>
+          <div style="font-size:11px;color:var(--text-muted);">Returning</div>
+        </div>
+        <div style="flex:1;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;">
+          <div style="font-size:24px;font-weight:700;">${open.length}</div>
+          <div style="font-size:11px;color:var(--text-muted);">To Fill</div>
+        </div>
+      </div>
+    `;
+
+    // Next step — just ONE thing, not a list of everything wrong
+    const nextSteps = [];
+
+    // Find the single most important person to connect with
+    filled.forEach(s => {
+      const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+      if (days > 21 && s.retentionRisk) {
+        nextSteps.push({ person: s, weight: days + (s.retentionRisk === 'high' ? 100 : 0),
+          text: `Connect with ${s.name}`, sub: `${s.role} · ${s.school}`, action: 'Log Touchpoint' });
+      }
+    });
+    undecided.forEach(s => {
+      nextSteps.push({ person: s, weight: 50,
+        text: `Talk with ${s.name} about next year`, sub: `${s.role} · ${s.school}`, action: 'Log Conversation' });
+    });
+    nextSteps.sort((a, b) => b.weight - a.weight);
+
+    document.getElementById('todayNudges').innerHTML = nextSteps.length ? `
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Longest since connected</div>
+      ${nextSteps.slice(0, 3).map(n => `
+        <div data-person-id="${n.person.id}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:500;font-size:14px;">${n.person.name}</div>
+            <div style="font-size:12px;color:var(--text-muted);">${n.sub}</div>
+          </div>
+          <button class="btn btn-primary" style="font-size:12px;padding:6px 12px;flex-shrink:0;" onclick="event.stopPropagation();openModal('touchpointModal',${n.person.id})">Log</button>
+        </div>
+      `).join('')}
+      ${nextSteps.length > 3 ? `<div style="text-align:center;padding:8px;"><button class="btn btn-secondary" style="font-size:12px;" onclick="document.querySelector('.mobile-nav-item[data-nav=people]').click()">See all ${nextSteps.length} →</button></div>` : ''}
+    ` : `
+      <div style="padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;">
+        <div style="font-size:14px;color:var(--text);">All connections are current.</div>
+      </div>
+    `;
+
+    // Schools — clean list, just % staffed
+    document.getElementById('todaySnapshot').innerHTML = `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        ${DEMO_DATA.schools.map(sch => {
+          const s = staff.filter(p => p.school === sch.name);
+          const schFilled = s.filter(p => p.status === 'filled').length;
+          const schPct = Math.round(schFilled / s.length * 100);
+          const schColor = schPct >= 95 ? 'var(--green)' : schPct >= 85 ? 'var(--amber)' : 'var(--text)';
+          const schOpen = s.filter(p => p.status === 'open').length;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light);font-size:13px;">
+            <span style="font-weight:500;">${sch.shortName || sch.name}</span>
+            <div style="display:flex;align-items:center;gap:12px;">
+              ${schOpen > 0 ? `<span style="font-size:12px;color:var(--text-muted);">${schOpen} to fill</span>` : ''}
+              <span style="font-weight:600;color:${schColor};font-size:13px;">${schPct}% staffed</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+
+    // Recent — just the last few touchpoints logged, calm
+    const recentStaff = staff.filter(s => s.lastTouchpoint && s.lastTouchpoint >= '2026-03-01')
+      .sort((a, b) => b.lastTouchpoint.localeCompare(a.lastTouchpoint)).slice(0, 3);
+    document.getElementById('todayActivity').innerHTML = recentStaff.map(s => `
+      <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;font-size:13px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+        <div style="flex:1;min-width:0;">
+          <span style="font-weight:500;">${s.name}</span>
+          <span style="color:var(--text-muted);"> · ${s.school}</span>
+        </div>
+        <span style="font-size:11px;color:var(--text-muted);">${s.lastTouchpoint.slice(5)}</span>
+      </div>
+    `).join('') || '<div style="padding:14px;text-align:center;font-size:13px;color:var(--text-muted);">No recent activity logged</div>';
+  },
+
+  // ---- Mobile People View ----
+  renderMobilePeople() {
+    const search = (document.getElementById('mobilePeopleSearch').value || '').toLowerCase();
+    const activeChip = document.querySelector('#mobilePeopleChips .form-chip.selected');
+    const filter = activeChip ? activeChip.dataset.mfilter : 'all';
+
+    let people = [...DEMO_DATA.staff];
+    if (filter === 'at-risk') people = people.filter(s => s.retentionRisk === 'high' || s.retentionRisk === 'moderate');
+    else if (filter === 'open') people = people.filter(s => s.status === 'open');
+    else if (filter === 'low-touch') people = people.filter(s => {
+      if (s.status === 'open') return false;
+      const d = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+      return d > 30;
+    });
+    else if (filter === 'itr-pending') people = people.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided');
+
+    if (search.length >= 2) {
+      people = people.filter(s =>
+        s.name.toLowerCase().includes(search) ||
+        s.role.toLowerCase().includes(search) ||
+        s.school.toLowerCase().includes(search) ||
+        (s.department && s.department.toLowerCase().includes(search))
+      );
+    }
+
+    people.sort((a, b) => {
+      const ro = { high: 0, moderate: 1, low: 2, null: 3 };
+      return (ro[a.retentionRisk] ?? 3) - (ro[b.retentionRisk] ?? 3) || a.name.localeCompare(b.name);
+    });
+
+    document.getElementById('mobilePeopleList').innerHTML = people.slice(0, 50).map(s => {
+      const touchDays = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+      const touchColor = s.status === 'open' ? 'var(--text-muted)' : touchDays <= 14 ? 'var(--green)' : touchDays <= 30 ? 'var(--amber)' : 'var(--red)';
+      const riskBorder = s.retentionRisk === 'high' ? 'var(--red)' : s.retentionRisk === 'moderate' ? 'var(--amber)' : 'transparent';
+      return `
+      <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid ${riskBorder};border-radius:var(--radius);margin-bottom:6px;cursor:pointer;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
+          <div style="font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.role} · ${s.school}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <span style="width:8px;height:8px;border-radius:50%;background:${touchColor};" title="Touchpoint: ${touchDays}d"></span>
+          <span class="staff-status status-${s.status}" style="font-size:10px;padding:2px 6px;">${this.formatStatus(s.status)}</span>
+        </div>
+      </div>`;
+    }).join('') + `<div style="padding:12px;text-align:center;font-size:12px;color:var(--text-muted);">Showing ${Math.min(people.length, 50)} of ${people.length}</div>`;
+  },
+
+  // ---- People List View ----
+  renderPeopleView(filter = 'all', search = '') {
+    let staff = [...DEMO_DATA.staff];
+
+    // Apply filter
+    if (filter === 'at-risk') staff = staff.filter(s => s.retentionRisk === 'high' || s.retentionRisk === 'moderate');
+    else if (filter === 'open') staff = staff.filter(s => s.status === 'open');
+    else if (filter === 'low-touch') staff = staff.filter(s => {
+      if (s.status === 'open') return false;
+      const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+      return days > 30;
+    });
+    else if (filter === 'itr-pending') staff = staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided');
+
+    // Apply search
+    if (search.length >= 2) {
+      const q = search.toLowerCase();
+      staff = staff.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.role.toLowerCase().includes(q) ||
+        s.school.toLowerCase().includes(q) ||
+        (s.department && s.department.toLowerCase().includes(q))
+      );
+    }
+
+    // Sort by name
+    staff.sort((a, b) => a.name.localeCompare(b.name));
+
+    const tbody = document.getElementById('peopleTableBody');
+    tbody.innerHTML = staff.slice(0, 100).map(s => {
+      const touchDays = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+      const touchColor = s.status === 'open' ? 'var(--text-muted)' : touchDays <= 14 ? 'var(--green)' : touchDays <= 30 ? 'var(--amber)' : 'var(--red)';
+      const engColor = (s.surveyEngagement || 0) >= 75 ? 'var(--green)' : (s.surveyEngagement || 0) >= 50 ? 'var(--amber)' : (s.surveyEngagement || 0) > 0 ? 'var(--red)' : 'var(--text-muted)';
+      return `
+        <tr style="border-bottom:1px solid var(--border-light);cursor:pointer;transition:background 100ms;"
+            onmouseover="this.style.background='var(--surface-alt)'" onmouseout="this.style.background=''"
+            data-person-id="${s.id}">
+          <td style="padding:10px 14px;font-weight:500;">${s.name}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);">${s.role}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);font-size:12px;">${s.school}</td>
+          <td style="padding:10px 14px;text-align:center;"><span class="staff-status status-${s.status}" style="font-size:11px;">${this.formatStatus(s.status)}</span></td>
+          <td style="padding:10px 14px;text-align:center;color:${s.retentionRisk === 'high' ? 'var(--red)' : s.retentionRisk === 'moderate' ? 'var(--amber)' : 'var(--text-muted)'};font-size:12px;font-weight:600;">${s.retentionRisk || '—'}</td>
+          <td style="padding:10px 14px;text-align:center;color:${engColor};font-weight:600;">${s.surveyEngagement || '—'}</td>
+          <td style="padding:10px 14px;text-align:center;color:${touchColor};font-size:12px;">${touchDays < 999 ? touchDays + 'd' : '—'}</td>
+          <td style="padding:10px 14px;text-align:center;font-size:12px;">${s.intentToReturn === 'yes' ? '<span style="color:var(--green)">✓</span>' : s.intentToReturn === 'no' ? '<span style="color:var(--red)">✗</span>' : s.intentToReturn === 'undecided' ? '<span style="color:var(--amber)">?</span>' : '<span style="color:var(--text-muted)">—</span>'}</td>
+        </tr>
+      `;
+    }).join('');
+
+    document.getElementById('peopleCount').textContent = `Showing ${Math.min(staff.length, 100)} of ${staff.length} staff`;
+
+    // Update filter button counts
+    const allCount = DEMO_DATA.staff.length;
+    const riskCount = DEMO_DATA.staff.filter(s => s.retentionRisk === 'high' || s.retentionRisk === 'moderate').length;
+    const openCount = DEMO_DATA.staff.filter(s => s.status === 'open').length;
+    const lowTouchCount = DEMO_DATA.staff.filter(s => {
+      if (s.status === 'open') return false;
+      const d = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+      return d > 30;
+    }).length;
+    const itrCount = DEMO_DATA.staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided').length;
+    const filterBtns = document.querySelectorAll('[data-people-filter]');
+    const labels = { all: `All (${allCount})`, open: `Open Positions (${openCount})`, 'low-touch': `Needs Connection (${lowTouchCount})`, 'itr-pending': `ITR Pending (${itrCount})` };
+    filterBtns.forEach(b => { if (labels[b.dataset.peopleFilter]) b.textContent = labels[b.dataset.peopleFilter]; });
+  },
+
+  // ---- Pipeline Grid View ----
+  renderPipelineGrid() {
+    const open = DEMO_DATA.staff.filter(s => s.status === 'open' || s.status === 'offer-out');
+    open.sort((a, b) => (a.pipelineApplicants || 0) - (b.pipelineApplicants || 0));
+
+    document.getElementById('pipelineGrid').innerHTML = open.map(p => {
+      const count = p.pipelineApplicants || 0;
+      const urgency = count === 0 ? 'var(--red)' : count <= 2 ? 'var(--amber)' : 'var(--green)';
+      const urgencyBg = count === 0 ? 'var(--red-bg)' : count <= 2 ? 'var(--amber-bg)' : 'var(--green-bg)';
+      const urgencyBorder = count === 0 ? 'var(--red-border)' : count <= 2 ? 'var(--amber-border)' : 'var(--green-border)';
+      return `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;border-left:3px solid ${urgency};transition:all var(--transition);"
+             onmouseover="this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.boxShadow=''"
+             data-person-id="${p.id}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <div style="font-weight:600;font-size:14px;">${p.role}</div>
+              <div style="font-size:12px;color:var(--text-secondary);">${p.school} · ${p.department || p.gradeLevel || ''}</div>
+            </div>
+            <span class="staff-status status-${p.status}" style="font-size:11px;">${this.formatStatus(p.status)}</span>
+          </div>
+          <div style="display:flex;gap:12px;margin-bottom:12px;">
+            <div style="padding:8px 12px;border-radius:6px;background:${urgencyBg};border:1px solid ${urgencyBorder};flex:1;text-align:center;">
+              <div style="font-size:20px;font-weight:700;color:${urgency};">${count}</div>
+              <div style="font-size:10px;color:var(--text-secondary);">Applicants</div>
+            </div>
+            ${p.status === 'offer-out' ? `
+            <div style="padding:8px 12px;border-radius:6px;background:var(--blue-bg);border:1px solid var(--blue-border);flex:1;text-align:center;">
+              <div style="font-size:20px;font-weight:700;color:var(--blue);">1</div>
+              <div style="font-size:10px;color:var(--text-secondary);">Offer Out</div>
+            </div>` : ''}
+          </div>
+          ${(p.certifications || []).length ? `<div style="font-size:11px;color:var(--text-muted);">Requires: ${p.certifications.join(', ')}</div>` : ''}
+          ${p.notes ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:8px;padding:8px;background:var(--surface-alt);border-radius:6px;">${p.notes}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    if (open.length === 0) {
+      document.getElementById('pipelineGrid').innerHTML = `<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text-muted);">No open positions. All seats filled!</div>`;
+    }
+  },
+
+  // ---- Helpers ----
+  formatGradeLabel(key) {
+    const map = {
+      'PK': 'Pre-K', 'K': 'Kindergarten',
+      '1': '1st Grade', '2': '2nd Grade', '3': '3rd Grade', '4': '4th Grade',
+      '5': '5th Grade', '6': '6th Grade', '7': '7th Grade', '8': '8th Grade',
+      '9': '9th Grade', '10': '10th Grade', '11': '11th Grade', '12': '12th Grade',
+      'All': 'All Grades / School-Wide'
+    };
+    return map[key] || key;
+  },
+
+  formatStatus(status) {
+    const map = {
+      'filled': 'Filled',
+      'open': 'Open',
+      'at-risk': 'Filled',
+      'offer-out': 'Offer Out',
+      'resigned': 'Resigned'
+    };
+    return map[status] || status;
+  },
+
+  // ---- Event Binding ----
+  bindEvents() {
+    // School card clicks
+    document.getElementById('schoolGrid').addEventListener('click', (e) => {
+      const card = e.target.closest('.school-card');
+      if (card) {
+        this.showSchoolDetail(card.dataset.schoolId);
+      }
+    });
+
+    // Breadcrumb navigation
+    document.getElementById('breadcrumb').addEventListener('click', (e) => {
+      const item = e.target.closest('.breadcrumb-item');
+      if (item && item.dataset.view === 'network') {
+        this.showNetworkView();
+      }
+    });
+
+    // Grade card expand + year toggle
+    document.getElementById('schoolDetail').addEventListener('click', (e) => {
+      // Year toggle
+      const yearBtn = e.target.closest('.year-btn');
+      if (yearBtn) {
+        document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
+        yearBtn.classList.add('active');
+        if (yearBtn.dataset.year === 'next' && this.selectedSchool) {
+          this.showNextYearPlan(this.selectedSchool);
+        } else if (this.selectedSchool) {
+          this.showSchoolDetail(this.selectedSchool.id);
+        }
+        return;
+      }
+
+      const gradeCard = e.target.closest('.grade-card');
+      if (gradeCard && !e.target.closest('.staff-row')) {
+        gradeCard.classList.toggle('expanded');
+      }
+
+      const staffRow = e.target.closest('.staff-row');
+      if (staffRow) {
+        this.showPerson(parseInt(staffRow.dataset.personId));
+      }
+    });
+
+    // Person overlay close
+    document.getElementById('personOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('personOverlay')) {
+        document.getElementById('personOverlay').classList.remove('active');
+      }
+    });
+
+    // Right panel person clicks
+    document.getElementById('rightPanel').addEventListener('click', (e) => {
+      const item = e.target.closest('[data-person-id]');
+      if (item) {
+        this.showPerson(parseInt(item.dataset.personId));
+      }
+    });
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('personOverlay').classList.remove('active');
+        if (this.currentView === 'school') {
+          this.showNetworkView();
+        }
+      }
+    });
+
+    // Search
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      if (query.length < 2) {
+        this.renderSchoolCards();
+        return;
+      }
+      const matches = DEMO_DATA.staff.filter(s =>
+        s.name.toLowerCase().includes(query) ||
+        s.role.toLowerCase().includes(query) ||
+        s.school.toLowerCase().includes(query) ||
+        (s.department && s.department.toLowerCase().includes(query))
+      );
+
+      const grid = document.getElementById('schoolGrid');
+      if (matches.length === 0) {
+        grid.innerHTML = `<p style="color:var(--text-muted);padding:20px;">No results for "${e.target.value}"</p>`;
+      } else {
+        grid.innerHTML = matches.slice(0, 20).map(m => {
+          const touchDays = m.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(m.lastTouchpoint)) / 86400000) : 999;
+          const touchColor = m.status === 'open' ? 'var(--text-muted)' : touchDays <= 14 ? 'var(--green)' : touchDays <= 30 ? 'var(--amber)' : 'var(--red)';
+          return `
+          <div class="school-card" style="cursor:pointer" onclick="app.showPerson(${m.id})">
+            <div class="school-card-header">
+              <div>
+                <div class="school-name">${m.name}</div>
+                <div class="school-grades">${m.role} · ${m.school}${m.department ? ' · ' + m.department : ''}</div>
+              </div>
+              <span class="staff-status status-${m.status}">${this.formatStatus(m.status)}</span>
+            </div>
+            <div style="display:flex;gap:16px;font-size:12px;color:var(--text-secondary);margin-top:8px;">
+              ${m.retentionRisk ? `<span style="color:${m.retentionRisk === 'high' ? 'var(--red)' : 'var(--amber)'};font-weight:600;">${m.retentionRisk} risk</span>` : ''}
+              ${m.surveyEngagement ? `<span>Engagement: ${m.surveyEngagement}</span>` : ''}
+              <span style="color:${touchColor}">Touch: ${touchDays < 999 ? touchDays + 'd' : '—'}</span>
+              <span>ITR: ${m.intentToReturn || '—'}</span>
+              <span>${m.yearsAtSchool || 0}y tenure</span>
+            </div>
+          </div>
+        `}).join('');
+      }
+    });
+
+    // View tabs
+    document.querySelectorAll('.view-tab[data-tab]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.view-tab[data-tab]').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const view = tab.dataset.tab;
+        document.getElementById('schoolGrid').style.display = view === 'overview' ? '' : 'none';
+        document.getElementById('networkStats').style.display = view === 'overview' ? '' : 'none';
+        document.querySelector('.search-bar').style.display = view === 'overview' ? '' : 'none';
+        document.getElementById('schoolDetail').style.display = 'none';
+        document.getElementById('peopleView').style.display = view === 'people' ? '' : 'none';
+        document.getElementById('pipelineView').style.display = view === 'pipeline' ? '' : 'none';
+        if (view === 'people') app.renderPeopleView();
+        if (view === 'pipeline') app.renderPipelineGrid();
+        if (view === 'overview' && app.currentView === 'network') app.showNetworkView();
+      });
+    });
+
+    // People view filters
+    document.getElementById('peopleView').addEventListener('click', (e) => {
+      const filterBtn = e.target.closest('[data-people-filter]');
+      if (filterBtn) {
+        document.querySelectorAll('[data-people-filter]').forEach(b => b.classList.remove('active'));
+        filterBtn.classList.add('active');
+        app.renderPeopleView(filterBtn.dataset.peopleFilter, document.getElementById('peopleSearch').value);
+      }
+      const row = e.target.closest('tr[data-person-id]');
+      if (row) app.showPerson(parseInt(row.dataset.personId));
+    });
+
+    // People search
+    document.getElementById('peopleSearch').addEventListener('input', (e) => {
+      const activeFilter = document.querySelector('[data-people-filter].active');
+      app.renderPeopleView(activeFilter ? activeFilter.dataset.peopleFilter : 'all', e.target.value);
+    });
+
+    // People table sorting
+    document.getElementById('peopleTable').addEventListener('click', (e) => {
+      const th = e.target.closest('th[data-sort]');
+      if (!th) return;
+      const field = th.dataset.sort;
+      const tbody = document.getElementById('peopleTableBody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const idx = Array.from(th.parentElement.children).indexOf(th);
+      const asc = th.dataset.dir !== 'asc';
+      th.dataset.dir = asc ? 'asc' : 'desc';
+      rows.sort((a, b) => {
+        const av = a.children[idx].textContent.trim();
+        const bv = b.children[idx].textContent.trim();
+        const cmp = isNaN(av) || isNaN(bv) ? av.localeCompare(bv) : Number(av) - Number(bv);
+        return asc ? cmp : -cmp;
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    });
+
+    // Pipeline view person clicks
+    document.getElementById('pipelineView').addEventListener('click', (e) => {
+      const card = e.target.closest('[data-person-id]');
+      if (card) app.showPerson(parseInt(card.dataset.personId));
+    });
+
+    // Stat card filtering
+    document.getElementById('networkStats').addEventListener('click', (e) => {
+      const card = e.target.closest('.stat-card');
+      if (!card) return;
+      const filter = card.dataset.filter;
+      const wasActive = card.classList.contains('active');
+
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+      if (wasActive) {
+        this.renderSchoolCards();
+        return;
+      }
+      card.classList.add('active');
+
+      // Filter school cards to highlight
+      const grid = document.getElementById('schoolGrid');
+      const cards = grid.querySelectorAll('.school-card');
+      cards.forEach(sc => {
+        const schoolId = sc.dataset.schoolId;
+        const school = DEMO_DATA.schools.find(s => s.id === schoolId);
+        if (!school) return;
+        const staff = DEMO_DATA.staff.filter(s => s.school === school.name);
+        let count = 0;
+        if (filter === 'all') count = staff.length;
+        else if (filter === 'filled') count = staff.filter(s => s.status === 'filled').length;
+        else if (filter === 'open') count = staff.filter(s => s.status === 'open').length;
+        else if (filter === 'at-risk') count = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
+        else if (filter === 'offer-out') count = staff.filter(s => s.status === 'offer-out').length;
+        else if (filter === 'not-asked') count = staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided').length;
+
+        if (count === 0 && filter !== 'all') {
+          sc.style.opacity = '0.4';
+        } else {
+          sc.style.opacity = '1';
+        }
+      });
+    });
+
+    // Mobile nav
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        const nav = item.dataset.nav;
+
+        // Hide all mobile views
+        document.getElementById('rightPanel').classList.remove('mobile-visible');
+        document.getElementById('mobileTodayView').style.display = 'none';
+        document.getElementById('mobilePeopleView').style.display = 'none';
+        const mainContent = document.querySelector('.network-view');
+        const breadcrumb = document.querySelector('.breadcrumb-bar');
+        const quickActions = document.querySelector('.quick-actions');
+
+        const mainContainer = document.querySelector('.main-container');
+
+        if (nav === 'today') {
+          mainContainer.style.display = 'none';
+          breadcrumb.style.display = 'none';
+          quickActions.style.display = 'none';
+          document.getElementById('mobileTodayView').style.display = 'block';
+          app.renderMobileToday();
+        } else if (nav === 'building') {
+          mainContainer.style.display = '';
+          mainContent.style.display = '';
+          breadcrumb.style.display = '';
+          quickActions.style.display = 'flex';
+          if (app.currentView === 'network') app.showNetworkView();
+        } else if (nav === 'people') {
+          mainContainer.style.display = 'none';
+          breadcrumb.style.display = 'none';
+          quickActions.style.display = 'none';
+          document.getElementById('mobilePeopleView').style.display = 'block';
+          app.renderMobilePeople();
+        } else if (nav === 'activity') {
+          mainContainer.style.display = 'none';
+          breadcrumb.style.display = 'none';
+          quickActions.style.display = 'none';
+          document.getElementById('rightPanel').classList.add('mobile-visible');
+        } else if (nav === 'actions') {
+          mainContainer.style.display = '';
+          mainContent.style.display = '';
+          breadcrumb.style.display = '';
+          quickActions.style.display = 'flex';
+          openModal('touchpointModal');
+        }
+      });
+    });
+
+    // Mobile people search + filter
+    document.getElementById('mobilePeopleSearch').addEventListener('input', () => app.renderMobilePeople());
+    document.getElementById('mobilePeopleChips').addEventListener('click', (e) => {
+      const chip = e.target.closest('.form-chip');
+      if (!chip) return;
+      document.querySelectorAll('#mobilePeopleChips .form-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      app.renderMobilePeople();
+    });
+    document.getElementById('mobilePeopleList').addEventListener('click', (e) => {
+      const card = e.target.closest('[data-person-id]');
+      if (card) app.showPerson(parseInt(card.dataset.personId));
+    });
+    document.getElementById('mobileTodayView').addEventListener('click', (e) => {
+      const card = e.target.closest('[data-person-id]');
+      if (card) app.showPerson(parseInt(card.dataset.personId));
+    });
+  }
+};
+
+// ---- Season & Features ----
+const seasonConfig = {
+  currentSeason: 'plan',
+
+  // Editable seasons
+  seasons: [
+    { id: 'onboarding', name: 'Onboarding & Stabilize', months: 'Aug – Sep', startMonth: 8, endMonth: 9, color: '#10b981' },
+    { id: 'invest', name: 'Invest & Retain', months: 'Oct – Dec', startMonth: 10, endMonth: 12, color: '#0d9488' },
+    { id: 'detect', name: 'Detect & Act', months: 'Jan – Feb', startMonth: 1, endMonth: 2, color: '#f59e0b' },
+    { id: 'plan', name: 'Plan & Recruit', months: 'Mar – May', startMonth: 3, endMonth: 5, color: '#3b82f6' },
+    { id: 'fill', name: 'Fill & Prepare', months: 'Jun – Jul', startMonth: 6, endMonth: 7, color: '#8b5cf6' },
+  ],
+
+  features: [
+    { id: 'onboarding', name: 'Onboarding Tracker', desc: 'New hire check-ins, 30/60/90 day touchpoints, getting to know new staff', icon: '🟢', seasons: ['onboarding'], alwaysOn: false, active: false },
+    { id: 'observations', name: 'Observation Cycle', desc: 'Observation scheduling, walk-through logging, follow-up reminders', icon: '👁️', seasons: ['onboarding', 'invest', 'detect'], alwaysOn: false, active: true },
+    { id: 'recognition', name: 'Recognition & Touchpoints', desc: 'Log positive touchpoints, recognition moments, coaching notes', icon: '✍️', seasons: [], alwaysOn: true, active: true },
+    { id: 'pulse', name: 'Mid-Year Pulse', desc: 'Quick engagement check, connect to Attuned/survey data', icon: '📊', seasons: ['invest'], alwaysOn: false, active: false },
+    { id: 'itr', name: 'Intent to Return', desc: 'ITR survey tracking, completion status, conversation prompts', icon: '📋', seasons: ['detect', 'plan'], alwaysOn: false, active: true },
+    { id: 'stay', name: 'Stay Conversations', desc: 'Guided stay conversation workflows, outcome logging, follow-up nudges', icon: '💬', seasons: ['detect', 'plan'], alwaysOn: false, active: true },
+    { id: 'retention', name: 'Connection Tracker', desc: 'See who you haven\'t connected with, engagement trends, conversation history', icon: '🤝', seasons: ['invest', 'detect', 'plan'], alwaysOn: false, active: true },
+    { id: 'staffingplan', name: 'Staffing Plan Builder', desc: 'This year vs next year comparison, gap analysis, enrollment-driven projections', icon: '📐', seasons: ['plan', 'fill'], alwaysOn: false, active: true },
+    { id: 'pipeline', name: 'Hiring Pipeline', desc: 'Open position tracking, applicant pipeline, offer management', icon: '📋', seasons: ['plan', 'fill'], alwaysOn: false, active: true },
+    { id: 'postings', name: 'Job Postings', desc: 'Post positions, connect to job boards, track applicant flow', icon: '📢', seasons: ['plan', 'fill'], alwaysOn: false, active: false },
+    { id: 'offers', name: 'Offer Management', desc: 'Track offers, approvals, acceptance deadlines, onboarding prep', icon: '📧', seasons: ['fill'], alwaysOn: false, active: false },
+    { id: 'enrollment', name: 'Enrollment Projections', desc: 'Connect enrollment data to staffing needs, flag over/under staffing', icon: '📈', seasons: ['plan'], alwaysOn: false, active: false },
+    { id: 'budget', name: 'Position Budgeting', desc: 'FTE tracking, funding source assignments, budget impact of staffing moves', icon: '💰', seasons: ['plan'], alwaysOn: false, active: false },
+    { id: 'nps', name: 'Staff NPS / Climate', desc: 'Net Promoter Score tracking, climate survey integration', icon: '🌡️', seasons: ['invest', 'detect'], alwaysOn: false, active: false },
+  ],
+
+  getSeasonLabel(id) {
+    const s = this.seasons.find(s => s.id === id);
+    return s ? s.name : id;
+  },
+
+  getSeasonMonths(id) {
+    const s = this.seasons.find(s => s.id === id);
+    return s ? s.months : '';
+  },
+
+  renderSeasonSelector() {
+    const container = document.getElementById('seasonSelector');
+    if (!container) return;
+    container.innerHTML = this.seasons.map(s =>
+      `<button class="form-chip ${s.id === this.currentSeason ? 'selected' : ''}" data-season="${s.id}" onclick="setSeason(this)" style="${s.id === this.currentSeason ? 'background:' + s.color + ';color:white;border-color:' + s.color : ''}">${s.months}: ${s.name}</button>`
+    ).join('');
+  },
+
+  renderCalendarConfig() {
+    const monthNames = ['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul'];
+    const monthNums = [8,9,10,11,12,1,2,3,4,5,6,7];
+
+    // Timeline bar
+    document.getElementById('seasonTimeline').innerHTML = `
+      <div style="display:flex;border-radius:var(--radius);overflow:hidden;height:36px;margin-bottom:8px;">
+        ${this.seasons.map(s => {
+          const span = s.startMonth <= s.endMonth
+            ? s.endMonth - s.startMonth + 1
+            : (12 - s.startMonth + 1) + s.endMonth;
+          return `<div style="flex:${span};background:${s.color};display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600;min-width:0;overflow:hidden;padding:0 4px;white-space:nowrap;">${s.name}</div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;">
+        ${monthNames.map(m => `<div style="flex:1;text-align:center;font-size:10px;color:var(--text-muted);">${m}</div>`).join('')}
+      </div>
+    `;
+
+    // Feature assignment per season
+    document.getElementById('featureAssignment').innerHTML = `
+      <!-- Always On -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="width:12px;height:12px;border-radius:3px;background:var(--text);display:inline-block;"></span>
+          Always On (Year-Round)
+        </div>
+        <div style="min-height:40px;padding:8px;background:var(--surface-alt);border:2px dashed var(--border);border-radius:var(--radius);display:flex;flex-wrap:wrap;gap:6px;" data-drop-season="always">
+          ${this.features.filter(f => f.alwaysOn).map(f => `
+            <span style="padding:4px 8px 4px 12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;font-size:12px;cursor:move;display:flex;align-items:center;gap:4px;" draggable="true" data-feature-id="${f.id}" ondragstart="dragFeature(event)">
+              ${f.icon} ${f.name}
+              <span onclick="event.stopPropagation();removeFeatureFromSeason('${f.id}','always')" style="cursor:pointer;margin-left:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;color:var(--text-muted);transition:all 100ms;" onmouseover="this.style.background='var(--red-bg)';this.style.color='var(--red)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">✕</span>
+            </span>
+          `).join('') || '<span style="font-size:12px;color:var(--text-muted);padding:4px;">Drag features here to make them year-round</span>'}
+        </div>
+      </div>
+
+      <!-- Per Season -->
+      ${this.seasons.map(s => `
+        <div style="margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="width:12px;height:12px;border-radius:3px;background:${s.color};display:inline-block;"></span>
+              ${s.name} <span style="font-weight:400;text-transform:none;letter-spacing:0;">(${s.months})</span>
+            </span>
+            <span style="font-size:11px;color:var(--text-muted);cursor:pointer;" onclick="editSeason('${s.id}')">Edit dates</span>
+          </div>
+          <div style="min-height:40px;padding:8px;background:${s.color}11;border:2px dashed ${s.color}44;border-radius:var(--radius);display:flex;flex-wrap:wrap;gap:6px;" data-drop-season="${s.id}" ondragover="event.preventDefault();this.style.borderColor='${s.color}'" ondragleave="this.style.borderColor='${s.color}44'" ondrop="dropFeature(event,'${s.id}')">
+            ${this.features.filter(f => !f.alwaysOn && f.seasons.includes(s.id)).map(f => `
+              <span style="padding:4px 8px 4px 12px;background:var(--surface);border:1px solid ${s.color}44;border-radius:16px;font-size:12px;cursor:move;display:flex;align-items:center;gap:4px;" draggable="true" data-feature-id="${f.id}" ondragstart="dragFeature(event)">
+                ${f.icon} ${f.name}
+                <span onclick="event.stopPropagation();removeFeatureFromSeason('${f.id}','${s.id}')" style="cursor:pointer;margin-left:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;color:var(--text-muted);transition:all 100ms;" onmouseover="this.style.background='var(--red-bg)';this.style.color='var(--red)'" onmouseout="this.style.background='';this.style.color='var(--text-muted)'">✕</span>
+              </span>
+            `).join('') || `<span style="font-size:12px;color:var(--text-muted);padding:4px;">Drag features here</span>`}
+          </div>
+        </div>
+      `).join('')}
+
+      <!-- Unused Features -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:8px;">Available Features (not assigned)</div>
+        <div style="min-height:40px;padding:8px;background:var(--surface-alt);border:2px dashed var(--border);border-radius:var(--radius);display:flex;flex-wrap:wrap;gap:6px;" data-drop-season="none" ondragover="event.preventDefault();this.style.borderColor='var(--text-muted)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="dropFeature(event,'none')">
+          ${this.features.filter(f => !f.alwaysOn && f.seasons.length === 0).map(f => `
+            <span style="padding:4px 12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;font-size:12px;cursor:move;display:flex;align-items:center;gap:4px;opacity:0.6;" draggable="true" data-feature-id="${f.id}" ondragstart="dragFeature(event)">
+              ${f.icon} ${f.name}
+            </span>
+          `).join('') || '<span style="font-size:12px;color:var(--text-muted);padding:4px;">All features assigned!</span>'}
+        </div>
+      </div>
+    `;
+  },
+
+  renderToggles() {
+    const container = document.getElementById('featureToggles');
+    if (!container) return;
+
+    // Group by recommended vs other
+    const recommended = this.features.filter(f => f.seasons.includes(this.currentSeason));
+    const other = this.features.filter(f => !f.seasons.includes(this.currentSeason));
+
+    container.innerHTML = `
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:10px;">Recommended for ${this.getSeasonLabel(this.currentSeason)} (${this.getSeasonMonths(this.currentSeason)})</div>
+      ${recommended.map(f => this.renderToggleRow(f, true)).join('')}
+      ${other.length ? `
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin:20px 0 10px;">Other Features</div>
+        ${other.map(f => this.renderToggleRow(f, false)).join('')}
+      ` : ''}
+    `;
+  },
+
+  renderToggleRow(feature, recommended) {
+    return `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid ${feature.active ? 'var(--accent)' : 'var(--border)'};border-radius:var(--radius);margin-bottom:8px;background:${feature.active ? 'var(--accent-light)' : 'var(--surface)'};transition:all 150ms;cursor:pointer;" onclick="toggleFeature('${feature.id}')">
+        <span style="font-size:20px;flex-shrink:0;">${feature.icon}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px;">
+            ${feature.name}
+            ${recommended ? '<span style="font-size:10px;padding:1px 6px;background:var(--accent);color:white;border-radius:8px;font-weight:500;">In Season</span>' : ''}
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">${feature.desc}</div>
+        </div>
+        <div style="width:44px;height:24px;border-radius:12px;background:${feature.active ? 'var(--accent)' : '#d1d5db'};position:relative;transition:background 200ms;flex-shrink:0;">
+          <div style="width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:2px;${feature.active ? 'right:2px;' : 'left:2px;'}transition:all 200ms;box-shadow:0 1px 3px rgba(0,0,0,0.15);"></div>
+        </div>
+      </div>
+    `;
+  }
+};
+
+function showSeasonView(view) {
+  document.getElementById('seasonActiveView').style.display = view === 'active' ? '' : 'none';
+  document.getElementById('seasonConfigView').style.display = view === 'config' ? '' : 'none';
+  document.getElementById('seasonViewActive').classList.toggle('active', view === 'active');
+  document.getElementById('seasonViewConfig').classList.toggle('active', view === 'config');
+  if (view === 'config') seasonConfig.renderCalendarConfig();
+}
+
+function setSeason(btn) {
+  const season = btn.dataset.season;
+  const s = seasonConfig.seasons.find(s => s.id === season);
+  document.querySelectorAll('#seasonSelector .form-chip').forEach(b => {
+    b.classList.remove('selected');
+    b.style.background = '';
+    b.style.color = '';
+    b.style.borderColor = '';
+  });
+  btn.classList.add('selected');
+  if (s) {
+    btn.style.background = s.color;
+    btn.style.color = 'white';
+    btn.style.borderColor = s.color;
+  }
+  seasonConfig.currentSeason = season;
+
+  // Auto-suggest features for this season
+  seasonConfig.features.forEach(f => {
+    f.active = f.alwaysOn || f.seasons.includes(seasonConfig.currentSeason);
+  });
+  seasonConfig.renderToggles();
+}
+
+function dragFeature(event) {
+  event.dataTransfer.setData('text/plain', event.target.dataset.featureId);
+}
+
+function dropFeature(event, seasonId) {
+  event.preventDefault();
+  const featureId = event.dataTransfer.getData('text/plain');
+  const feature = seasonConfig.features.find(f => f.id === featureId);
+  if (!feature) return;
+
+  if (seasonId === 'always') {
+    feature.alwaysOn = true;
+    feature.seasons = [];
+  } else if (seasonId === 'none') {
+    feature.alwaysOn = false;
+    feature.seasons = [];
+  } else {
+    feature.alwaysOn = false;
+    // Add to this season if not already there
+    if (!feature.seasons.includes(seasonId)) {
+      feature.seasons.push(seasonId);
+    }
+  }
+
+  seasonConfig.renderCalendarConfig();
+  showToast(`${feature.name} → ${seasonId === 'always' ? 'Always On' : seasonId === 'none' ? 'Unassigned' : seasonConfig.getSeasonLabel(seasonId)}`);
+}
+
+function addCustomSeason() {
+  const name = prompt('Season name (e.g., "Testing Window"):');
+  if (!name) return;
+  const months = prompt('Months (e.g., "Apr – May"):');
+  if (!months) return;
+  const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  const colors = ['#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
+  const color = colors[seasonConfig.seasons.length % colors.length];
+  seasonConfig.seasons.push({ id, name, months, startMonth: 1, endMonth: 1, color });
+  seasonConfig.renderCalendarConfig();
+  seasonConfig.renderSeasonSelector();
+  showToast(`Season "${name}" added`);
+}
+
+function removeFeatureFromSeason(featureId, seasonId) {
+  const feature = seasonConfig.features.find(f => f.id === featureId);
+  if (!feature) return;
+
+  if (seasonId === 'always') {
+    feature.alwaysOn = false;
+  } else {
+    feature.seasons = feature.seasons.filter(s => s !== seasonId);
+  }
+
+  seasonConfig.renderCalendarConfig();
+  showToast(`${feature.name} removed from ${seasonId === 'always' ? 'Always On' : seasonConfig.getSeasonLabel(seasonId)}`);
+}
+
+function editSeason(id) {
+  const season = seasonConfig.seasons.find(s => s.id === id);
+  if (!season) return;
+  const newName = prompt('Season name:', season.name);
+  if (newName) season.name = newName;
+  const newMonths = prompt('Months:', season.months);
+  if (newMonths) season.months = newMonths;
+  seasonConfig.renderCalendarConfig();
+  seasonConfig.renderSeasonSelector();
+}
+
+function toggleFeature(id) {
+  const feature = seasonConfig.features.find(f => f.id === id);
+  if (feature) {
+    feature.active = !feature.active;
+    seasonConfig.renderToggles();
+  }
+}
+
+function applySeasonConfig() {
+  const season = seasonConfig.currentSeason;
+  const activeFeatures = seasonConfig.features.filter(f => f.active).map(f => f.name);
+
+  // Update season display in topbar
+  const seasonLabel = seasonConfig.getSeasonLabel(season);
+  const seasonMonths = seasonConfig.getSeasonMonths(season);
+  document.querySelector('.topbar-season').textContent = `${seasonLabel} — ${seasonMonths}`;
+
+  // Update season widget
+  const seasonTitle = document.querySelector('.season-title');
+  if (seasonTitle) seasonTitle.textContent = seasonLabel;
+
+  // Update season bar position
+  const positions = { onboarding: 12, invest: 32, detect: 52, plan: 68, fill: 88 };
+  const pct = positions[season] || 50;
+  const barFill = document.querySelector('.season-bar-fill');
+  const barMarker = document.querySelector('.season-bar-marker');
+  if (barFill) barFill.style.width = pct + '%';
+  if (barMarker) barMarker.style.left = pct + '%';
+
+  // Show/hide UI elements based on active features
+  const itrActive = seasonConfig.features.find(f => f.id === 'itr')?.active;
+  const pipelineActive = seasonConfig.features.find(f => f.id === 'pipeline')?.active;
+  const retentionActive = seasonConfig.features.find(f => f.id === 'retention')?.active;
+
+  // Toggle right panel sections
+  const retentionPanel = document.getElementById('retentionPanel');
+  const pipelinePanel = document.getElementById('pipelinePanel');
+  const nudgesPanel = document.getElementById('nudgesPanel');
+  if (retentionPanel) retentionPanel.style.display = retentionActive ? '' : 'none';
+  if (pipelinePanel) pipelinePanel.style.display = pipelineActive ? '' : 'none';
+
+  // Re-render nudges based on active features
+  app.renderNudges();
+  app.renderRetentionSignals();
+  app.renderPipeline();
+
+  closeModal('seasonModal');
+  showToast(`Season set to ${seasonLabel} · ${activeFeatures.length} features active`);
+}
+
+// Render toggles when modal opens
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[title="Season & Features"]')) {
+    seasonConfig.renderSeasonSelector();
+    seasonConfig.renderToggles();
+  }
+});
+
+// ---- CSV Import ----
+const importer = {
+  rawData: [],
+  headers: [],
+  step: 1,
+  mapping: {},
+
+  // TalentPoint fields we want to map to
+  fields: [
+    { key: 'name', label: 'Name', required: true, hints: ['employee name', 'full name', 'name', 'staff name', 'first last'] },
+    { key: 'school', label: 'School', required: true, hints: ['location name', 'location', 'school', 'building', 'site', 'campus', 'work location'] },
+    { key: 'role', label: 'Role / Position', required: true, hints: ['job title', 'position title', 'job', 'role', 'position', 'title', 'assignment', 'job alike'] },
+    { key: 'gradeLevel', label: 'Grade Level', required: false, hints: ['grade level', 'grade level desc', 'grade', 'grades', 'grade band'] },
+    { key: 'department', label: 'Department / Subject', required: false, hints: ['subject desc', 'subject', 'department', 'dept', 'content area', 'function'] },
+    { key: 'status', label: 'Status', required: false, hints: ['employment status', 'status code', 'status', 'position status'] },
+    { key: 'certifications', label: 'Certifications', required: false, hints: ['teacher certification', 'cert', 'certification', 'credential', 'license', 'endorsement'] },
+    { key: 'hireDate', label: 'Hire Date', required: false, hints: ['last hire date', 'original hire date', 'hire date', 'start date', 'date hired'] },
+    { key: 'yearsTeaching', label: 'Years Experience', required: false, hints: ['relevant years of experience', 'years of experience', 'years experience', 'experience', 'years', 'tenure', 'years of service'] },
+    { key: 'section', label: 'Section / Room', required: false, hints: ['section', 'room', 'classroom', 'period'] },
+    { key: 'intentToReturn', label: 'Intent to Return', required: false, hints: ['intent', 'itr', 'intent to return', 'returning', 'return'] },
+    { key: 'notes', label: 'Notes', required: false, hints: ['notes', 'note', 'comments', 'comment'] },
+    { key: 'email', label: 'Email', required: false, hints: ['email address', 'email', 'e-mail', 'mail'] },
+    { key: 'employeeId', label: 'Employee ID', required: false, hints: ['employee number', 'employee id', 'emp id', 'badge'] },
+    { key: 'supervisor', label: 'Supervisor', required: false, hints: ['supervisor name', 'supervisor', 'manager', 'reports to'] },
+  ],
+
+  parseCSV(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return;
+
+    // Detect delimiter
+    const firstLine = lines[0];
+    const tabCount = (firstLine.match(/\t/g) || []).length;
+    const commaCount = (firstLine.match(/,/g) || []).length;
+    const delimiter = tabCount > commaCount ? '\t' : ',';
+
+    // Parse with basic CSV handling (handles quoted fields)
+    function parseLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQuotes = !inQuotes; }
+        else if (ch === delimiter && !inQuotes) { result.push(current.trim()); current = ''; }
+        else { current += ch; }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    this.headers = parseLine(lines[0]);
+    this.rawData = lines.slice(1).map(l => parseLine(l)).filter(r => r.some(c => c));
+
+    // Auto-map columns — prefer exact matches, then longest hint match
+    this.mapping = {};
+    const usedColumns = new Set();
+
+    // Pass 1: exact matches
+    this.fields.forEach(f => {
+      const match = this.headers.findIndex((h, i) => {
+        if (usedColumns.has(i)) return false;
+        const hl = h.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+        return f.hints.some(hint => hl === hint);
+      });
+      if (match !== -1) {
+        this.mapping[f.key] = match;
+        usedColumns.add(match);
+      }
+    });
+
+    // Pass 2: partial matches for unmapped fields (longest hint first)
+    this.fields.forEach(f => {
+      if (this.mapping[f.key] !== undefined) return;
+      const sortedHints = [...f.hints].sort((a, b) => b.length - a.length);
+      const match = this.headers.findIndex((h, i) => {
+        if (usedColumns.has(i)) return false;
+        const hl = h.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+        return sortedHints.some(hint => hl.includes(hint));
+      });
+      if (match !== -1) {
+        this.mapping[f.key] = match;
+        usedColumns.add(match);
+      }
+    });
+  },
+
+  showStep(n) {
+    this.step = n;
+    document.getElementById('importStep1').style.display = n === 1 ? '' : 'none';
+    document.getElementById('importStep2').style.display = n === 2 ? '' : 'none';
+    document.getElementById('importStep3').style.display = n === 3 ? '' : 'none';
+    document.getElementById('importNextBtn').style.display = (n === 1 && this.rawData.length) || n === 2 ? '' : 'none';
+    document.getElementById('importBackBtn').style.display = n > 1 ? '' : 'none';
+    document.getElementById('importFinishBtn').style.display = n === 3 ? '' : 'none';
+    if (n === 1) document.getElementById('importBackBtn').style.display = 'none';
+    if (n === 2) document.getElementById('importNextBtn').textContent = 'Next: Preview';
+  },
+
+  renderMapping() {
+    document.getElementById('importRowCount').textContent = this.rawData.length;
+    document.getElementById('importColCount').textContent = this.headers.length;
+
+    document.getElementById('columnMapping').innerHTML = this.fields.map(f => {
+      const options = this.headers.map((h, i) =>
+        `<option value="${i}" ${this.mapping[f.key] === i ? 'selected' : ''}>${h}</option>`
+      ).join('');
+      const mapped = this.mapping[f.key] !== undefined;
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light);">
+          <div style="width:160px;font-size:13px;font-weight:500;">
+            ${f.label}
+            ${f.required ? '<span style="color:var(--red);">*</span>' : ''}
+          </div>
+          <select class="form-select" style="flex:1;" data-field="${f.key}" onchange="importer.mapping['${f.key}'] = this.value === '' ? undefined : parseInt(this.value)">
+            <option value="">— Skip —</option>
+            ${options}
+          </select>
+          <span style="font-size:14px;">${mapped ? '✓' : ''}</span>
+        </div>
+      `;
+    }).join('');
+
+    // Show sample data
+    const sample = this.rawData.slice(0, 2);
+    if (sample.length) {
+      document.getElementById('columnMapping').innerHTML += `
+        <div style="margin-top:16px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Sample Data (first 2 rows)</div>
+        <div style="overflow-x:auto;margin-top:8px;">
+          <table style="font-size:11px;border-collapse:collapse;width:100%;">
+            <tr style="background:var(--surface-alt);">${this.headers.map(h => `<th style="padding:4px 8px;text-align:left;white-space:nowrap;border:1px solid var(--border);">${h}</th>`).join('')}</tr>
+            ${sample.map(r => `<tr>${r.map(c => `<td style="padding:4px 8px;border:1px solid var(--border);white-space:nowrap;">${c || '—'}</td>`).join('')}</tr>`).join('')}
+          </table>
+        </div>
+      `;
+    }
+  },
+
+  renderPreview() {
+    // Convert raw data using mapping
+    const staff = this.rawData.map((row, i) => {
+      const get = (key) => this.mapping[key] !== undefined ? row[this.mapping[key]] || '' : '';
+      return {
+        id: i + 1,
+        name: get('name'),
+        school: get('school'),
+        role: get('role'),
+        gradeLevel: get('gradeLevel'),
+        department: get('department'),
+        status: this.normalizeStatus(get('status')),
+        certifications: get('certifications') ? get('certifications').split(/[,;]/).map(c => c.trim()) : [],
+        hireDate: get('hireDate'),
+        yearsTeaching: parseInt(get('yearsTeaching')) || null,
+        yearsAtSchool: null,
+        section: get('section'),
+        retentionRisk: null,
+        intentToReturn: this.normalizeITR(get('intentToReturn')),
+        lastTouchpoint: null,
+        touchpointCount: 0,
+        lastObservation: null,
+        surveyEngagement: null,
+        pipelineApplicants: null,
+        notes: get('notes') || null
+      };
+    }).filter(s => s.name && s.school);
+
+    // Summary
+    const schools = [...new Set(staff.map(s => s.school))];
+    const roles = [...new Set(staff.map(s => s.role))];
+    document.getElementById('importPreviewSummary').innerHTML = `
+      Ready to import <strong>${staff.length}</strong> staff across <strong>${schools.length}</strong> school${schools.length !== 1 ? 's' : ''} with <strong>${roles.length}</strong> unique roles.
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        ${schools.map(s => {
+          const count = staff.filter(p => p.school === s).length;
+          return `<span style="padding:3px 10px;background:var(--surface-alt);border-radius:10px;font-size:12px;">${s} (${count})</span>`;
+        }).join('')}
+      </div>
+    `;
+
+    // Preview table
+    document.getElementById('importPreviewTable').innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:var(--surface-alt);position:sticky;top:0;">
+          <th style="padding:8px;text-align:left;border-bottom:1px solid var(--border);">Name</th>
+          <th style="padding:8px;text-align:left;border-bottom:1px solid var(--border);">School</th>
+          <th style="padding:8px;text-align:left;border-bottom:1px solid var(--border);">Role</th>
+          <th style="padding:8px;text-align:left;border-bottom:1px solid var(--border);">Grade/Dept</th>
+          <th style="padding:8px;text-align:left;border-bottom:1px solid var(--border);">Status</th>
+        </tr></thead>
+        <tbody>
+          ${staff.slice(0, 50).map(s => `<tr style="border-bottom:1px solid var(--border-light);">
+            <td style="padding:6px 8px;font-weight:500;">${s.name}</td>
+            <td style="padding:6px 8px;color:var(--text-secondary);">${s.school}</td>
+            <td style="padding:6px 8px;color:var(--text-secondary);">${s.role}</td>
+            <td style="padding:6px 8px;color:var(--text-secondary);">${s.department || s.gradeLevel || '—'}</td>
+            <td style="padding:6px 8px;"><span class="staff-status status-${s.status}">${s.status}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      ${staff.length > 50 ? `<div style="padding:8px;text-align:center;font-size:11px;color:var(--text-muted);">Showing 50 of ${staff.length}...</div>` : ''}
+    `;
+
+    this.importedStaff = staff;
+  },
+
+  normalizeStatus(raw) {
+    const s = (raw || '').toLowerCase().trim();
+    if (!s || s === 'active' || s === 'employed' || s === 'filled' || s === 'current') return 'filled';
+    if (s.includes('open') || s.includes('vacant') || s.includes('unfilled')) return 'open';
+    if (s.includes('resign') || s.includes('left') || s.includes('separated') || s.includes('terminated')) return 'resigned';
+    if (s.includes('offer') || s.includes('pending')) return 'offer-out';
+    if (s.includes('risk') || s.includes('concern')) return 'at-risk';
+    return 'filled';
+  },
+
+  normalizeITR(raw) {
+    const s = (raw || '').toLowerCase().trim();
+    if (!s) return 'not-asked';
+    if (s === 'yes' || s === 'y' || s === 'returning' || s === 'confirmed') return 'yes';
+    if (s === 'no' || s === 'n' || s === 'leaving' || s === 'departing') return 'no';
+    if (s.includes('undecided') || s.includes('maybe') || s.includes('unsure') || s === 'u') return 'undecided';
+    if (s.includes('not asked') || s.includes('pending') || s === 'na' || s === 'n/a') return 'not-asked';
+    return 'not-asked';
+  },
+
+  importedStaff: []
+};
+
+// File handling
+document.addEventListener('DOMContentLoaded', () => {
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('csvFile');
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--accent)';
+    dropZone.style.background = 'var(--accent-light)';
+  });
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.background = '';
+  });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.background = '';
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) handleFile(fileInput.files[0]);
+  });
+});
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    importer.parseCSV(e.target.result);
+    if (importer.rawData.length === 0) {
+      showToast('Could not parse CSV — check the file format', 'error');
+      return;
+    }
+    // Update drop zone to show success
+    document.getElementById('dropZone').innerHTML = `
+      <div style="font-size:20px;margin-bottom:4px;">✓</div>
+      <div style="font-weight:600;font-size:14px;color:var(--green);">${file.name}</div>
+      <div style="font-size:12px;color:var(--text-muted);">${importer.rawData.length} rows · ${importer.headers.length} columns</div>
+    `;
+    document.getElementById('dropZone').style.borderColor = 'var(--green)';
+    importer.showStep(1);
+  };
+  reader.readAsText(file);
+}
+
+function importNext() {
+  if (importer.step === 1) {
+    importer.showStep(2);
+    importer.renderMapping();
+    document.getElementById('importNextBtn').textContent = 'Next: Preview';
+  } else if (importer.step === 2) {
+    // Validate required fields
+    const missing = importer.fields.filter(f => f.required && importer.mapping[f.key] === undefined);
+    if (missing.length) {
+      showToast(`Please map required field${missing.length > 1 ? 's' : ''}: ${missing.map(f => f.label).join(', ')}`, 'warning');
+      return;
+    }
+    importer.showStep(3);
+    importer.renderPreview();
+  }
+}
+
+function importBack() {
+  if (importer.step === 2) {
+    importer.showStep(1);
+    document.getElementById('importNextBtn').textContent = 'Next: Map Columns';
+  } else if (importer.step === 3) {
+    importer.showStep(2);
+    document.getElementById('importNextBtn').textContent = 'Next: Preview';
+    document.getElementById('importNextBtn').style.display = '';
+  }
+}
+
+function importFinish() {
+  if (!importer.importedStaff.length) return;
+
+  // Build schools array from imported data
+  const schoolNames = [...new Set(importer.importedStaff.map(s => s.school))];
+  DEMO_DATA.schools = schoolNames.map((name, i) => {
+    const staff = importer.importedStaff.filter(s => s.school === name);
+    const grades = [...new Set(staff.map(s => s.gradeLevel).filter(Boolean))];
+
+    // Clean up grade span into a readable range
+    function cleanGradeSpan(grades) {
+      if (!grades.length) return 'All';
+      // Extract numeric grades and special values
+      const nums = new Set();
+      let hasPK = false, hasK = false;
+      grades.forEach(g => {
+        const gl = g.toLowerCase().trim();
+        if (gl.includes('prek') || gl.includes('pre-k') || gl === 'pk') hasPK = true;
+        else if (gl === 'k' || gl.includes('kinder')) hasK = true;
+        // Extract numbers from grade strings
+        const matches = gl.match(/\d+/g);
+        if (matches) matches.forEach(m => nums.add(parseInt(m)));
+      });
+      const sorted = [...nums].sort((a, b) => a - b);
+      const parts = [];
+      if (hasPK) parts.push('PK');
+      if (hasK) parts.push('K');
+      if (sorted.length >= 2) {
+        parts.push(`${sorted[0]}-${sorted[sorted.length - 1]}`);
+      } else if (sorted.length === 1) {
+        parts.push(`${sorted[0]}`);
+      }
+      return parts.length ? parts.join(', ') : 'All';
+    }
+
+    return {
+      id: `sch-${i + 1}`,
+      name: name,
+      shortName: name.split(/\s+/).filter(w => w.length > 2 || w === w.toUpperCase()).map(w => w[0]).join('').toUpperCase().slice(0, 4),
+      gradeSpan: cleanGradeSpan(grades),
+      enrollment: staff.length * 10,
+      sections: {},
+      narrative: ''
+    };
+  });
+
+  DEMO_DATA.staff = importer.importedStaff;
+  DEMO_DATA.network.totalSchools = schoolNames.length;
+  DEMO_DATA.network.totalStaff = importer.importedStaff.length;
+  DEMO_DATA.network.name = 'Imported Network';
+  DEMO_DATA.staffingPlans = [];
+
+  // Fully rebuild UI
+  document.querySelector('.topbar-network').textContent = DEMO_DATA.network.name;
+  app.currentView = 'network';
+  app.selectedSchool = null;
+  app.renderNetworkStats();
+  app.renderSchoolCards();
+  app.renderNudges();
+  app.renderRetentionSignals();
+  app.renderActivityFeed();
+  app.renderPipeline();
+  app.renderHealthBars();
+  app.updateNotifBadge();
+
+  // Reset view state
+  document.getElementById('schoolGrid').style.display = '';
+  document.getElementById('networkStats').style.display = '';
+  document.querySelector('.search-bar').style.display = '';
+  document.getElementById('schoolDetail').style.display = 'none';
+  document.getElementById('viewTitle').textContent = 'Network Overview';
+  document.getElementById('viewSubtitle').textContent = `${schoolNames.length} schools · ${importer.importedStaff.length} staff`;
+  document.getElementById('breadcrumb').innerHTML = `<span class="breadcrumb-item active" data-view="network">Network</span>`;
+
+  closeModal('importModal');
+  showToast(`Imported ${importer.importedStaff.length} staff across ${schoolNames.length} schools`);
+}
+
+function useDemoData() {
+  // Reload the page to restore demo data
+  location.reload();
+}
+
+// ---- Modals & Toasts ----
+function openModal(id, personId) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+
+  // Populate person dropdowns
+  const selects = modal.querySelectorAll('select');
+  selects.forEach(sel => {
+    if (sel.id === 'moveDest') {
+      sel.innerHTML = '<option value="">Select destination school...</option>' +
+        DEMO_DATA.schools.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    } else {
+      const staff = DEMO_DATA.staff.filter(s => s.status !== 'open');
+      sel.innerHTML = '<option value="">Select a person...</option>' +
+        staff.sort((a,b) => a.name.localeCompare(b.name))
+          .map(s => `<option value="${s.id}" ${s.id === personId ? 'selected' : ''}>${s.name} — ${s.role}, ${s.school}</option>`).join('');
+    }
+  });
+
+  modal.classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'warning' ? '⚠' : '!'}</span> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function saveTouchpoint() {
+  const person = document.getElementById('touchpointPerson');
+  if (!person.value) { showToast('Please select a person', 'warning'); return; }
+  const name = person.options[person.selectedIndex].text.split(' — ')[0];
+  const typeChip = document.querySelector('#touchpointType .form-chip.selected');
+  const type = typeChip ? typeChip.dataset.value : 'check-in';
+  closeModal('touchpointModal');
+  showToast(`Touchpoint logged for ${name} (${type})`);
+}
+
+function saveFlag() {
+  const person = document.getElementById('flagPerson');
+  if (!person.value) { showToast('Please select a person', 'warning'); return; }
+  const name = person.options[person.selectedIndex].text.split(' — ')[0];
+  const levelChip = document.querySelector('#flagLevel .form-chip.selected');
+  const level = levelChip ? levelChip.textContent : 'Monitor';
+  closeModal('flagModal');
+  showToast(`Concern flagged for ${name} — ${level}`, 'warning');
+}
+
+function saveMove() {
+  const person = document.getElementById('movePerson');
+  if (!person.value) { showToast('Please select a person', 'warning'); return; }
+  const name = person.options[person.selectedIndex].text.split(' — ')[0];
+  const actionChip = document.querySelector('#moveAction .form-chip.selected');
+  const action = actionChip ? actionChip.textContent : 'Move';
+  closeModal('moveModal');
+  showToast(`${action}: ${name} — approval chain initiated`);
+}
+
+// Chip selection
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('.form-chip');
+  if (!chip) return;
+  const group = chip.parentElement;
+  // Check if multi-select (flagReason allows multiple)
+  if (group.id === 'flagReason') {
+    chip.classList.toggle('selected');
+  } else {
+    group.querySelectorAll('.form-chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+  }
+
+  // Show/hide transfer destination
+  if (group.id === 'moveAction') {
+    const dest = document.getElementById('moveDestGroup');
+    dest.style.display = chip.dataset.value === 'transfer' ? '' : 'none';
+
+    // Update chain preview
+    const preview = document.getElementById('moveChainPreview');
+    const chains = {
+      'resignation': 'Position posted → AP notified → Talent team alerted → Next year plan updated',
+      'transfer': 'Transfer request sent → Receiving principal notified → Both staffing charts updated',
+      'role-change': 'Role updated → HR notified → Certification check triggered',
+      'new-position': 'Position created → Budget check → Posting drafted → Talent team notified',
+      'remove-position': 'Position removed → Budget updated → Next year plan adjusted'
+    };
+    preview.innerHTML = `This action will trigger: <strong>${chains[chip.dataset.value] || chains.resignation}</strong>`;
+  }
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+});
+
+// ---- Init ----
+document.addEventListener('DOMContentLoaded', () => {
+  app.init();
+
+  // Device toggle
+  document.querySelectorAll('.device-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const device = btn.dataset.device;
+      if (device === 'phone') {
+        document.body.classList.add('phone-mode');
+        // Move mobile-specific elements inside phone frame
+        const phoneInner = document.querySelector('.phone-inner');
+        const overlay = document.getElementById('personOverlay');
+        const mobileNav = document.querySelector('.mobile-nav');
+        const mobileToday = document.getElementById('mobileTodayView');
+        const mobilePeople = document.getElementById('mobilePeopleView');
+        [overlay, mobileNav, mobileToday, mobilePeople].forEach(el => {
+          if (phoneInner && el && !phoneInner.contains(el)) phoneInner.appendChild(el);
+        });
+        // Start on Today view
+        document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector('.mobile-nav-item[data-nav="today"]').classList.add('active');
+        document.querySelector('.main-container').style.display = 'none';
+        document.querySelector('.breadcrumb-bar').style.display = 'none';
+        document.querySelector('.quick-actions').style.display = 'none';
+        mobileToday.style.display = 'block';
+        mobilePeople.style.display = 'none';
+        app.renderMobileToday();
+      } else {
+        document.body.classList.remove('phone-mode');
+        // Restore desktop view
+        document.querySelector('.main-container').style.display = '';
+        document.querySelector('.network-view').style.display = '';
+        document.querySelector('.breadcrumb-bar').style.display = '';
+        document.getElementById('mobileTodayView').style.display = 'none';
+        document.getElementById('mobilePeopleView').style.display = 'none';
+        document.getElementById('rightPanel').classList.remove('mobile-visible');
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

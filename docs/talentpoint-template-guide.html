@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalentPoint — Import Template Guide</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f0f2f5;
+  color: #1b2332;
+  line-height: 1.6;
+}
+.container { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.subtitle { font-size: 15px; color: #556070; margin-bottom: 32px; }
+.card {
+  background: white;
+  border: 1px solid #e0e3e8;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card h2 { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+.card h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #0d9488; }
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #0d9488;
+  color: white;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 150ms;
+}
+.download-btn:hover { background: #0a7c72; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+th { text-align: left; padding: 10px 12px; background: #f5f6f8; border-bottom: 2px solid #e0e3e8; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; color: #556070; }
+td { padding: 10px 12px; border-bottom: 1px solid #eceff3; vertical-align: top; }
+.required { color: #ef4444; font-weight: 600; }
+.optional { color: #8892a4; font-size: 11px; }
+.field-name { font-weight: 600; }
+.hint { font-size: 12px; color: #8892a4; margin-top: 2px; }
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.tag-required { background: #fef2f2; color: #ef4444; }
+.tag-recommended { background: #fffbeb; color: #f59e0b; }
+.tag-optional { background: #f5f6f8; color: #8892a4; }
+.tag-enrichment { background: #e6f7f5; color: #0d9488; }
+.steps { display: flex; gap: 16px; margin-bottom: 24px; }
+.step {
+  flex: 1;
+  padding: 16px;
+  background: #f5f6f8;
+  border-radius: 8px;
+  text-align: center;
+}
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0d9488;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.step-label { font-size: 13px; font-weight: 500; }
+code {
+  background: #f5f6f8;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'SF Mono', Monaco, Consolas, monospace;
+}
+.note {
+  padding: 12px 16px;
+  background: #e6f7f5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #065f46;
+  margin-top: 16px;
+}
+.warning {
+  padding: 12px 16px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400e;
+  margin-top: 16px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>TalentPoint Import Template</h1>
+<p class="subtitle">Get your staffing data into TalentPoint in three steps.</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-label">Download template</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-label">Fill in your data</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-label">Import to TalentPoint</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Download</h2>
+  <p style="font-size:14px;color:#556070;margin-bottom:16px;">
+    Download the template CSV, fill it in with your staffing data, then import it into TalentPoint. The template includes example rows to show you the format.
+  </p>
+  <a class="download-btn" href="talentpoint-import-template.csv" download>
+    Download Template (.csv)
+  </a>
+  <div class="note">
+    <strong>Quick start:</strong> You only need 3 columns to get started — Name, School, and Position Title. Everything else enriches the picture but isn't required. Start with what you have.
+  </div>
+</div>
+
+<div class="card">
+  <h2>Column Reference</h2>
+  <p style="font-size:14px;color:#556070;margin-bottom:16px;">
+    Every column explained. Fill in what you have — TalentPoint works with partial data and gets smarter as you add more.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Required?</th>
+        <th>Description</th>
+        <th>Example</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="field-name">Employee Name</td>
+        <td><span class="tag tag-required">Required</span></td>
+        <td>Full name. "Last, First" or "First Last" — either works.
+          <div class="hint">For open positions, enter "OPEN POSITION"</div></td>
+        <td><code>Smith, Maria</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">School</td>
+        <td><span class="tag tag-required">Required</span></td>
+        <td>School or campus name. Must match exactly across rows for the same school.
+          <div class="hint">Use the full name your staff would recognize</div></td>
+        <td><code>Langston Hughes Academy</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Position Title</td>
+        <td><span class="tag tag-required">Required</span></td>
+        <td>The role or position. Be as specific as helpful.
+          <div class="hint">Include grade/subject in the title if that's how your HRIS stores it</div></td>
+        <td><code>Lead Teacher - 3rd Grade</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Grade Level</td>
+        <td><span class="tag tag-recommended">Recommended</span></td>
+        <td>Grade level or grade band. Use: PK, K, 1-8, 9-12, or ranges like K-4, 5-8. Use "All" for school-wide roles.
+          <div class="hint">This is the field most HRIS systems DON'T have — it's what makes the staffing chart work</div></td>
+        <td><code>3</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Department/Subject</td>
+        <td><span class="tag tag-recommended">Recommended</span></td>
+        <td>Department or content area. Especially important for middle/high school.
+          <div class="hint">Elementary can use "Elementary". Support staff can use "SPED", "Operations", etc.</div></td>
+        <td><code>Math</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Section</td>
+        <td><span class="tag tag-optional">Optional</span></td>
+        <td>Section letter, room number, or period. Helps distinguish multiple teachers in the same grade.
+          <div class="hint">A, B, C or Room 101 or Period 3</div></td>
+        <td><code>A</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Status</td>
+        <td><span class="tag tag-recommended">Recommended</span></td>
+        <td>Current employment/position status.
+          <div class="hint">Active, Open, Resigned, Offer Out. If blank, defaults to Active.</div></td>
+        <td><code>Active</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Certifications</td>
+        <td><span class="tag tag-optional">Optional</span></td>
+        <td>Teaching certifications, endorsements, credentials. Comma-separated if multiple.
+          <div class="hint">Critical for identifying shortage-cert positions</div></td>
+        <td><code>Elementary K-6, ESL</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Hire Date</td>
+        <td><span class="tag tag-optional">Optional</span></td>
+        <td>Date hired. Any reasonable format — YYYY-MM-DD preferred.
+          <div class="hint">Used to calculate tenure</div></td>
+        <td><code>2019-08-12</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Years Teaching</td>
+        <td><span class="tag tag-optional">Optional</span></td>
+        <td>Total years of teaching experience (not just at this school).
+          <div class="hint">Helps identify early-career vs veteran patterns</div></td>
+        <td><code>7</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Intent to Return</td>
+        <td><span class="tag tag-enrichment">Enrichment</span></td>
+        <td>Has this person been asked if they're returning next year?
+          <div class="hint">Yes, No, Undecided, Not Asked. This is Stream 5 data — usually not in any HRIS.</div></td>
+        <td><code>Yes</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Email</td>
+        <td><span class="tag tag-optional">Optional</span></td>
+        <td>Work email address.</td>
+        <td><code>msmith@example.com</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Employee ID</td>
+        <td><span class="tag tag-optional">Optional</span></td>
+        <td>HRIS employee ID or badge number. Used to match records across imports.</td>
+        <td><code>10042</code></td>
+      </tr>
+      <tr>
+        <td class="field-name">Notes</td>
+        <td><span class="tag tag-optional">Optional</span></td>
+        <td>Any context. "Coaching candidate", "Interviewing elsewhere", "New hire Aug 2026".</td>
+        <td><code>Strong mentor potential</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Tips</h2>
+
+  <h3>Starting from your HRIS export (UKG, Namely, Frontline, etc.)</h3>
+  <p style="font-size:13px;color:#556070;margin-bottom:12px;">
+    Export your staffing roster from your HRIS. It will have Name, School, Position, Hire Date, Status — the basics. Import that first to get started, then enrich with the school-specific fields (Grade Level, Department, Certifications) that your HRIS doesn't carry.
+  </p>
+
+  <h3>Open positions</h3>
+  <p style="font-size:13px;color:#556070;margin-bottom:12px;">
+    Include open/unfilled positions with "OPEN POSITION" as the name and "Open" as the status. This gives TalentPoint the full staffing picture, not just who's here today.
+  </p>
+
+  <h3>Support staff and operations</h3>
+  <p style="font-size:13px;color:#556070;margin-bottom:12px;">
+    Include everyone — custodians, cafeteria, office staff, security. Use "All" for grade level and their functional area for department (Operations, Cafeteria, Facilities, Admin). TalentPoint tracks the whole building, not just teachers.
+  </p>
+
+  <h3>Multiple schools</h3>
+  <p style="font-size:13px;color:#556070;margin-bottom:12px;">
+    Put all schools in one file. The School column tells TalentPoint how to organize them. School names must match exactly — "Langston Hughes" and "Langston Hughes Academy" will be treated as two different schools.
+  </p>
+
+  <div class="warning">
+    <strong>Data stays on your machine.</strong> The CSV import runs entirely in your browser. No data is uploaded to any server. TalentPoint processes the file locally.
+  </div>
+</div>
+
+<div class="card">
+  <h2>What comes next</h2>
+  <p style="font-size:13px;color:#556070;">
+    After import, TalentPoint will show you what's missing and what to add next. The staffing picture gets richer over time as you:
+  </p>
+  <ul style="font-size:13px;color:#556070;margin:12px 0 0 20px;">
+    <li>Log touchpoints and observations (Stream 6)</li>
+    <li>Connect survey data from Attuned, TNTP, or UpBeat (Stream 3)</li>
+    <li>Track intent-to-return conversations (Stream 5)</li>
+    <li>Build next year's staffing plan (Stream 4)</li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>
