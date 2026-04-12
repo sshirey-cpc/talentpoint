@@ -1423,10 +1423,9 @@ body:not(.phone-mode) .quick-actions { display: none; }
     <div id="peopleView" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;" id="peopleFilters">
-          <button class="view-tab active" data-people-filter="all">All (530)</button>
+          <button class="view-tab active" data-people-filter="all">All</button>
           <button class="view-tab" data-people-filter="open">Open Positions</button>
           <button class="view-tab" data-people-filter="low-touch">Needs Connection</button>
-          <button class="view-tab" data-people-filter="itr-pending">ITR Pending</button>
         </div>
         <input type="text" class="search-input" placeholder="Filter by name, role, school..." id="peopleSearch" style="max-width:300px;padding:8px 12px;">
       </div>
@@ -1438,9 +1437,7 @@ body:not(.phone-mode) .quick-actions { display: none; }
               <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="role">Role ↕</th>
               <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="school">School ↕</th>
               <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="status">Status ↕</th>
-              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="risk">Risk ↕</th>
-              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="engagement">Eng ↕</th>
-              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="touch">Touch ↕</th>
+              <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="touch">Last Connected ↕</th>
               <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">ITR</th>
             </tr>
           </thead>
@@ -1549,6 +1546,9 @@ body:not(.phone-mode) .quick-actions { display: none; }
 
   <!-- Urgent banner -->
   <div id="todayUrgent" style="margin-bottom:16px;"></div>
+
+  <!-- Birthdays -->
+  <div id="todayBirthdays" style="margin-bottom:16px;"></div>
 
   <!-- Next step -->
   <div id="todayNudges" style="margin-bottom:20px;"></div>
@@ -1667,34 +1667,16 @@ body:not(.phone-mode) .quick-actions { display: none; }
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Concern Level</label>
-        <div class="form-chips" id="flagLevel">
-          <span class="form-chip selected" data-value="monitor">Monitor</span>
-          <span class="form-chip" data-value="at-risk">Needs Attention</span>
-          <span class="form-chip" data-value="urgent">Likely Leaving</span>
-        </div>
+        <label class="form-label">Note (optional)</label>
+        <textarea class="form-textarea" id="flagNotes" placeholder="Any context you want to remember..."></textarea>
       </div>
-      <div class="form-group">
-        <label class="form-label">Reason</label>
-        <div class="form-chips" id="flagReason" style="flex-wrap:wrap;">
-          <span class="form-chip" data-value="compensation">Compensation</span>
-          <span class="form-chip" data-value="workload">Workload</span>
-          <span class="form-chip" data-value="culture">Culture/Climate</span>
-          <span class="form-chip" data-value="leadership">Leadership</span>
-          <span class="form-chip" data-value="personal">Personal/Family</span>
-          <span class="form-chip" data-value="career">Career Growth</span>
-          <span class="form-chip" data-value="relocation">Relocation</span>
-          <span class="form-chip" data-value="other">Other</span>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes</label>
-        <textarea class="form-textarea" id="flagNotes" placeholder="What's happening? What triggered this flag?"></textarea>
+      <div style="padding:12px;background:var(--surface-alt);border-radius:var(--radius);font-size:13px;color:var(--text-secondary);">
+        This flag is private to you. It marks this person for your attention — only you and those above you in the org can see it.
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('flagModal')">Cancel</button>
-      <button class="btn btn-danger" onclick="saveFlag()">Flag Concern</button>
+      <button class="btn btn-primary" onclick="saveFlag()">Set Flag</button>
     </div>
   </div>
 </div>
@@ -1925,17 +1907,17 @@ const app = {
     const nudges = [];
     const isFeatureActive = (id) => seasonConfig.features.find(f => f.id === id)?.active ?? true;
 
-    // Overdue touchpoints on at-risk staff (requires recognition or retention feature)
+    // Staff not connected with recently (requires recognition or retention feature)
     if (isFeatureActive('recognition') || isFeatureActive('retention')) {
-      staff.filter(s => s.status === 'filled' && s.retentionRisk).forEach(s => {
+      staff.filter(s => s.status === 'filled').forEach(s => {
         const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
         if (days > 21) {
           nudges.push({
-            priority: s.retentionRisk === 'high' ? 0 : 1,
+            priority: days,
             icon: '→',
             type: 'nudge',
-            text: `<strong>Check in with ${s.name}</strong> — ${days < 999 ? days + ' days since last touchpoint' : 'no touchpoints logged'}`,
-            meta: `${s.school} · ${s.role} · ${s.retentionRisk} risk`,
+            text: `<strong>${s.name}</strong> — ${days < 999 ? days + ' days since last connection' : 'no connections logged'}`,
+            meta: `${s.school} · ${s.role}`,
             personId: s.id
           });
         }
@@ -2022,14 +2004,11 @@ const app = {
 
   updateNotifBadge() {
     const staff = DEMO_DATA.staff;
-    const highRisk = staff.filter(s => s.retentionRisk === 'high').length;
-    const openZero = staff.filter(s => s.status === 'open' && (s.pipelineApplicants || 0) === 0).length;
-    const itrOverdue = staff.filter(s => s.intentToReturn === 'not-asked' && s.status === 'filled').length;
-    const total = highRisk + openZero + Math.min(itrOverdue, 5); // cap itr
+    const openPositions = staff.filter(s => s.status === 'open').length;
     const badge = document.getElementById('notifBadge');
     if (badge) {
-      badge.textContent = total;
-      badge.style.display = total > 0 ? '' : 'none';
+      badge.textContent = openPositions;
+      badge.style.display = openPositions > 0 ? '' : 'none';
     }
   },
 
@@ -2038,7 +2017,6 @@ const app = {
     const staff = DEMO_DATA.staff;
     const filled = staff.filter(s => s.status === 'filled').length;
     const open = staff.filter(s => s.status === 'open').length;
-    const atRisk = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
     const offers = staff.filter(s => s.status === 'offer-out').length;
     const notAskedITR = staff.filter(s => s.intentToReturn === 'not-asked').length;
     const undecided = staff.filter(s => s.intentToReturn === 'undecided').length;
@@ -2051,9 +2029,7 @@ const app = {
     const nSegs = [
       { count: filled, color: '#10b981' },
       { count: offers, color: '#3b82f6' },
-      { count: atRisk, color: '#f59e0b' },
-      { count: open, color: '#ef4444' },
-      { count: staff.filter(s => s.status === 'resigned').length, color: '#d1d5db' },
+      { count: open + staff.filter(s => s.status === 'resigned').length, color: '#ef4444' },
     ].filter(s => s.count > 0).map(s => {
       const dash = (s.count / nTotal) * nC;
       const svg = `<circle cx="40" cy="40" r="${nR}" fill="none" stroke="${s.color}" stroke-width="10" stroke-dasharray="${dash} ${nC - dash}" stroke-dashoffset="${-nOff}"/>`;
@@ -2097,8 +2073,7 @@ const app = {
       const staff = DEMO_DATA.staff.filter(s => s.school === school.name);
       const filled = staff.filter(s => s.status === 'filled').length;
       const open = staff.filter(s => s.status === 'open').length;
-      const atRisk = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
-      const offers = staff.filter(s => s.status === 'offer-out').length;
+        const offers = staff.filter(s => s.status === 'offer-out').length;
       const resigned = staff.filter(s => s.status === 'resigned').length;
       const total = staff.length;
 
@@ -2171,46 +2146,6 @@ const app = {
     }).join('');
   },
 
-  calcHealthScore(staff) {
-    const total = staff.length;
-    if (!total) return 100;
-    const filled = staff.filter(s => s.status === 'filled').length;
-    const open = staff.filter(s => s.status === 'open').length;
-    const resigned = staff.filter(s => s.status === 'resigned').length;
-    const highRisk = staff.filter(s => s.retentionRisk === 'high').length;
-    const modRisk = staff.filter(s => s.retentionRisk === 'moderate').length;
-    const notAsked = staff.filter(s => s.intentToReturn === 'not-asked').length;
-    const undecided = staff.filter(s => s.intentToReturn === 'undecided').length;
-    const intentNo = staff.filter(s => s.intentToReturn === 'no').length;
-    const lowTouch = staff.filter(s => {
-      if (s.status === 'open') return false;
-      const d = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
-      return d > 30;
-    }).length;
-    const thinPipeline = staff.filter(s => s.status === 'open' && (s.pipelineApplicants || 0) <= 1).length;
-
-    let score = 100;
-    // Each open position is a real problem
-    score -= open * 4;
-    // Each resignation is a hit
-    score -= resigned * 5;
-    // High risk staff are serious — each one matters
-    score -= highRisk * 6;
-    // Moderate risk adds up
-    score -= modRisk * 2;
-    // Confirmed departures
-    score -= intentNo * 4;
-    // Undecided is a yellow flag
-    score -= undecided * 1.5;
-    // Not asking ITR in spring is negligent — scaled by percentage
-    score -= Math.min(notAsked / total, 0.5) * 20;
-    // Low touchpoint activity means the leader isn't doing the work
-    score -= Math.min(lowTouch / total, 0.5) * 15;
-    // Open positions with thin pipeline are critical
-    score -= thinPipeline * 3;
-
-    return Math.max(0, Math.min(100, Math.round(score)));
-  },
 
   getSchoolAlerts(school, staff) {
     const alerts = [];
@@ -2279,13 +2214,10 @@ const app = {
     // School-level stats
     const filled = staff.filter(s => s.status === 'filled').length;
     const open = staff.filter(s => s.status === 'open').length;
-    const atRisk = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
     const offers = staff.filter(s => s.status === 'offer-out').length;
     const itrYes = staff.filter(s => s.intentToReturn === 'yes').length;
     const itrNotAsked = staff.filter(s => s.intentToReturn === 'not-asked').length;
     const itrUndecided = staff.filter(s => s.intentToReturn === 'undecided').length;
-    const avgEngagement = Math.round(staff.filter(s => s.surveyEngagement).reduce((a,s) => a + s.surveyEngagement, 0) / (staff.filter(s => s.surveyEngagement).length || 1));
-    const healthScore = this.calcHealthScore(staff);
 
     // Donut chart SVG
     const total = staff.length;
@@ -2350,12 +2282,10 @@ const app = {
                     touchDays <= 14 ? '<span style="color:var(--green);font-size:8px;" title="Touchpoint recent">●</span>' :
                     touchDays <= 30 ? '<span style="color:var(--amber);font-size:8px;" title="Touchpoint aging">●</span>' :
                     '<span style="color:var(--red);font-size:8px;" title="30+ days since connection">●</span>';
-                  const riskDot = m.retentionRisk === 'high' ? '<span style="color:var(--red);font-size:10px;" title="High risk">▲</span>' :
-                    m.retentionRisk === 'moderate' ? '<span style="color:var(--amber);font-size:10px;" title="Moderate risk">▲</span>' : '';
                   return `
                   <div class="staff-row" data-person-id="${m.id}">
                     <div>
-                      <div class="staff-name">${m.name} ${riskDot}</div>
+                      <div class="staff-name">${m.name}</div>
                       <div class="staff-role">${m.role}${m.yearsAtSchool ? ' · ' + m.yearsAtSchool + 'y' : ''} ${touchDot}</div>
                     </div>
                     <span class="staff-status status-${m.status}">${this.formatStatus(m.status)}</span>
@@ -2479,6 +2409,14 @@ const app = {
           <span class="person-detail-label">Tenure</span>
           <span class="person-detail-value">${person.yearsAtSchool || 0}y at school · ${person.yearsTeaching || 0}y teaching</span>
         </div>
+        ${person.birthday ? `<div class="person-detail-row">
+          <span class="person-detail-label">Birthday</span>
+          <span class="person-detail-value">${person.birthday}</span>
+        </div>` : ''}
+        ${person.ptoBalance != null ? `<div class="person-detail-row">
+          <span class="person-detail-label">PTO Balance</span>
+          <span class="person-detail-value">${person.ptoBalance} days</span>
+        </div>` : ''}
       </div>
 
       <!-- Engagement -->
@@ -2762,8 +2700,8 @@ const app = {
     // Find the single most important person to connect with
     filled.forEach(s => {
       const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
-      if (days > 21 && s.retentionRisk) {
-        nextSteps.push({ person: s, weight: days + (s.retentionRisk === 'high' ? 100 : 0),
+      if (days > 21) {
+        nextSteps.push({ person: s, weight: days,
           text: `Connect with ${s.name}`, sub: `${s.role} · ${s.school}`, action: 'Log Touchpoint' });
       }
     });
@@ -2772,6 +2710,32 @@ const app = {
         text: `Talk with ${s.name} about next year`, sub: `${s.role} · ${s.school}`, action: 'Log Conversation' });
     });
     nextSteps.sort((a, b) => b.weight - a.weight);
+
+    // Birthdays this week
+    const thisWeek = staff.filter(s => {
+      if (!s.birthday || s.status === 'open') return false;
+      // birthday is "MM-DD" format, check if within 3 days of March 15
+      const parts = s.birthday.split('-');
+      const bMonth = parseInt(parts[0]);
+      const bDay = parseInt(parts[1]);
+      // Simple check: March 12-18 (within a few days of the 15th)
+      return bMonth === 3 && bDay >= 12 && bDay <= 18;
+    });
+    document.getElementById('todayBirthdays').innerHTML = thisWeek.length ? `
+      <div style="padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Birthdays this week</div>
+        ${thisWeek.map(s => `
+          <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer;${thisWeek.indexOf(s) < thisWeek.length - 1 ? 'border-bottom:1px solid var(--border-light);' : ''}">
+            <span style="font-size:16px;">🎂</span>
+            <div style="flex:1;">
+              <span style="font-weight:500;font-size:14px;">${s.name}</span>
+              <span style="font-size:12px;color:var(--text-muted);"> · ${s.role}</span>
+            </div>
+            <span style="font-size:12px;color:var(--text-muted);">${s.birthday.replace('-','/')}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
 
     document.getElementById('todayNudges').innerHTML = nextSteps.length ? `
       <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Longest since connected</div>
@@ -2833,7 +2797,6 @@ const app = {
     const filter = activeChip ? activeChip.dataset.mfilter : 'all';
 
     let people = [...DEMO_DATA.staff];
-    if (filter === 'at-risk') people = people.filter(s => s.retentionRisk === 'high' || s.retentionRisk === 'moderate');
     else if (filter === 'open') people = people.filter(s => s.status === 'open');
     else if (filter === 'low-touch') people = people.filter(s => {
       if (s.status === 'open') return false;
@@ -2851,17 +2814,13 @@ const app = {
       );
     }
 
-    people.sort((a, b) => {
-      const ro = { high: 0, moderate: 1, low: 2, null: 3 };
-      return (ro[a.retentionRisk] ?? 3) - (ro[b.retentionRisk] ?? 3) || a.name.localeCompare(b.name);
-    });
+    people.sort((a, b) => a.name.localeCompare(b.name));
 
     document.getElementById('mobilePeopleList').innerHTML = people.slice(0, 50).map(s => {
       const touchDays = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
       const touchColor = s.status === 'open' ? 'var(--text-muted)' : touchDays <= 14 ? 'var(--green)' : touchDays <= 30 ? 'var(--amber)' : 'var(--red)';
-      const riskBorder = s.retentionRisk === 'high' ? 'var(--red)' : s.retentionRisk === 'moderate' ? 'var(--amber)' : 'transparent';
       return `
-      <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-left:3px solid ${riskBorder};border-radius:var(--radius);margin-bottom:6px;cursor:pointer;">
+      <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;">
         <div style="flex:1;min-width:0;">
           <div style="font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
           <div style="font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.role} · ${s.school}</div>
@@ -2877,10 +2836,24 @@ const app = {
   // ---- People List View ----
   renderPeopleView(filter = 'all', search = '') {
     let staff = [...DEMO_DATA.staff];
+    const itrActive = seasonConfig.features.find(f => f.id === 'itr')?.active;
+
+    // Manage ITR tab visibility
+    const filtersDiv = document.getElementById('peopleFilters');
+    const existingITR = filtersDiv.querySelector('[data-people-filter="itr-pending"]');
+    if (itrActive && !existingITR) {
+      const btn = document.createElement('button');
+      btn.className = 'view-tab';
+      btn.dataset.peopleFilter = 'itr-pending';
+      btn.textContent = 'ITR Pending';
+      filtersDiv.appendChild(btn);
+    } else if (!itrActive && existingITR) {
+      existingITR.remove();
+      if (filter === 'itr-pending') filter = 'all';
+    }
 
     // Apply filter
-    if (filter === 'at-risk') staff = staff.filter(s => s.retentionRisk === 'high' || s.retentionRisk === 'moderate');
-    else if (filter === 'open') staff = staff.filter(s => s.status === 'open');
+    if (filter === 'open') staff = staff.filter(s => s.status === 'open' || s.status === 'resigned');
     else if (filter === 'low-touch') staff = staff.filter(s => {
       if (s.status === 'open') return false;
       const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
@@ -2899,15 +2872,29 @@ const app = {
       );
     }
 
-    // Sort by name
-    staff.sort((a, b) => a.name.localeCompare(b.name));
+    // Sort
+    if (filter === 'low-touch') {
+      staff.sort((a, b) => {
+        const da = a.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(a.lastTouchpoint)) / 86400000) : 999;
+        const db = b.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(b.lastTouchpoint)) / 86400000) : 999;
+        return db - da;
+      });
+    } else {
+      staff.sort((a, b) => a.name.localeCompare(b.name));
+    }
 
+    // Column sets per tab
+    const thead = document.querySelector('#peopleTable thead tr');
     const tbody = document.getElementById('peopleTableBody');
-    tbody.innerHTML = staff.slice(0, 100).map(s => {
-      const touchDays = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
-      const touchColor = s.status === 'open' ? 'var(--text-muted)' : touchDays <= 14 ? 'var(--green)' : touchDays <= 30 ? 'var(--amber)' : 'var(--red)';
-      const engColor = (s.surveyEngagement || 0) >= 75 ? 'var(--green)' : (s.surveyEngagement || 0) >= 50 ? 'var(--amber)' : (s.surveyEngagement || 0) > 0 ? 'var(--red)' : 'var(--text-muted)';
-      return `
+
+    if (filter === 'all') {
+      thead.innerHTML = `
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="name">Name ↕</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="role">Role ↕</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);cursor:pointer;" data-sort="school">School ↕</th>
+        <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Status</th>
+      `;
+      tbody.innerHTML = staff.slice(0, 100).map(s => `
         <tr style="border-bottom:1px solid var(--border-light);cursor:pointer;transition:background 100ms;"
             onmouseover="this.style.background='var(--surface-alt)'" onmouseout="this.style.background=''"
             data-person-id="${s.id}">
@@ -2915,28 +2902,84 @@ const app = {
           <td style="padding:10px 14px;color:var(--text-secondary);">${s.role}</td>
           <td style="padding:10px 14px;color:var(--text-secondary);font-size:12px;">${s.school}</td>
           <td style="padding:10px 14px;text-align:center;"><span class="staff-status status-${s.status}" style="font-size:11px;">${this.formatStatus(s.status)}</span></td>
-          <td style="padding:10px 14px;text-align:center;color:${s.retentionRisk === 'high' ? 'var(--red)' : s.retentionRisk === 'moderate' ? 'var(--amber)' : 'var(--text-muted)'};font-size:12px;font-weight:600;">${s.retentionRisk || '—'}</td>
-          <td style="padding:10px 14px;text-align:center;color:${engColor};font-weight:600;">${s.surveyEngagement || '—'}</td>
-          <td style="padding:10px 14px;text-align:center;color:${touchColor};font-size:12px;">${touchDays < 999 ? touchDays + 'd' : '—'}</td>
-          <td style="padding:10px 14px;text-align:center;font-size:12px;">${s.intentToReturn === 'yes' ? '<span style="color:var(--green)">✓</span>' : s.intentToReturn === 'no' ? '<span style="color:var(--red)">✗</span>' : s.intentToReturn === 'undecided' ? '<span style="color:var(--amber)">?</span>' : '<span style="color:var(--text-muted)">—</span>'}</td>
         </tr>
-      `;
-    }).join('');
+      `).join('');
 
-    document.getElementById('peopleCount').textContent = `Showing ${Math.min(staff.length, 100)} of ${staff.length} staff`;
+    } else if (filter === 'open') {
+      thead.innerHTML = `
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Position</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">School</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Grade/Dept</th>
+        <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Applicants</th>
+      `;
+      tbody.innerHTML = staff.slice(0, 100).map(s => `
+        <tr style="border-bottom:1px solid var(--border-light);cursor:pointer;transition:background 100ms;"
+            onmouseover="this.style.background='var(--surface-alt)'" onmouseout="this.style.background=''"
+            data-person-id="${s.id}">
+          <td style="padding:10px 14px;font-weight:500;">${s.role}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);font-size:12px;">${s.school}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);">${s.department || s.gradeLevel || '—'}</td>
+          <td style="padding:10px 14px;text-align:center;font-weight:600;">${s.pipelineApplicants || 0}</td>
+        </tr>
+      `).join('');
+
+    } else if (filter === 'low-touch') {
+      thead.innerHTML = `
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Name</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Role</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">School</th>
+        <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Days</th>
+        <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);"></th>
+      `;
+      tbody.innerHTML = staff.slice(0, 100).map(s => {
+        const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+        return `
+        <tr style="border-bottom:1px solid var(--border-light);cursor:pointer;transition:background 100ms;"
+            onmouseover="this.style.background='var(--surface-alt)'" onmouseout="this.style.background=''"
+            data-person-id="${s.id}">
+          <td style="padding:10px 14px;font-weight:500;">${s.name}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);">${s.role}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);font-size:12px;">${s.school}</td>
+          <td style="padding:10px 14px;text-align:center;font-weight:600;">${days < 999 ? days + 'd' : '—'}</td>
+          <td style="padding:10px 14px;text-align:center;"><button class="btn btn-primary" style="font-size:11px;padding:4px 10px;" onclick="event.stopPropagation();openModal('touchpointModal',${s.id})">Log</button></td>
+        </tr>
+      `}).join('');
+
+    } else if (filter === 'itr-pending') {
+      thead.innerHTML = `
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Name</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Role</th>
+        <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">School</th>
+        <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">ITR Status</th>
+      `;
+      tbody.innerHTML = staff.slice(0, 100).map(s => `
+        <tr style="border-bottom:1px solid var(--border-light);cursor:pointer;transition:background 100ms;"
+            onmouseover="this.style.background='var(--surface-alt)'" onmouseout="this.style.background=''"
+            data-person-id="${s.id}">
+          <td style="padding:10px 14px;font-weight:500;">${s.name}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);">${s.role}</td>
+          <td style="padding:10px 14px;color:var(--text-secondary);font-size:12px;">${s.school}</td>
+          <td style="padding:10px 14px;text-align:center;font-size:12px;">${s.intentToReturn === 'undecided' ? 'Undecided' : 'Not asked'}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('peopleCount').textContent = `Showing ${Math.min(staff.length, 100)} of ${staff.length}`;
 
     // Update filter button counts
     const allCount = DEMO_DATA.staff.length;
-    const riskCount = DEMO_DATA.staff.filter(s => s.retentionRisk === 'high' || s.retentionRisk === 'moderate').length;
-    const openCount = DEMO_DATA.staff.filter(s => s.status === 'open').length;
+    const openCount = DEMO_DATA.staff.filter(s => s.status === 'open' || s.status === 'resigned').length;
     const lowTouchCount = DEMO_DATA.staff.filter(s => {
       if (s.status === 'open') return false;
       const d = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
       return d > 30;
     }).length;
-    const itrCount = DEMO_DATA.staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided').length;
+    const labels = { all: `All (${allCount})`, open: `Open Positions (${openCount})`, 'low-touch': `Needs Connection (${lowTouchCount})` };
+    if (itrActive) {
+      const itrCount = DEMO_DATA.staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided').length;
+      labels['itr-pending'] = `ITR Pending (${itrCount})`;
+    }
     const filterBtns = document.querySelectorAll('[data-people-filter]');
-    const labels = { all: `All (${allCount})`, open: `Open Positions (${openCount})`, 'low-touch': `Needs Connection (${lowTouchCount})`, 'itr-pending': `ITR Pending (${itrCount})` };
     filterBtns.forEach(b => { if (labels[b.dataset.peopleFilter]) b.textContent = labels[b.dataset.peopleFilter]; });
   },
 
@@ -3110,7 +3153,6 @@ const app = {
               <span class="staff-status status-${m.status}">${this.formatStatus(m.status)}</span>
             </div>
             <div style="display:flex;gap:16px;font-size:12px;color:var(--text-secondary);margin-top:8px;">
-              ${m.retentionRisk ? `<span style="color:${m.retentionRisk === 'high' ? 'var(--red)' : 'var(--amber)'};font-weight:600;">${m.retentionRisk} risk</span>` : ''}
               ${m.surveyEngagement ? `<span>Engagement: ${m.surveyEngagement}</span>` : ''}
               <span style="color:${touchColor}">Touch: ${touchDays < 999 ? touchDays + 'd' : '—'}</span>
               <span>ITR: ${m.intentToReturn || '—'}</span>
@@ -3208,7 +3250,6 @@ const app = {
         if (filter === 'all') count = staff.length;
         else if (filter === 'filled') count = staff.filter(s => s.status === 'filled').length;
         else if (filter === 'open') count = staff.filter(s => s.status === 'open').length;
-        else if (filter === 'at-risk') count = staff.filter(s => s.retentionRisk === 'high' || s.status === 'at-risk').length;
         else if (filter === 'offer-out') count = staff.filter(s => s.status === 'offer-out').length;
         else if (filter === 'not-asked') count = staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided').length;
 
@@ -3626,6 +3667,8 @@ const importer = {
     { key: 'section', label: 'Section / Room', required: false, hints: ['section', 'room', 'classroom', 'period'] },
     { key: 'intentToReturn', label: 'Intent to Return', required: false, hints: ['intent', 'itr', 'intent to return', 'returning', 'return'] },
     { key: 'notes', label: 'Notes', required: false, hints: ['notes', 'note', 'comments', 'comment'] },
+    { key: 'birthday', label: 'Date of Birth', required: false, hints: ['date of birth', 'dob', 'birth date', 'birthday', 'birthdate'] },
+    { key: 'ptoBalance', label: 'PTO Balance', required: false, hints: ['pto', 'pto balance', 'time off', 'vacation days', 'days remaining', 'leave balance'] },
     { key: 'email', label: 'Email', required: false, hints: ['email address', 'email', 'e-mail', 'mail'] },
     { key: 'employeeId', label: 'Employee ID', required: false, hints: ['employee number', 'employee id', 'emp id', 'badge'] },
     { key: 'supervisor', label: 'Supervisor', required: false, hints: ['supervisor name', 'supervisor', 'manager', 'reports to'] },
@@ -3760,6 +3803,8 @@ const importer = {
         yearsTeaching: parseInt(get('yearsTeaching')) || null,
         yearsAtSchool: null,
         section: get('section'),
+        birthday: get('birthday') ? this.normalizeBirthday(get('birthday')) : null,
+        ptoBalance: get('ptoBalance') ? parseInt(get('ptoBalance')) : null,
         retentionRisk: null,
         intentToReturn: this.normalizeITR(get('intentToReturn')),
         lastTouchpoint: null,
@@ -3818,6 +3863,23 @@ const importer = {
     if (s.includes('offer') || s.includes('pending')) return 'offer-out';
     if (s.includes('risk') || s.includes('concern')) return 'at-risk';
     return 'filled';
+  },
+
+  normalizeBirthday(raw) {
+    // Try to extract MM-DD from various date formats
+    const s = (raw || '').trim();
+    if (!s) return null;
+    // Try parsing as date
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${mm}-${dd}`;
+    }
+    // Already MM-DD or MM/DD?
+    const match = s.match(/(\d{1,2})[\/-](\d{1,2})/);
+    if (match) return `${match[1].padStart(2,'0')}-${match[2].padStart(2,'0')}`;
+    return null;
   },
 
   normalizeITR(raw) {
@@ -4039,10 +4101,8 @@ function saveFlag() {
   const person = document.getElementById('flagPerson');
   if (!person.value) { showToast('Please select a person', 'warning'); return; }
   const name = person.options[person.selectedIndex].text.split(' — ')[0];
-  const levelChip = document.querySelector('#flagLevel .form-chip.selected');
-  const level = levelChip ? levelChip.textContent : 'Monitor';
   closeModal('flagModal');
-  showToast(`Concern flagged for ${name} — ${level}`, 'warning');
+  showToast(`Flag set for ${name}`);
 }
 
 function saveMove() {
