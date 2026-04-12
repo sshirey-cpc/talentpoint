@@ -1569,6 +1569,7 @@ body:not(.phone-mode) .quick-actions { display: none; }
     <span class="form-chip selected" data-mfilter="all">All</span>
     <span class="form-chip" data-mfilter="open">Open Positions</span>
     <span class="form-chip" data-mfilter="low-touch">Needs Connection</span>
+    <span class="form-chip" data-mfilter="itr-pending" id="mobileITRChip">Intent to Return</span>
     <span class="form-chip" data-mfilter="itr-pending">ITR Pending</span>
   </div>
   <div id="mobilePeopleList"></div>
@@ -2711,31 +2712,56 @@ const app = {
     });
     nextSteps.sort((a, b) => b.weight - a.weight);
 
-    // Birthdays this week
-    const thisWeek = staff.filter(s => {
+    // Birthdays — today first, expandable to this week
+    const todayBdays = staff.filter(s => {
       if (!s.birthday || s.status === 'open') return false;
-      // birthday is "MM-DD" format, check if within 3 days of March 15
-      const parts = s.birthday.split('-');
-      const bMonth = parseInt(parts[0]);
-      const bDay = parseInt(parts[1]);
-      // Simple check: March 12-18 (within a few days of the 15th)
-      return bMonth === 3 && bDay >= 12 && bDay <= 18;
+      return s.birthday === '03-15';
     });
-    document.getElementById('todayBirthdays').innerHTML = thisWeek.length ? `
-      <div style="padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">
-        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Birthdays this week</div>
-        ${thisWeek.map(s => `
-          <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer;${thisWeek.indexOf(s) < thisWeek.length - 1 ? 'border-bottom:1px solid var(--border-light);' : ''}">
+    const weekBdays = staff.filter(s => {
+      if (!s.birthday || s.status === 'open') return false;
+      const parts = s.birthday.split('-');
+      const bDay = parseInt(parts[1]);
+      return parseInt(parts[0]) === 3 && bDay >= 12 && bDay <= 18 && s.birthday !== '03-15';
+    });
+
+    let bdayHTML = '';
+    if (todayBdays.length || weekBdays.length) {
+      bdayHTML = `<div style="padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">`;
+      if (todayBdays.length) {
+        bdayHTML += todayBdays.map(s => `
+          <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer;">
             <span style="font-size:16px;">🎂</span>
             <div style="flex:1;">
-              <span style="font-weight:500;font-size:14px;">${s.name}</span>
+              <span style="font-weight:500;font-size:14px;">${s.name}'s birthday today</span>
               <span style="font-size:12px;color:var(--text-muted);"> · ${s.role}</span>
             </div>
-            <span style="font-size:12px;color:var(--text-muted);">${s.birthday.replace('-','/')}</span>
           </div>
-        `).join('')}
-      </div>
-    ` : '';
+        `).join('');
+      }
+      if (weekBdays.length) {
+        bdayHTML += `
+          <div style="margin-top:${todayBdays.length ? '8px;border-top:1px solid var(--border-light);padding-top:8px;' : ''}">
+            <div style="font-size:12px;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:4px;" onclick="const el=this.nextElementSibling;el.style.display=el.style.display==='none'?'':'none';this.querySelector('.chev').textContent=el.style.display==='none'?'▸':'▾'">
+              <span class="chev">▸</span> ${weekBdays.length} more this week
+            </div>
+            <div style="display:none;">
+              ${weekBdays.map(s => `
+                <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer;">
+                  <span style="font-size:14px;">🎂</span>
+                  <div style="flex:1;">
+                    <span style="font-weight:500;font-size:13px;">${s.name}</span>
+                    <span style="font-size:12px;color:var(--text-muted);"> · ${s.role}</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--text-muted);">${s.birthday.replace('-','/')}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      bdayHTML += `</div>`;
+    }
+    document.getElementById('todayBirthdays').innerHTML = bdayHTML;
 
     document.getElementById('todayNudges').innerHTML = nextSteps.length ? `
       <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:10px;">Longest since connected</div>
@@ -2796,14 +2822,30 @@ const app = {
     const activeChip = document.querySelector('#mobilePeopleChips .form-chip.selected');
     const filter = activeChip ? activeChip.dataset.mfilter : 'all';
 
+    // Show/hide ITR chip based on feature toggle
+    const itrActive = seasonConfig.features.find(f => f.id === 'itr')?.active;
+    const mobileITRChip = document.getElementById('mobileITRChip');
+    if (mobileITRChip) mobileITRChip.style.display = itrActive ? '' : 'none';
+
     let people = [...DEMO_DATA.staff];
-    else if (filter === 'open') people = people.filter(s => s.status === 'open');
-    else if (filter === 'low-touch') people = people.filter(s => {
-      if (s.status === 'open') return false;
-      const d = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
-      return d > 30;
-    });
-    else if (filter === 'itr-pending') people = people.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided');
+    if (filter === 'open') people = people.filter(s => s.status === 'open' || s.status === 'resigned');
+    else if (filter === 'low-touch') {
+      people = people.filter(s => {
+        if (s.status === 'open') return false;
+        const d = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+        return d > 30;
+      });
+      people.sort((a, b) => {
+        const da = a.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(a.lastTouchpoint)) / 86400000) : 999;
+        const db = b.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(b.lastTouchpoint)) / 86400000) : 999;
+        return db - da;
+      });
+    }
+    else if (filter === 'itr-pending') {
+      people = people.filter(s => s.status === 'filled' || s.status === 'offer-out');
+      const itrOrder = { 'not-asked': 0, 'undecided': 1, 'no': 2, 'yes': 3 };
+      people.sort((a, b) => (itrOrder[a.intentToReturn] ?? 0) - (itrOrder[b.intentToReturn] ?? 0) || a.name.localeCompare(b.name));
+    }
 
     if (search.length >= 2) {
       people = people.filter(s =>
@@ -2814,20 +2856,30 @@ const app = {
       );
     }
 
-    people.sort((a, b) => a.name.localeCompare(b.name));
+    if (filter !== 'low-touch' && filter !== 'itr-pending') {
+      people.sort((a, b) => a.name.localeCompare(b.name));
+    }
 
     document.getElementById('mobilePeopleList').innerHTML = people.slice(0, 50).map(s => {
-      const touchDays = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
-      const touchColor = s.status === 'open' ? 'var(--text-muted)' : touchDays <= 14 ? 'var(--green)' : touchDays <= 30 ? 'var(--amber)' : 'var(--red)';
+      // Right-side info changes based on filter
+      let rightInfo = `<span class="staff-status status-${s.status}" style="font-size:10px;padding:2px 6px;">${this.formatStatus(s.status)}</span>`;
+      if (filter === 'low-touch') {
+        const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
+        rightInfo = `<span style="font-size:13px;font-weight:600;color:var(--text-secondary);">${days < 999 ? days + 'd' : '—'}</span>`;
+      } else if (filter === 'open') {
+        rightInfo = `<span style="font-size:12px;color:var(--text-secondary);">${s.pipelineApplicants || 0} applicants</span>`;
+      } else if (filter === 'itr-pending') {
+        const itrLabel = s.intentToReturn === 'yes' ? 'Yes' : s.intentToReturn === 'no' ? 'No' : s.intentToReturn === 'undecided' ? 'Maybe' : 'Pending';
+        rightInfo = `<span style="font-size:12px;color:var(--text-secondary);">${itrLabel}</span>`;
+      }
       return `
       <div data-person-id="${s.id}" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer;">
         <div style="flex:1;min-width:0;">
           <div style="font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
           <div style="font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.role} · ${s.school}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-          <span style="width:8px;height:8px;border-radius:50%;background:${touchColor};" title="Touchpoint: ${touchDays}d"></span>
-          <span class="staff-status status-${s.status}" style="font-size:10px;padding:2px 6px;">${this.formatStatus(s.status)}</span>
+        <div style="flex-shrink:0;">
+          ${rightInfo}
         </div>
       </div>`;
     }).join('') + `<div style="padding:12px;text-align:center;font-size:12px;color:var(--text-muted);">Showing ${Math.min(people.length, 50)} of ${people.length}</div>`;
@@ -2845,7 +2897,7 @@ const app = {
       const btn = document.createElement('button');
       btn.className = 'view-tab';
       btn.dataset.peopleFilter = 'itr-pending';
-      btn.textContent = 'ITR Pending';
+      btn.textContent = 'Intent to Return';
       filtersDiv.appendChild(btn);
     } else if (!itrActive && existingITR) {
       existingITR.remove();
@@ -2859,7 +2911,7 @@ const app = {
       const days = s.lastTouchpoint ? Math.floor((new Date('2026-03-15') - new Date(s.lastTouchpoint)) / 86400000) : 999;
       return days > 30;
     });
-    else if (filter === 'itr-pending') staff = staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided');
+    else if (filter === 'itr-pending') staff = staff.filter(s => s.status === 'filled' || s.status === 'offer-out');
 
     // Apply search
     if (search.length >= 2) {
@@ -2946,22 +2998,27 @@ const app = {
       `}).join('');
 
     } else if (filter === 'itr-pending') {
+      // Sort: pending first, then maybe, then no, then yes
+      const itrOrder = { 'not-asked': 0, 'undecided': 1, 'no': 2, 'yes': 3 };
+      staff.sort((a, b) => (itrOrder[a.intentToReturn] ?? 0) - (itrOrder[b.intentToReturn] ?? 0) || a.name.localeCompare(b.name));
       thead.innerHTML = `
         <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Name</th>
         <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Role</th>
         <th style="text-align:left;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">School</th>
-        <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">ITR Status</th>
+        <th style="text-align:center;padding:10px 14px;font-weight:600;font-size:12px;color:var(--text-secondary);">Intent to Return</th>
       `;
-      tbody.innerHTML = staff.slice(0, 100).map(s => `
+      tbody.innerHTML = staff.slice(0, 100).map(s => {
+        const itrLabel = s.intentToReturn === 'yes' ? 'Yes' : s.intentToReturn === 'no' ? 'No' : s.intentToReturn === 'undecided' ? 'Maybe' : 'Pending';
+        return `
         <tr style="border-bottom:1px solid var(--border-light);cursor:pointer;transition:background 100ms;"
             onmouseover="this.style.background='var(--surface-alt)'" onmouseout="this.style.background=''"
             data-person-id="${s.id}">
           <td style="padding:10px 14px;font-weight:500;">${s.name}</td>
           <td style="padding:10px 14px;color:var(--text-secondary);">${s.role}</td>
           <td style="padding:10px 14px;color:var(--text-secondary);font-size:12px;">${s.school}</td>
-          <td style="padding:10px 14px;text-align:center;font-size:12px;">${s.intentToReturn === 'undecided' ? 'Undecided' : 'Not asked'}</td>
+          <td style="padding:10px 14px;text-align:center;font-size:12px;">${itrLabel}</td>
         </tr>
-      `).join('');
+      `}).join('');
     }
 
     document.getElementById('peopleCount').textContent = `Showing ${Math.min(staff.length, 100)} of ${staff.length}`;
@@ -2976,8 +3033,8 @@ const app = {
     }).length;
     const labels = { all: `All (${allCount})`, open: `Open Positions (${openCount})`, 'low-touch': `Needs Connection (${lowTouchCount})` };
     if (itrActive) {
-      const itrCount = DEMO_DATA.staff.filter(s => s.intentToReturn === 'not-asked' || s.intentToReturn === 'undecided').length;
-      labels['itr-pending'] = `ITR Pending (${itrCount})`;
+      const itrTotal = DEMO_DATA.staff.filter(s => s.status === 'filled' || s.status === 'offer-out').length;
+      labels['itr-pending'] = `Intent to Return (${itrTotal})`;
     }
     const filterBtns = document.querySelectorAll('[data-people-filter]');
     filterBtns.forEach(b => { if (labels[b.dataset.peopleFilter]) b.textContent = labels[b.dataset.peopleFilter]; });
